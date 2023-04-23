@@ -27,7 +27,7 @@ import {
 } from '@vicons/antd'
 import _ from 'lodash'
 import { useI18n } from 'vue-i18n'
-import { ResourceFileTableData } from '../types'
+import { IUpdateFile, ResourceFileTableData } from '../types'
 import { fileTypeArr } from '@/common/common'
 import { downloadResource, deleteResource } from '@/service/modules/resources'
 import { IRenameFile, IRtDisb } from '../types'
@@ -51,7 +51,7 @@ const props = {
 export default defineComponent({
   name: 'TableAction',
   props,
-  emits: ['updateList', 'renameResource'],
+  emits: ['updateList', 'renameResource','updateUploadFile'],
   setup(props, { emit }) {
     const { t } = useI18n()
     const router: Router = useRouter()
@@ -63,8 +63,15 @@ export default defineComponent({
       return !(flag && size < 1000000)
     }
 
-    const handleEditFile = (item: { id: number }) => {
-      router.push({ name: 'resource-file-edit', params: { id: item.id } })
+    const handleEditFile = (item: { id: number,name:string,description:string,size:number }) => {
+      //router.push({ name: 'resource-file-edit', params: { id: item.id } })
+      if(rtDisb(item.name,item.size))
+      {
+        emit('updateUploadFile', item.id, item.name, item.description)
+      }else{
+        router.push({ name: 'resource-file-edit', params: { id: item.id } })
+      }
+      
     }
 
     const handleDeleteFile = (id: number) => {
@@ -75,12 +82,17 @@ export default defineComponent({
       emit('renameResource', id, name, description)
     }
 
+    const handleUpdateFile: IUpdateFile = (id, name, description) => {
+      emit('updateUploadFile', id, name, description)
+    }
+
     return {
       t,
       rtDisb,
       handleEditFile,
       handleDeleteFile,
       handleRenameFile,
+      handleUpdateFile,
       ...props
     }
   },
@@ -95,7 +107,6 @@ export default defineComponent({
               <NButton
                 size='tiny'
                 type='info'
-                disabled={this.rtDisb(this.row.name, this.row.size)}
                 tag='div'
                 onClick={() => {
                   this.handleEditFile(this.row)

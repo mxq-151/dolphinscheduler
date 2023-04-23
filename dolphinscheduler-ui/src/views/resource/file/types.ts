@@ -33,6 +33,12 @@ export interface IEmit {
 export interface IRenameFile {
   (id: number, name: string, description: string): void
 }
+
+export interface IUpdateFile {
+  (id: number, name: string, description: string): void
+}
+
+
 export interface IRtDisb {
   (name: string, size: number): boolean
 }

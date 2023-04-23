@@ -21,7 +21,7 @@ import { useRouter } from 'vue-router'
 import { bytesToSize } from '@/common/common'
 import { useFileStore } from '@/store/file/file'
 import TableAction from './table-action'
-import { IRenameFile } from '../types'
+import { IRenameFile, IUpdateFile } from '../types'
 import ButtonLink from '@/components/button-link'
 import { NEllipsis } from 'naive-ui'
 import {
@@ -44,7 +44,7 @@ const goSubFolder = (router: Router, item: any) => {
   }
 }
 
-export function useTable(renameResource: IRenameFile, updateList: () => void) {
+export function useTable(renameResource: IRenameFile, updateList: () => void,updateUploadFile:IUpdateFile) {
   const { t } = useI18n()
   const router: Router = useRouter()
 
@@ -112,6 +112,7 @@ export function useTable(renameResource: IRenameFile, updateList: () => void) {
           row,
           onRenameResource: (id, name, description) =>
             renameResource(id, name, description),
+          onUpdateUploadFile:(id, name, description)=> updateUploadFile(id, name, description),
           onUpdateList: () => updateList()
         }),
       ...COLUMN_WIDTH_CONFIG['operation'](4)

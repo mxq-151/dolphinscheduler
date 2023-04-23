@@ -2509,27 +2509,8 @@ public class ProcessServiceImpl implements ProcessService {
             taskDefinitionLog.setUpdateTime(now);
             taskDefinitionLog.setOperateTime(now);
             taskDefinitionLog.setOperator(operator.getId());
-
             String ids = getResourceIds(taskDefinitionLog);
-            if (!StringUtils.isEmpty(ids)) {
-                String[] array = ids.split(",");
-                List<Map<String, Long>> idMap = new ArrayList<>();
-                for (String ele : array) {
-                    Map<String, Long> map = new HashMap<>();
-                    map.put("id", Long.valueOf(ele));
-                    idMap.add(map);
-                }
-                String str = taskDefinitionLog.getTaskParams();
-                ObjectNode node = JSONUtils.parseObject(str);
-                node.set("resourceList", JSONUtils.toJsonNode(idMap));
-                taskDefinitionLog.setTaskParams(JSONUtils.toJsonString(node));
-            } else {
-                String str = taskDefinitionLog.getTaskParams();
-                ObjectNode node = JSONUtils.parseObject(str);
-                node.set("resourceList", JSONUtils.toJsonNode(new ArrayList<>()));
-                taskDefinitionLog.setTaskParams(JSONUtils.toJsonString(node));
-            }
-
+            updateTaskParams(taskDefinitionLog);
             taskDefinitionLog.setResourceIds(ids);
             if (taskDefinitionLog.getCode() == 0) {
                 taskDefinitionLog.setCode(CodeGenerateUtils.getInstance().genCode());
@@ -2727,6 +2708,28 @@ public class ProcessServiceImpl implements ProcessService {
         return DagHelper.buildDagGraph(processDag);
     }
 
+    private void updateTaskParams(TaskDefinition task) {
+        String ids = getResourceIds(task);
+        if (!StringUtils.isEmpty(ids)) {
+            String[] array = ids.split(",");
+            List<Map<String, Long>> idMap = new ArrayList<>();
+            for (String ele : array) {
+                Map<String, Long> map = new HashMap<>();
+                map.put("id", Long.valueOf(ele));
+                idMap.add(map);
+            }
+            String str = task.getTaskParams();
+            ObjectNode node = JSONUtils.parseObject(str);
+            node.set("resourceList", JSONUtils.toJsonNode(idMap));
+            task.setTaskParams(JSONUtils.toJsonString(node));
+        } else {
+            String str = task.getTaskParams();
+            ObjectNode node = JSONUtils.parseObject(str);
+            node.set("resourceList", JSONUtils.toJsonNode(new ArrayList<>()));
+            task.setTaskParams(JSONUtils.toJsonString(node));
+        }
+    }
+
     /**
      * generate DagData
      */
@@ -2737,27 +2740,8 @@ public class ProcessServiceImpl implements ProcessService {
         List<TaskDefinitionLog> taskDefinitionLogList = genTaskDefineList(taskRelations);
         List<TaskDefinition> taskDefinitions =
                 taskDefinitionLogList.stream().map(t -> {
-
-                    String ids = getResourceIds(t);
-                    if (!StringUtils.isEmpty(ids)) {
-                        String[] array = ids.split(",");
-                        List<Map<String, Long>> idMap = new ArrayList<>();
-                        for (String ele : array) {
-                            Map<String, Long> map = new HashMap<>();
-                            map.put("id", Long.valueOf(ele));
-                            idMap.add(map);
-                        }
-                        String str = t.getTaskParams();
-                        ObjectNode node = JSONUtils.parseObject(str);
-                        node.set("resourceList", JSONUtils.toJsonNode(idMap));
-                        t.setTaskParams(JSONUtils.toJsonString(node));
-                    } else {
-                        String str = t.getTaskParams();
-                        ObjectNode node = JSONUtils.parseObject(str);
-                        node.set("resourceList", JSONUtils.toJsonNode(new ArrayList<>()));
-                        t.setTaskParams(JSONUtils.toJsonString(node));
-                    }
                     TaskDefinition task = (TaskDefinition) t;
+                    updateTaskParams(task);
                     return task;
                 }).collect(Collectors.toList());
         return new DagData(processDefinition, taskRelations, taskDefinitions);

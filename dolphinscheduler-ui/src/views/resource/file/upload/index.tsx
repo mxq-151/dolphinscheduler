@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { defineComponent, toRefs, PropType, getCurrentInstance } from 'vue'
+import { defineComponent, toRefs, PropType, getCurrentInstance,watch } from 'vue'
 import { NButton, NForm, NFormItem, NInput, NUpload } from 'naive-ui'
 
 import { useI18n } from 'vue-i18n'
@@ -26,6 +26,18 @@ const props = {
   show: {
     type: Boolean as PropType<boolean>,
     default: false
+  },
+  id: {
+    type: Number as PropType<number>,
+    default: -1
+  },
+  name: {
+    type: String as PropType<string>,
+    default: ''
+  },
+  description: {
+    type: String as PropType<string>,
+    default: ''
   }
 }
 
@@ -34,7 +46,7 @@ export default defineComponent({
   props,
   emits: ['updateList', 'update:show'],
   setup(props, ctx) {
-    const { state, resetForm } = useForm()
+    const { state, resetForm } = useForm(props.id,props.name,props.description)
     const { handleUploadFile } = useUpload(state)
 
     const hideModal = () => {
@@ -43,9 +55,9 @@ export default defineComponent({
     }
 
     const customRequest = ({ file }: any) => {
-      state.uploadForm.name = file.name
-      state.uploadForm.file = file.file
-      state.uploadFormRef.validate()
+        state.uploadForm.name = file.name
+        state.uploadForm.file = file.file
+        state.uploadFormRef.validate()
     }
 
     const handleFile = () => {
@@ -58,6 +70,16 @@ export default defineComponent({
     }
 
     const trim = getCurrentInstance()?.appContext.config.globalProperties.trim
+
+    watch(
+      () => props.show,
+      () => {
+        state.uploadForm.id = props.id
+        state.uploadForm.name = props.name
+        state.uploadForm.file='file'
+        state.uploadForm.description = props.description
+      }
+    )
 
     return {
       hideModal,

@@ -19,25 +19,34 @@ import { reactive, ref, unref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { FormRules } from 'naive-ui'
 
-const defaultValue = () => ({
-  name: '',
-  file: '',
-  description: '',
+const defaultValue = (id:number,name:string,description:string,file:string) => ({
+  id,
+  name,
+  file,
+  description,
   pid: -1,
   currentDir: '/'
 })
 
-export function useForm() {
+export function useForm(id:number,name:string,description:string) {
   const { t } = useI18n()
 
-  const resetForm = () => {
-    state.uploadForm = Object.assign(unref(state.uploadForm), defaultValue())
+  let file='';
+  if(id!=-1)
+  {
+    file='file';
   }
+
+  
+  const resetForm = () => {
+    state.uploadForm = Object.assign(unref(state.uploadForm), defaultValue(id,name,description,''))
+  }
+
 
   const state = reactive({
     uploadFormRef: ref(),
     uploadFormNameRef: ref(),
-    uploadForm: defaultValue(),
+    uploadForm: defaultValue(id,name,description,''),
     saving: false,
     rules: {
       name: {

@@ -39,7 +39,7 @@ import { useI18n } from 'vue-i18n'
 import { SearchOutlined } from '@vicons/antd'
 import { useTable } from './table/use-table'
 import { useFileState } from './use-file'
-import { BreadcrumbItem, IRenameFile } from './types'
+import { BreadcrumbItem, IRenameFile, IUpdateFile } from './types'
 import { useFileStore } from '@/store/file/file'
 import {
   queryCurrentResourceById,
@@ -71,6 +71,12 @@ export default defineComponent({
       description: ''
     })
 
+    const updateUploadInfo = reactive({
+      id: -1,
+      name: '',
+      description: ''
+    })
+
     const paginationReactive = reactive({
       page: 1,
       pageSize: 10,
@@ -86,6 +92,13 @@ export default defineComponent({
         paginationReactive.page,
         paginationReactive.pageSize
       )
+    }
+
+    const handleUpdateUploadFile:IUpdateFile= (id, name, description) => {
+      updateUploadInfo.id = id
+      updateUploadInfo.name = name
+      updateUploadInfo.description = description
+      handleShowModal(uploadShowRef)
     }
 
     const handleUpdatePageSize = (pageSize: number) => {
@@ -245,6 +258,8 @@ export default defineComponent({
       pagination: paginationReactive,
       renameInfo,
       breadcrumbItemsRef,
+      handleUpdateUploadFile,
+      updateUploadInfo,
       trim
     }
   },
@@ -252,7 +267,7 @@ export default defineComponent({
     const { t } = useI18n()
     const { columnsRef, tableWidth } = useTable(
       this.handleRenameFile,
-      this.updateList
+      this.updateList,this.handleUpdateUploadFile
     )
     const {
       handleConditions,
@@ -349,6 +364,9 @@ export default defineComponent({
         />
         <ResourceUploadModal
           v-model:show={this.uploadShowRef}
+          id={this.updateUploadInfo.id}
+          name={this.updateUploadInfo.name}
+          description={this.updateUploadInfo.description}
           onUpdateList={this.updateList}
         />
         <ResourceRenameModal
