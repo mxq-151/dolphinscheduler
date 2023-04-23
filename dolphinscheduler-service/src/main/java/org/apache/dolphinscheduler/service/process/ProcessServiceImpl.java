@@ -121,6 +121,7 @@ import org.apache.dolphinscheduler.remote.processor.StateEventCallbackService;
 import org.apache.dolphinscheduler.remote.utils.Host;
 import org.apache.dolphinscheduler.service.cron.CronUtils;
 import org.apache.dolphinscheduler.service.exceptions.CronParseException;
+import org.apache.dolphinscheduler.service.exceptions.ResourceNotExistsException;
 import org.apache.dolphinscheduler.service.exceptions.ServiceException;
 import org.apache.dolphinscheduler.service.expand.CuringParamsService;
 import org.apache.dolphinscheduler.service.log.LogClient;
@@ -1814,6 +1815,9 @@ public class ProcessServiceImpl implements ProcessService {
             resourceInfo = new ResourceInfo();
             // get resource from database, only one resource should be returned
             Resource resource = getResourceById(resourceId);
+            if (resource == null) {
+                throw new ResourceNotExistsException("resource id:" + resourceId + " not exist");
+            }
             resourceInfo.setId(resourceId);
             resourceInfo.setRes(resource.getFileName());
             resourceInfo.setResourceName(resource.getFullName());

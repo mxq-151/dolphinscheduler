@@ -81,6 +81,7 @@ import org.apache.dolphinscheduler.server.master.runner.task.TaskProcessorFactor
 import org.apache.dolphinscheduler.service.alert.ProcessAlertManager;
 import org.apache.dolphinscheduler.service.cron.CronUtils;
 import org.apache.dolphinscheduler.service.exceptions.CronParseException;
+import org.apache.dolphinscheduler.service.exceptions.ResourceNotExistsException;
 import org.apache.dolphinscheduler.service.expand.CuringParamsService;
 import org.apache.dolphinscheduler.service.model.TaskNode;
 import org.apache.dolphinscheduler.service.process.ProcessDag;
@@ -88,6 +89,7 @@ import org.apache.dolphinscheduler.service.process.ProcessService;
 import org.apache.dolphinscheduler.service.queue.PeerTaskInstancePriorityQueue;
 import org.apache.dolphinscheduler.service.utils.DagHelper;
 import org.apache.dolphinscheduler.service.utils.LoggerUtils;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -826,7 +828,8 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
                             task.getTaskCode(),
                             task.getState());
                     if (validTaskMap.containsKey(task.getTaskCode())) {
-                        logger.warn("Have same taskCode taskInstance when init task queue, need to check taskExecutionStatus, taskCode:{}",
+                        logger.warn(
+                                "Have same taskCode taskInstance when init task queue, need to check taskExecutionStatus, taskCode:{}",
                                 task.getTaskCode());
                         int oldTaskInstanceId = validTaskMap.get(task.getTaskCode());
                         TaskInstance oldTaskInstance = taskInstanceMap.get(oldTaskInstanceId);
@@ -975,7 +978,8 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
                         taskInstance.getProcessInstanceId(),
                         taskInstance.getTaskGroupPriority());
                 if (!acquireTaskGroup) {
-                    logger.info("Submitted task will not be dispatch right now because the first time to try to acquire" +
+                    logger.info(
+                            "Submitted task will not be dispatch right now because the first time to try to acquire" +
                                     " task group failed, taskInstanceName: {}, taskGroupId: {}",
                             taskInstance.getName(), taskGroupId);
                     return Optional.of(taskInstance);
@@ -984,7 +988,8 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
 
             boolean dispatchSuccess = taskProcessor.action(TaskAction.DISPATCH);
             if (!dispatchSuccess) {
-                logger.error("Dispatch standby process {} task {} failed", processInstance.getName(), taskInstance.getName());
+                logger.error("Dispatch standby process {} task {} failed", processInstance.getName(),
+                        taskInstance.getName());
                 return Optional.empty();
             }
             taskProcessor.action(TaskAction.RUN);
@@ -1011,9 +1016,12 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
                 this.stateEvents.add(taskStateChangeEvent);
             }
             return Optional.of(taskInstance);
+        } catch (ResourceNotExistsException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Submit standby task {} error, taskCode: {}", taskInstance.getName(),
                     taskInstance.getTaskCode(), e);
+            e.printStackTrace();
             return Optional.empty();
         } finally {
             LoggerUtils.removeWorkflowAndTaskInstanceIdMDC();
@@ -1438,9 +1446,10 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             List<String> nextTaskList =
                     DagHelper.parseConditionTask(dependNodeName, skipTaskNodeMap, dag, getCompleteTaskInstanceMap());
             if (!nextTaskList.contains(nextNodeName)) {
-                logger.info("DependTask is a condition task, and its next condition branch does not hava current task, " +
-                                "dependTaskCode: {}, currentTaskCode: {}", dependNodeName, nextNodeName
-                        );
+                logger.info(
+                        "DependTask is a condition task, and its next condition branch does not hava current task, " +
+                                "dependTaskCode: {}, currentTaskCode: {}",
+                        dependNodeName, nextNodeName);
                 return false;
             }
         } else {
@@ -1816,7 +1825,8 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
                 TaskInstance retryTask = processService.findTaskInstanceById(task.getId());
                 if (retryTask != null && retryTask.getState().isForceSuccess()) {
                     task.setState(retryTask.getState());
-                    logger.info("Task {} has been forced success, put it into complete task list and stop retrying, taskInstanceId: {}",
+                    logger.info(
+                            "Task {} has been forced success, put it into complete task list and stop retrying, taskInstanceId: {}",
                             task.getName(), task.getId());
                     removeTaskFromStandbyList(task);
                     completeTaskMap.put(task.getTaskCode(), task.getId());
@@ -1834,7 +1844,17 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             DependResult dependResult = getDependResultForTask(task);
             if (DependResult.SUCCESS == dependResult) {
                 logger.info("The dependResult of task {} is success, so ready to submit to execute", task.getName());
-                Optional<TaskInstance> taskInstanceOptional = submitTaskExec(task);
+                Optional<TaskInstance> taskInstanceOptional = null;
+                try {
+                    taskInstanceOptional = submitTaskExec(task);
+                } catch (ResourceNotExistsException e) {
+                    this.taskFailedSubmit = true;
+                    removeTaskFromStandbyList(task);
+                    e.printStackTrace();
+                    logger.error(e.getMessage());
+                    return;
+                }
+
                 if (!taskInstanceOptional.isPresent()) {
                     this.taskFailedSubmit = true;
                     // Remove and add to complete map and error map

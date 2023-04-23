@@ -63,6 +63,14 @@ export default defineComponent({
       return !(flag && size < 1000000)
     }
 
+    const checkShow: IRtDisb = (name, size) => {
+      const i = name.lastIndexOf('.')
+      const a = name.substring(i, name.length)
+      const flag = _.includes(fileTypeArr, _.trimStart(a, '.'))
+      return !flag;
+    }
+
+
     const handleEditFile = (item: { id: number,name:string,description:string,size:number }) => {
       //router.push({ name: 'resource-file-edit', params: { id: item.id } })
       if(rtDisb(item.name,item.size))
@@ -89,6 +97,7 @@ export default defineComponent({
     return {
       t,
       rtDisb,
+      checkShow,
       handleEditFile,
       handleDeleteFile,
       handleRenameFile,
@@ -108,6 +117,7 @@ export default defineComponent({
                 size='tiny'
                 type='info'
                 tag='div'
+                disabled={this.checkShow(this.row.name,this.row.size)}
                 onClick={() => {
                   this.handleEditFile(this.row)
                 }}
