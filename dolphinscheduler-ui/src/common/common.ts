@@ -67,6 +67,27 @@ export const fileTypeArr = [
   'js'
 ]
 
+export const fileAllTypeArr = [
+  'txt',
+  'log',
+  'sh',
+  'bat',
+  'conf',
+  'cfg',
+  'py',
+  'java',
+  'sql',
+  'xml',
+  'hql',
+  'properties',
+  'json',
+  'yml',
+  'yaml',
+  'ini',
+  'jar',
+  'js'
+]
+
 /**
  * Operation type
  * @desc tooltip

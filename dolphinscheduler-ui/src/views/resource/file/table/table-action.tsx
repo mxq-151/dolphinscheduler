@@ -28,7 +28,7 @@ import {
 import _ from 'lodash'
 import { useI18n } from 'vue-i18n'
 import { IUpdateFile, ResourceFileTableData } from '../types'
-import { fileTypeArr } from '@/common/common'
+import { fileTypeArr, fileAllTypeArr } from '@/common/common'
 import { downloadResource, deleteResource } from '@/service/modules/resources'
 import { IRenameFile, IRtDisb } from '../types'
 import type { Router } from 'vue-router'
@@ -66,7 +66,7 @@ export default defineComponent({
     const checkShow: IRtDisb = (name, size) => {
       const i = name.lastIndexOf('.')
       const a = name.substring(i, name.length)
-      const flag = _.includes(fileTypeArr, _.trimStart(a, '.'))
+      const flag = _.includes(fileAllTypeArr, _.trimStart(a, '.'))
       return !flag;
     }
 
@@ -117,7 +117,7 @@ export default defineComponent({
                 size='tiny'
                 type='info'
                 tag='div'
-                disabled={this.checkShow(this.row.name,this.row.size)}
+                disabled={this.checkShow(this.row.name,this.row.size) || this.row?.directory ? true : false}
                 onClick={() => {
                   this.handleEditFile(this.row)
                 }}
