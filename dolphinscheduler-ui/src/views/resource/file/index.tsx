@@ -144,6 +144,9 @@ export default defineComponent({
     }
 
     const handleUploadFile = () => {
+      updateUploadInfo.id=-1
+      updateUploadInfo.name=''
+      updateUploadInfo.description=''
       handleShowModal(uploadShowRef)
     }
 

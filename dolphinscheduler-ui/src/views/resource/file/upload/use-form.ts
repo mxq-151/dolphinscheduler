@@ -37,7 +37,7 @@ export function useForm(id:number,name:string,description:string) {
     file='file';
   }
 
-  
+
   const resetForm = () => {
     state.uploadForm = Object.assign(unref(state.uploadForm), defaultValue(id,name,description,''))
   }

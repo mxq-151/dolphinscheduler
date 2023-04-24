@@ -37,7 +37,14 @@ export function useUpload(state: any) {
     if (state.saving) return
     state.saving = true
     try {
-
+      debugger
+      if(state.uploadForm.file=='' || state.uploadForm.file=='file' )
+      {
+        window.$message.success('文件不能为空')
+        state.saving = false
+        resetForm()
+        return
+      }
       if(state.uploadForm.id!=-1)
       {
         const pid = router.currentRoute.value.params.id || -1

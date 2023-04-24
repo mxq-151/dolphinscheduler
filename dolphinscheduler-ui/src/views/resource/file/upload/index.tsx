@@ -21,6 +21,7 @@ import { useI18n } from 'vue-i18n'
 import Modal from '@/components/modal'
 import { useForm } from './use-form'
 import { useUpload } from './use-upload'
+import { fi } from 'date-fns/locale'
 
 const props = {
   show: {
@@ -54,15 +55,28 @@ export default defineComponent({
       ctx.emit('update:show')
     }
 
+    const getSuffex = (name:string)=>{
+      const i = name.lastIndexOf('.')
+      const a = name.substring(i, name.length)
+      return a;
+    }
     const customRequest = ({ file }: any) => {
-        state.uploadForm.name = file.name
-        state.uploadForm.file = file.file
-        state.uploadFormRef.validate()
+        if(getSuffex(state.uploadForm.name)!=getSuffex(file.name)){
+          window.$message.success('文件类型前后不一致')
+          state.uploadForm.file=''
+          return;
+        }else{
+          state.uploadForm.name = file.name
+           state.uploadForm.file = file.file
+           state.uploadFormRef.validate()
+        }
+        
     }
 
     const handleFile = () => {
       handleUploadFile(ctx.emit, hideModal, resetForm)
     }
+
 
     const removeFile = () => {
       state.uploadForm.name = ''
