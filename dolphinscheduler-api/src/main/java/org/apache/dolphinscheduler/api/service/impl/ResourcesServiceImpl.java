@@ -435,6 +435,7 @@ public class ResourcesServiceImpl extends BaseServiceImpl implements ResourcesSe
         if (StringUtils.isEmpty(tenantCode)) {
             return result;
         }
+
         // verify whether the resource exists in storage
         // get the path of origin file in storage
         String originFileName = storageOperate.getFileName(resource.getType(), tenantCode, originFullName);
@@ -477,6 +478,46 @@ public class ResourcesServiceImpl extends BaseServiceImpl implements ResourcesSe
                     return result;
                 }
             }
+        }
+
+        // get all resource id of process definitions those is released
+        List<Map<String, Object>> list = processDefinitionMapper.listResources();
+        Map<Integer, Set<Long>> resourceProcessMap =
+                ResourceProcessDefinitionUtils.getResourceProcessDefinitionMap(list);
+        Set<Integer> resourceIdSet = resourceProcessMap.keySet();
+        // get all children of the resource
+        List<Integer> allChildren = listAllChildren(resource, true);
+
+        Integer[] needDeleteResourceIdArray = allChildren.toArray(new Integer[allChildren.size()]);
+        if (needDeleteResourceIdArray.length >= 2) {
+            logger.error("can't be updated,because There are files or folders in the current directory:{}", resource);
+            putMsg(result, Status.RESOURCE_HAS_FOLDER, resource.getFileName());
+            return result;
+        }
+
+        // if resource type is UDF,need check whether it is bound by UDF function
+        if (resource.getType() == (ResourceType.UDF)) {
+            List<UdfFunc> udfFuncs = udfFunctionMapper.listUdfByResourceId(needDeleteResourceIdArray);
+            if (CollectionUtils.isNotEmpty(udfFuncs)) {
+                logger.error("can't be updated,because it is bound by UDF functions:{}", udfFuncs);
+                putMsg(result, Status.UDF_RESOURCE_IS_BOUND, udfFuncs.get(0).getFuncName());
+                return result;
+            }
+        }
+
+        if (resourceIdSet.contains(resource.getPid())) {
+            logger.error("can't be updated,because it is used of process definition");
+            putMsg(result, Status.RESOURCE_IS_USED);
+            return result;
+        }
+        resourceIdSet.retainAll(allChildren);
+        if (CollectionUtils.isNotEmpty(resourceIdSet)) {
+            logger.error("can't be updated,because it is used of process definition");
+            for (Integer resId : resourceIdSet) {
+                logger.error("resource id:{} is used of process definition {}", resId, resourceProcessMap.get(resId));
+            }
+            putMsg(result, Status.RESOURCE_IS_USED);
+            return result;
         }
 
         // updateResource data

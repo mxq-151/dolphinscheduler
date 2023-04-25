@@ -37,7 +37,6 @@ export function useUpload(state: any) {
     if (state.saving) return
     state.saving = true
     try {
-      debugger
       if(state.uploadForm.file=='' || state.uploadForm.file=='file' )
       {
         window.$message.success('文件不能为空')

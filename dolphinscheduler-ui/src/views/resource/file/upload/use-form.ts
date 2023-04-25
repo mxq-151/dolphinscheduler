@@ -17,7 +17,7 @@
 
 import { reactive, ref, unref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { FormRules } from 'naive-ui'
+import type { FormRules,UploadInst } from 'naive-ui'
 
 const defaultValue = (id:number,name:string,description:string,file:string) => ({
   id,
@@ -47,6 +47,7 @@ export function useForm(id:number,name:string,description:string) {
     uploadFormRef: ref(),
     uploadFormNameRef: ref(),
     uploadForm: defaultValue(id,name,description,''),
+    newFile: [],
     saving: false,
     rules: {
       name: {

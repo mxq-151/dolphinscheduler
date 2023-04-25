@@ -61,12 +61,13 @@ export default defineComponent({
       return a;
     }
     const customRequest = ({ file }: any) => {
-        if(getSuffex(state.uploadForm.name)!=getSuffex(file.name)){
+        if(state.uploadForm.id != -1 && getSuffex(state.uploadForm.name)!= getSuffex(file.name)){
           window.$message.success('文件类型前后不一致')
           state.uploadForm.file=''
+          state.newFile = []
           return;
         }else{
-          state.uploadForm.name = file.name
+           state.uploadForm.name = file.name
            state.uploadForm.file = file.file
            state.uploadFormRef.validate()
         }
@@ -90,7 +91,7 @@ export default defineComponent({
       () => {
         state.uploadForm.id = props.id
         state.uploadForm.name = props.name
-        state.uploadForm.file='file'
+        state.uploadForm.file ='file'
         state.uploadForm.description = props.description
       }
     )
@@ -140,7 +141,7 @@ export default defineComponent({
           </NFormItem>
           <NFormItem label={t('resource.file.upload_files')} path='file'>
             <NUpload
-              v-model={[this.uploadForm.file, 'value']}
+              v-model:file-list={this.newFile}
               customRequest={this.customRequest}
               class='btn-upload'
               max={1}
