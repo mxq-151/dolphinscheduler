@@ -52,9 +52,9 @@ export default defineComponent({
 
     const hideModal = () => {
       resetForm()
+      state.newFile =[]
       ctx.emit('update:show')
     }
-
     const getSuffex = (name:string)=>{
       const i = name.lastIndexOf('.')
       const a = name.substring(i, name.length)

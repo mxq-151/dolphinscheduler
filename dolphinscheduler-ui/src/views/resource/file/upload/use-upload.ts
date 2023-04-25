@@ -40,13 +40,14 @@ export function useUpload(state: any) {
       if(state.uploadForm.file=='' || state.uploadForm.file=='file' )
       {
         window.$message.success('文件不能为空')
+        state.newFile = []
         state.saving = false
         resetForm()
         return
       }
       if(state.uploadForm.id!=-1)
       {
-        const pid = router.currentRoute.value.params.id || -1
+      const pid = router.currentRoute.value.params.id || -1
       const currentDir = fileStore.getCurrentDir || '/'
       const formData = new FormData()
       formData.append('file', state.uploadForm.file)
@@ -58,6 +59,7 @@ export function useUpload(state: any) {
 
       await updateResource(formData as any,state.uploadForm.id)
       window.$message.success(t('resource.file.success'))
+      state.newFile=[]
       state.saving = false
       emit('updateList')
 
@@ -77,6 +79,7 @@ export function useUpload(state: any) {
 
       await createResource(formData as any)
       window.$message.success(t('resource.file.success'))
+      state.newFile=[]
       state.saving = false
       emit('updateList')
 
