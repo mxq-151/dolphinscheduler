@@ -80,7 +80,9 @@ export default defineComponent({
 
 
     const removeFile = () => {
-      state.uploadForm.name = ''
+      if(state.uploadForm.id == -1){
+        state.uploadForm.name = ''
+      }
       state.uploadForm.file = ''
     }
 
