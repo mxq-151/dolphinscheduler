@@ -110,7 +110,7 @@ public class FailoverServiceTest {
         springApplicationContext.setApplicationContext(applicationContext);
 
         given(masterConfig.getListenPort()).willReturn(masterPort);
-        testMasterHost = NetUtils.getAddr(masterConfig.getListenPort());
+        testMasterHost = NetUtils.getAddr(masterConfig.getIpAddress(),masterConfig.getListenPort());
         given(masterConfig.getMasterAddress()).willReturn(testMasterHost);
         MasterFailoverService masterFailoverService =
                 new MasterFailoverService(registryClient, masterConfig, processService, nettyExecutorManager,

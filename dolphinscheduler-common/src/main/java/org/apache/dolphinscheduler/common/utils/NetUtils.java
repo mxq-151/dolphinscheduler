@@ -18,7 +18,9 @@
 package org.apache.dolphinscheduler.common.utils;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.max;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dolphinscheduler.common.constants.Constants;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -61,7 +63,10 @@ public class NetUtils {
      * @return addr
      */
     public static String getAddr(String host, int port) {
-        return String.format("%s:%d", host, port);
+        if (StringUtils.isNotBlank(host)){
+            return String.format("%s:%d", host, port);
+        }
+        throw new RuntimeException("the ip format is incorrect");
     }
 
     /**
@@ -71,6 +76,8 @@ public class NetUtils {
     public static String getAddr(int port) {
         return getAddr(getHost(), port);
     }
+
+
 
     /**
      * get host

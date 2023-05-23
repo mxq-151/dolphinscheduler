@@ -157,8 +157,8 @@ public class MasterRegistryClient implements AutoCloseable {
         registryClient.remove(masterRegistryPath);
         registryClient.persistEphemeral(masterRegistryPath, JSONUtils.toJsonString(masterHeartBeatTask.getHeartBeat()));
 
-        while (!registryClient.checkNodeExists(NetUtils.getHost(), NodeType.MASTER)) {
-            logger.warn("The current master server node:{} cannot find in registry", NetUtils.getHost());
+        while (!registryClient.checkNodeExists(masterConfig.getIpAddress(), NodeType.MASTER)) {
+            logger.warn("The current master server node:{} cannot find in registry", masterConfig.getIpAddress());
             ThreadUtils.sleep(SLEEP_TIME_MILLIS);
         }
 
