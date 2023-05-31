@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.SSLException;
+
 @Service
 public class WorkerRpcServer implements Closeable {
 
@@ -71,7 +73,7 @@ public class WorkerRpcServer implements Closeable {
 
     private NettyRemotingServer nettyRemotingServer;
 
-    public void start() {
+    public void start() throws SSLException {
         LOGGER.info("Worker rpc server starting");
         NettyServerConfig serverConfig = new NettyServerConfig();
         serverConfig.setListenPort(workerConfig.getListenPort());

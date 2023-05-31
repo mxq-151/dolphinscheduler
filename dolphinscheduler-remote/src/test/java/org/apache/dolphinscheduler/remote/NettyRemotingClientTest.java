@@ -37,6 +37,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 
+import javax.net.ssl.SSLException;
+
 /**
  *  netty remote client test
  */
@@ -46,7 +48,7 @@ public class NettyRemotingClientTest {
      *  test send sync
      */
     @Test
-    public void testSendSync() {
+    public void testSendSync() throws SSLException {
         NettyServerConfig serverConfig = new NettyServerConfig();
 
         NettyRemotingServer server = new NettyRemotingServer(serverConfig);
@@ -54,6 +56,7 @@ public class NettyRemotingClientTest {
             @Override
             public void process(Channel channel, Command command) {
                 channel.writeAndFlush(Pong.create(command.getOpaque()));
+                channel.writeAndFlush(Pong.pongContent());
             }
         });
 
@@ -77,7 +80,7 @@ public class NettyRemotingClientTest {
      *  test sned async
      */
     @Test
-    public void testSendAsync(){
+    public void testSendAsync() throws SSLException {
         NettyServerConfig serverConfig = new NettyServerConfig();
 
         NettyRemotingServer server = new NettyRemotingServer(serverConfig);

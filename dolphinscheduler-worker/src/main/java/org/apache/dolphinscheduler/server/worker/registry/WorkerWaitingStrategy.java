@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.SSLException;
 import java.time.Duration;
 
 @Service
@@ -129,7 +130,7 @@ public class WorkerWaitingStrategy implements WorkerConnectStrategy {
 
     }
 
-    private void reStartWorkerResource() {
+    private void reStartWorkerResource() throws SSLException {
         // reopen the resource, if reopen failed should stop the worker server
         workerRpcServer.start();
         logger.warn("Worker server restart PRC server due to reconnect to registry");

@@ -39,6 +39,8 @@ import org.springframework.stereotype.Service;
 
 import io.netty.channel.Channel;
 
+import javax.net.ssl.SSLException;
+
 /**
  * cache notify service
  */
@@ -60,7 +62,7 @@ public class CacheNotifyServiceImpl implements CacheNotifyService {
      */
     private final NettyRemotingClient nettyRemotingClient;
 
-    public CacheNotifyServiceImpl() {
+    public CacheNotifyServiceImpl() throws SSLException {
         final NettyClientConfig clientConfig = new NettyClientConfig();
         this.nettyRemotingClient = new NettyRemotingClient(clientConfig);
     }

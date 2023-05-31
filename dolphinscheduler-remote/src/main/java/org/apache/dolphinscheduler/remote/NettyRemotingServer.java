@@ -17,6 +17,9 @@
 
 package org.apache.dolphinscheduler.remote;
 
+import io.netty.handler.ssl.ClientAuth;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import org.apache.dolphinscheduler.remote.codec.NettyDecoder;
 import org.apache.dolphinscheduler.remote.codec.NettyEncoder;
 import org.apache.dolphinscheduler.remote.command.CommandType;
@@ -27,6 +30,7 @@ import org.apache.dolphinscheduler.remote.processor.NettyRequestProcessor;
 import org.apache.dolphinscheduler.remote.utils.Constants;
 import org.apache.dolphinscheduler.remote.utils.NettyUtils;
 
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -48,6 +52,8 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+
+import javax.net.ssl.SSLException;
 
 /**
  * remoting netty server
@@ -96,12 +102,13 @@ public class NettyRemotingServer {
      */
     private static final String NETTY_BIND_FAILURE_MSG = "NettyRemotingServer bind %s fail";
 
+
     /**
      * server init
      *
      * @param serverConfig server config
      */
-    public NettyRemotingServer(final NettyServerConfig serverConfig) {
+    public NettyRemotingServer(final NettyServerConfig serverConfig) throws SSLException {
         this.serverConfig = serverConfig;
         ThreadFactory bossThreadFactory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("NettyServerBossThread_%s").build();
         ThreadFactory workerThreadFactory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("NettyServerWorkerThread_%s").build();
@@ -117,8 +124,18 @@ public class NettyRemotingServer {
     /**
      * server start
      */
-    public void start() {
+    public void start() throws SSLException {
         if (isStarted.compareAndSet(false, true)) {
+            String basePath = "/opt/dolphinscheduler/tls/";
+            File certChainFile = new File(basePath+"server/server.crt");
+            File keyFile = new File(basePath+"pkcs8_server.key");
+            File rootFile = new File(basePath+"ca.crt");
+            //生成sslContext对象
+            SslContext sslContext = SslContextBuilder.forServer(certChainFile, keyFile)
+                    .trustManager(rootFile)
+                    .clientAuth(ClientAuth.REQUIRE)
+                    .build();
+
             this.serverBootstrap
                     .group(this.bossGroup, this.workGroup)
                     .channel(NettyUtils.getServerSocketChannelClass())
@@ -131,8 +148,8 @@ public class NettyRemotingServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
 
                         @Override
-                        protected void initChannel(SocketChannel ch) {
-                            initNettyChannel(ch);
+                        protected void initChannel(SocketChannel ch) throws SSLException {
+                            initNettyChannel(ch, sslContext);
                         }
                     });
 
@@ -156,21 +173,25 @@ public class NettyRemotingServer {
     /**
      * init netty channel
      *
-     * @param ch socket channel
+     * @param ch         socket channel
+     * @param sslContext
      */
-    private void initNettyChannel(SocketChannel ch) {
+    private void initNettyChannel(SocketChannel ch, SslContext sslContext) throws SSLException {
         ch.pipeline()
+                //添加ssl安全验证
+                .addFirst(sslContext.newHandler(ch.alloc()))
                 .addLast("encoder", new NettyEncoder())
                 .addLast("decoder", new NettyDecoder())
                 .addLast("server-idle-handle", new IdleStateHandler(0, 0, Constants.NETTY_SERVER_HEART_BEAT_TIME, TimeUnit.MILLISECONDS))
                 .addLast("handler", serverHandler);
+        System.out.println("tls服务端已经加密111");
     }
 
     /**
      * register processor
      *
      * @param commandType command type
-     * @param processor processor
+     * @param processor   processor
      */
     public void registerProcessor(final CommandType commandType, final NettyRequestProcessor processor) {
         this.registerProcessor(commandType, processor, null);
@@ -180,8 +201,8 @@ public class NettyRemotingServer {
      * register processor
      *
      * @param commandType command type
-     * @param processor processor
-     * @param executor thread executor
+     * @param processor   processor
+     * @param executor    thread executor
      */
     public void registerProcessor(final CommandType commandType, final NettyRequestProcessor processor, final ExecutorService executor) {
         this.serverHandler.registerProcessor(commandType, processor, executor);

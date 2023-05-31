@@ -69,6 +69,7 @@ spring:
       org.quartz.jobStore.misfireThreshold: 60000
       org.quartz.scheduler.batchTriggerAcquisitionMaxCount: 1
       org.quartz.scheduler.makeSchedulerThreadDaemon: true
+      org.quartz.scheduler.makeSchedulerThreadDaemon: true
       org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
       org.quartz.jobStore.clusterCheckinInterval: 5000
 

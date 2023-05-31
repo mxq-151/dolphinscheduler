@@ -27,6 +27,9 @@ import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.ssl.ClientAuth;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.dolphinscheduler.remote.codec.NettyDecoder;
 import org.apache.dolphinscheduler.remote.codec.NettyEncoder;
@@ -49,6 +52,8 @@ import org.apache.dolphinscheduler.remote.utils.NettyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -84,7 +89,7 @@ public class NettyRemotingClient implements AutoCloseable {
 
     private final ScheduledExecutorService responseFutureExecutor;
 
-    public NettyRemotingClient(final NettyClientConfig clientConfig) {
+    public NettyRemotingClient(final NettyClientConfig clientConfig) throws SSLException {
         this.clientConfig = clientConfig;
         if (Epoll.isAvailable()) {
             this.workerGroup = new EpollEventLoopGroup(clientConfig.getWorkerThreads(), new NamedThreadFactory("NettyClient"));
@@ -106,7 +111,20 @@ public class NettyRemotingClient implements AutoCloseable {
         this.start();
     }
 
-    private void start() {
+    private void start() throws SSLException {
+        String basePath = "/opt/dolphinscheduler/tls/";
+        File certChainFile = new File(basePath+"client/client.crt");
+        File keyFile = new File(basePath+"pkcs8_client.key");
+        File rootFile = new File(basePath+"ca.crt");
+        //生成SslContext对象
+        SslContext sslContext = SslContextBuilder.forClient()
+                //客户端crt+key.pk8
+                .keyManager(certChainFile, keyFile)
+                //ca根证书
+                .trustManager(rootFile)
+                //双向验证
+                .clientAuth(ClientAuth.REQUIRE)
+                .build();
 
         this.bootstrap
                 .group(this.workerGroup)
@@ -118,10 +136,14 @@ public class NettyRemotingClient implements AutoCloseable {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, clientConfig.getConnectTimeoutMillis())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    public void initChannel(SocketChannel ch) {
+                    public void initChannel(SocketChannel ch){
                         ch.pipeline()
+                                //添加ssl安全验证
+                                .addFirst(sslContext.newHandler(ch.alloc()))
                                 .addLast("client-idle-handler", new IdleStateHandler(Constants.NETTY_CLIENT_HEART_BEAT_TIME, 0, 0, TimeUnit.MILLISECONDS))
-                                .addLast(new NettyDecoder(), clientHandler, encoder);
+                                .addLast(new NettyDecoder(), clientHandler, encoder)
+                                ;
+                        System.out.println("tls客户端已经加密111");
                     }
                 });
         this.responseFutureExecutor.scheduleAtFixedRate(ResponseFuture::scanFutureTable, 5000, 1000, TimeUnit.MILLISECONDS);
@@ -131,9 +153,9 @@ public class NettyRemotingClient implements AutoCloseable {
     /**
      * async send
      *
-     * @param host host
-     * @param command command
-     * @param timeoutMillis timeoutMillis
+     * @param host           host
+     * @param command        command
+     * @param timeoutMillis  timeoutMillis
      * @param invokeCallback callback function
      */
     public void sendAsync(final Host host, final Command command,
@@ -193,8 +215,8 @@ public class NettyRemotingClient implements AutoCloseable {
     /**
      * sync send
      *
-     * @param host host
-     * @param command command
+     * @param host          host
+     * @param command       command
      * @param timeoutMillis timeoutMillis
      * @return command
      */
@@ -233,7 +255,7 @@ public class NettyRemotingClient implements AutoCloseable {
     /**
      * send task
      *
-     * @param host host
+     * @param host    host
      * @param command command
      */
     public void send(final Host host, final Command command) throws RemotingException {
@@ -262,7 +284,7 @@ public class NettyRemotingClient implements AutoCloseable {
      * register processor
      *
      * @param commandType command type
-     * @param processor processor
+     * @param processor   processor
      */
     public void registerProcessor(final CommandType commandType, final NettyRequestProcessor processor) {
         this.registerProcessor(commandType, processor, null);
@@ -272,8 +294,8 @@ public class NettyRemotingClient implements AutoCloseable {
      * register processor
      *
      * @param commandType command type
-     * @param processor processor
-     * @param executor thread executor
+     * @param processor   processor
+     * @param executor    thread executor
      */
     public void registerProcessor(final CommandType commandType, final NettyRequestProcessor processor, final ExecutorService executor) {
         this.clientHandler.registerProcessor(commandType, processor, executor);
@@ -293,7 +315,7 @@ public class NettyRemotingClient implements AutoCloseable {
     /**
      * create channel
      *
-     * @param host host
+     * @param host   host
      * @param isSync sync flag
      * @return channel
      */

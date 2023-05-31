@@ -28,6 +28,7 @@ import org.apache.dolphinscheduler.remote.config.NettyServerConfig;
 import java.io.Closeable;
 
 import javax.annotation.PreDestroy;
+import javax.net.ssl.SSLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public class AlertServer implements Closeable {
     }
 
     @EventListener
-    public void run(ApplicationReadyEvent readyEvent) {
+    public void run(ApplicationReadyEvent readyEvent) throws SSLException {
         logger.info("Alert server is staring ...");
 
         checkTable();
@@ -115,7 +116,7 @@ public class AlertServer implements Closeable {
         }
     }
 
-    private void startServer() {
+    private void startServer() throws SSLException {
         NettyServerConfig serverConfig = new NettyServerConfig();
         serverConfig.setListenPort(alertConfig.getPort());
 

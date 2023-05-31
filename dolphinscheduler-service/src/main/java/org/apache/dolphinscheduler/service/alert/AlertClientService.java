@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
+
 public class AlertClientService implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(AlertClientService.class);
@@ -52,7 +54,7 @@ public class AlertClientService implements AutoCloseable {
     /**
      * alert client
      */
-    public AlertClientService() {
+    public AlertClientService() throws SSLException {
         this.clientConfig = new NettyClientConfig();
         this.client = new NettyRemotingClient(clientConfig);
         this.isRunning = new AtomicBoolean(true);
@@ -61,7 +63,7 @@ public class AlertClientService implements AutoCloseable {
     /**
      * alert client
      */
-    public AlertClientService(String host, int port) {
+    public AlertClientService(String host, int port) throws SSLException {
         this();
         this.host = host;
         this.port = port;

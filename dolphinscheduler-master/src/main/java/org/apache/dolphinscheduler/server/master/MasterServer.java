@@ -41,6 +41,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.annotation.PostConstruct;
+import javax.net.ssl.SSLException;
 
 @SpringBootApplication
 @ComponentScan("org.apache.dolphinscheduler")
@@ -83,7 +84,7 @@ public class MasterServer implements IStoppable {
      * run master server
      */
     @PostConstruct
-    public void run() throws SchedulerException {
+    public void run() throws SchedulerException, SSLException {
         // init rpc server
         this.masterRPCServer.start();
 

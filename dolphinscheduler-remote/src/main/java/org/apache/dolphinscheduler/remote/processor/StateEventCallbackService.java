@@ -35,6 +35,8 @@ import org.springframework.stereotype.Service;
 
 import io.netty.channel.Channel;
 
+import javax.net.ssl.SSLException;
+
 /**
  * task callback service
  */
@@ -54,7 +56,7 @@ public class StateEventCallbackService {
      */
     private final NettyRemotingClient nettyRemotingClient;
 
-    public StateEventCallbackService() {
+    public StateEventCallbackService() throws SSLException {
         final NettyClientConfig clientConfig = new NettyClientConfig();
         this.nettyRemotingClient = new NettyRemotingClient(clientConfig);
     }
