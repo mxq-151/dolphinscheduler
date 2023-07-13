@@ -22,11 +22,13 @@ import org.apache.dolphinscheduler.service.alert.AlertClientService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.net.ssl.SSLException;
+
 @Configuration
 public class BeanConfig {
 
     @Bean
-    public AlertClientService alertClientService(WorkerConfig workerConfig) {
+    public AlertClientService alertClientService(WorkerConfig workerConfig) throws SSLException {
         return new AlertClientService(
                 workerConfig.getAlertListenHost(),
                 workerConfig.getAlertListenPort());

@@ -28,6 +28,7 @@ import lombok.Data;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.Errors;
@@ -57,6 +58,10 @@ public class WorkerConfig implements Validator {
     /**
      * This field doesn't need to set at config file, it will be calculated by workerIp:listenPort
      */
+    //ip
+    @Value("${ipConfig.ip}")
+    private String ipAddress;
+    //ip:port
     private String workerAddress;
     private String workerRegistryPath;
 
@@ -79,7 +84,7 @@ public class WorkerConfig implements Validator {
         if (workerConfig.getMaxCpuLoadAvg() <= 0) {
             workerConfig.setMaxCpuLoadAvg(Runtime.getRuntime().availableProcessors() * 2);
         }
-        workerConfig.setWorkerAddress(NetUtils.getAddr(workerConfig.getListenPort()));
+        workerConfig.setWorkerAddress(NetUtils.getAddr(workerConfig.getIpAddress(),workerConfig.getListenPort()));
 
         workerConfig.setWorkerRegistryPath(REGISTRY_DOLPHINSCHEDULER_WORKERS + "/" + workerConfig.getWorkerAddress());
         printConfig();

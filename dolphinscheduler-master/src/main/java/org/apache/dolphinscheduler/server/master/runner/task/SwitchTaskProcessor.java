@@ -77,7 +77,7 @@ public class SwitchTaskProcessor extends BaseTaskProcessor {
                         processInstance.getProcessDefinitionVersion(),
                         taskInstance.getProcessInstanceId(),
                         taskInstance.getId()));
-        taskInstance.setHost(NetUtils.getAddr(masterConfig.getListenPort()));
+        taskInstance.setHost(NetUtils.getAddr(masterConfig.getIpAddress(),masterConfig.getListenPort()));
         taskInstance.setState(TaskExecutionStatus.RUNNING_EXECUTION);
         taskInstance.setStartTime(new Date());
         processService.updateTaskInstance(taskInstance);

@@ -42,6 +42,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.net.ssl.SSLException;
+
 /**
  * tenant cache proxy test
  */
@@ -58,7 +60,7 @@ public class CacheNotifyServiceTest {
     private RegistryClient registryClient;
 
     @Test
-    public void testNotifyMaster() {
+    public void testNotifyMaster() throws SSLException {
         User user1 = new User();
         user1.setId(100);
         Command cacheExpireCommand = new CacheExpireCommand(CacheType.USER, "100").convert2Command();

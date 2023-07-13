@@ -112,7 +112,7 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
     public void init() {
         this.masterPrepareExecService = (ThreadPoolExecutor) ThreadUtils
                 .newDaemonFixedThreadExecutor("MasterPreExecThread", masterConfig.getPreExecThreads());
-        this.masterAddress = NetUtils.getAddr(masterConfig.getListenPort());
+        this.masterAddress = NetUtils.getAddr(masterConfig.getIpAddress(),masterConfig.getListenPort());
     }
 
     @Override

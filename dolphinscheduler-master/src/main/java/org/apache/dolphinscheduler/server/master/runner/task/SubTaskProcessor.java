@@ -198,7 +198,7 @@ public class SubTaskProcessor extends BaseTaskProcessor {
         if (subProcessInstance == null || taskInstance.getState().isFinished()) {
             return false;
         }
-        taskInstance.setHost(NetUtils.getAddr(masterConfig.getListenPort()));
+        taskInstance.setHost(NetUtils.getAddr(masterConfig.getIpAddress(),masterConfig.getListenPort()));
         taskInstance.setState(TaskExecutionStatus.RUNNING_EXECUTION);
         taskInstance.setStartTime(new Date());
         processService.updateTaskInstance(taskInstance);

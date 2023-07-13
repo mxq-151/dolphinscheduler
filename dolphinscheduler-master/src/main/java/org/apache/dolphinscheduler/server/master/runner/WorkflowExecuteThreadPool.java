@@ -157,7 +157,7 @@ public class WorkflowExecuteThreadPool extends ThreadPoolTaskExecutor {
         for (Map.Entry<ProcessInstance, TaskInstance> entry : fatherMaps.entrySet()) {
             ProcessInstance processInstance = entry.getKey();
             TaskInstance taskInstance = entry.getValue();
-            String address = NetUtils.getAddr(masterConfig.getListenPort());
+            String address = NetUtils.getAddr(masterConfig.getIpAddress(),masterConfig.getListenPort());
             try {
                 LoggerUtils.setWorkflowAndTaskInstanceIDMDC(processInstance.getId(), taskInstance.getId());
                 if (processInstance.getHost().equalsIgnoreCase(address)) {

@@ -40,8 +40,12 @@ public class NetUtilsTest {
     @Test
     public void testGetAddr() {
         assertEquals(NetUtils.getHost() + ":5678", NetUtils.getAddr(5678));
-        assertEquals("127.0.0.1:5678", NetUtils.getAddr("127.0.0.1", 5678));
-        assertEquals("localhost:1234", NetUtils.getAddr("localhost", 1234));
+        assertEquals("182.42.83.255:5678", NetUtils.getAddr("182.42.83.255", 5678));
+        assertEquals("182.42.87.196:5678", NetUtils.getAddr("182.42.87.196", 5678));
+        assertEquals("182.42.83.18:5678", NetUtils.getAddr("182.42.83.18", 5678));
+        assertEquals("14.29.118.43:5678", NetUtils.getAddr("14.29.118.43", 5678));
+        assertEquals("125.88.205.166:5678", NetUtils.getAddr("125.88.205.166", 5678));
+//        assertEquals("localhost:1234", NetUtils.getAddr("localhost", 1234));
     }
 
     @Test

@@ -42,6 +42,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.net.ssl.SSLException;
+
 /**
  * netty executor manager test
  */
@@ -51,7 +53,7 @@ public class NettyExecutorManagerTest {
     @Autowired
     private NettyExecutorManager nettyExecutorManager;
     @Test
-    public void testExecute() throws ExecuteException {
+    public void testExecute() throws ExecuteException, SSLException {
         final NettyServerConfig serverConfig = new NettyServerConfig();
         serverConfig.setListenPort(30000);
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(serverConfig);

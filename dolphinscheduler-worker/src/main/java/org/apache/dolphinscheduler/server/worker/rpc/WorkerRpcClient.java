@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.net.ssl.SSLException;
+
 /**
  * This rpc client is only used to send message, will not receive message, all response message should send to {@link WorkerRpcServer}.
  */
@@ -51,7 +53,7 @@ public class WorkerRpcClient implements AutoCloseable {
 
     private NettyRemotingClient nettyRemotingClient;
 
-    public void start() {
+    public void start() throws SSLException {
         logger.info("Worker rpc client starting");
         NettyClientConfig nettyClientConfig = new NettyClientConfig();
         this.nettyRemotingClient = new NettyRemotingClient(nettyClientConfig);

@@ -30,6 +30,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.reflect.Whitebox;
 
+import javax.net.ssl.SSLException;
+
 @ExtendWith(MockitoExtension.class)
 public class AlertServerTest {
 
@@ -55,7 +57,7 @@ public class AlertServerTest {
 
     }
     @Test
-    public void alertServerStartSuccessfully() {
+    public void alertServerStartSuccessfully() throws SSLException {
 
         alertServer.run(null);
 
