@@ -65,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -116,6 +117,10 @@ public class ServerNodeManager implements InitializingBean {
 
     private volatile int totalSlot = 0;
 
+    // 配置filter nm workerhost
+    @Value("${nm.hostPre}")
+    private String hostPre;
+
     public int getSlot() {
         return currentSlot;
     }
@@ -123,6 +128,8 @@ public class ServerNodeManager implements InitializingBean {
     public int getMasterSize() {
         return totalSlot;
     }
+
+
 
     @Override
     public void afterPropertiesSet() {
@@ -279,7 +286,7 @@ public class ServerNodeManager implements InitializingBean {
                 tmpWorkerGroupMappings.put(workerGroupName, activeWorkerNodes);
             }
             if (!tmpWorkerGroupMappings.containsKey(Constants.DEFAULT_WORKER_GROUP)) {
-                tmpWorkerGroupMappings.put(Constants.DEFAULT_WORKER_GROUP, workerNodeInfo.keySet());
+                tmpWorkerGroupMappings.put(Constants.DEFAULT_WORKER_GROUP, workerNodeInfo.keySet().stream().filter(s->s.contains(hostPre)).collect(Collectors.toSet()));
             }
         } finally {
             workerNodeInfoReadLock.unlock();

@@ -72,6 +72,8 @@ public class NetUtils {
         return getAddr(getHost(), port);
     }
 
+
+
     /**
      * get host
      * @return host
@@ -86,7 +88,8 @@ public class NetUtils {
                 }
                 return canonicalHost;
             }
-            return inetAddress.getHostAddress();
+//            return inetAddress.getHostAddress();
+            return inetAddress.getHostName();
         }
         return null;
     }
@@ -178,7 +181,7 @@ public class NetUtils {
         return address;
     }
 
-    public static boolean isValidV4Address(InetAddress address) {
+    protected static boolean isValidV4Address(InetAddress address) {
 
         if (address == null || address.isLoopbackAddress()) {
             return false;

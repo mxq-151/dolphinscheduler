@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,6 +79,9 @@ public class WorkerGroupServiceImpl extends BaseServiceImpl implements WorkerGro
 
     @Autowired
     private EnvironmentWorkerGroupRelationMapper environmentWorkerGroupRelationMapper;
+
+    @Value("${nm.hostPre}")
+    private String hostPre;
 
     /**
      * create or update a worker group
@@ -284,7 +288,7 @@ public class WorkerGroupServiceImpl extends BaseServiceImpl implements WorkerGro
                 .map(workerGroup -> Constants.DEFAULT_WORKER_GROUP.equals(workerGroup.getName())).findAny();
         if (!containDefaultWorkerGroups.isPresent() || !containDefaultWorkerGroups.get()) {
             // there doesn't exist a default WorkerGroup, we will add all worker to the default worker group.
-            Set<String> activeWorkerNodes = registryClient.getServerNodeSet(NodeType.WORKER);
+            Set<String> activeWorkerNodes = registryClient.getServerNodeSet(NodeType.WORKER).stream().filter(s -> s.contains(hostPre)).collect(Collectors.toSet());
             WorkerGroup defaultWorkerGroup = new WorkerGroup();
             defaultWorkerGroup.setName(Constants.DEFAULT_WORKER_GROUP);
             defaultWorkerGroup.setAddrList(String.join(Constants.COMMA, activeWorkerNodes));

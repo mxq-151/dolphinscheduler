@@ -70,7 +70,7 @@ public class ChannelUtils {
             LOGGER.warn("The channel is already closed");
             return Host.EMPTY;
         }
-        return new Host(NetUtils.getHost(socketAddress.getAddress()), socketAddress.getPort());
+        return new Host(socketAddress.getHostName(), socketAddress.getPort());
     }
 
 }
