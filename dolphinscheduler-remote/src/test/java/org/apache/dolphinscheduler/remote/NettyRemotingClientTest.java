@@ -48,7 +48,7 @@ public class NettyRemotingClientTest {
      *  test send sync
      */
     @Test
-    public void testSendSync() throws SSLException {
+    public void testSendSync()  {
         NettyServerConfig serverConfig = new NettyServerConfig();
 
         NettyRemotingServer server = new NettyRemotingServer(serverConfig);
@@ -80,7 +80,7 @@ public class NettyRemotingClientTest {
      *  test sned async
      */
     @Test
-    public void testSendAsync() throws SSLException {
+    public void testSendAsync()  {
         NettyServerConfig serverConfig = new NettyServerConfig();
 
         NettyRemotingServer server = new NettyRemotingServer(serverConfig);

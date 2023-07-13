@@ -89,7 +89,7 @@ public class NettyRemotingClient implements AutoCloseable {
 
     private final ScheduledExecutorService responseFutureExecutor;
 
-    public NettyRemotingClient(final NettyClientConfig clientConfig) throws SSLException {
+    public NettyRemotingClient(final NettyClientConfig clientConfig)  {
         this.clientConfig = clientConfig;
         if (Epoll.isAvailable()) {
             this.workerGroup = new EpollEventLoopGroup(clientConfig.getWorkerThreads(), new NamedThreadFactory("NettyClient"));
@@ -111,20 +111,20 @@ public class NettyRemotingClient implements AutoCloseable {
         this.start();
     }
 
-    private void start() throws SSLException {
-        String basePath = "/opt/dolphinscheduler/tls/";
-        File certChainFile = new File(basePath+"client/client.crt");
-        File keyFile = new File(basePath+"pkcs8_client.key");
-        File rootFile = new File(basePath+"ca.crt");
-        //生成SslContext对象
-        SslContext sslContext = SslContextBuilder.forClient()
-                //客户端crt+key.pk8
-                .keyManager(certChainFile, keyFile)
-                //ca根证书
-                .trustManager(rootFile)
-                //双向验证
-                .clientAuth(ClientAuth.REQUIRE)
-                .build();
+    private void start()  {
+//        String basePath = "/opt/dolphinscheduler/tls/";
+//        File certChainFile = new File(basePath+"client/client.crt");
+//        File keyFile = new File(basePath+"pkcs8_client.key");
+//        File rootFile = new File(basePath+"ca.crt");
+//        //生成SslContext对象
+//        SslContext sslContext = SslContextBuilder.forClient()
+//                //客户端crt+key.pk8
+//                .keyManager(certChainFile, keyFile)
+//                //ca根证书
+//                .trustManager(rootFile)
+//                //双向验证
+//                .clientAuth(ClientAuth.REQUIRE)
+//                .build();
 
         this.bootstrap
                 .group(this.workerGroup)
@@ -139,11 +139,11 @@ public class NettyRemotingClient implements AutoCloseable {
                     public void initChannel(SocketChannel ch){
                         ch.pipeline()
                                 //添加ssl安全验证
-                                .addFirst(sslContext.newHandler(ch.alloc()))
+//                                .addFirst(sslContext.newHandler(ch.alloc()))
                                 .addLast("client-idle-handler", new IdleStateHandler(Constants.NETTY_CLIENT_HEART_BEAT_TIME, 0, 0, TimeUnit.MILLISECONDS))
                                 .addLast(new NettyDecoder(), clientHandler, encoder)
                                 ;
-                        System.out.println("tls客户端已经加密111");
+//                        System.out.println("tls客户端已经加密111");
                     }
                 });
         this.responseFutureExecutor.scheduleAtFixedRate(ResponseFuture::scanFutureTable, 5000, 1000, TimeUnit.MILLISECONDS);

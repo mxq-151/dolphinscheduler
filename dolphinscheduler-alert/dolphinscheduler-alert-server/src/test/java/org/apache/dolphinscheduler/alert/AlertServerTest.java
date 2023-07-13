@@ -57,7 +57,7 @@ public class AlertServerTest {
 
     }
     @Test
-    public void alertServerStartSuccessfully() throws SSLException {
+    public void alertServerStartSuccessfully()  {
 
         alertServer.run(null);
 

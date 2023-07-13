@@ -112,7 +112,7 @@ public class WorkerServer implements IStoppable {
     }
 
     @PostConstruct
-    public void run() throws SSLException {
+    public void run()  {
         this.workerRpcServer.start();
         this.workerRpcClient.start();
         this.taskPluginManager.loadPlugin();

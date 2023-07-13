@@ -130,7 +130,7 @@ public class WorkerWaitingStrategy implements WorkerConnectStrategy {
 
     }
 
-    private void reStartWorkerResource() throws SSLException {
+    private void reStartWorkerResource()  {
         // reopen the resource, if reopen failed should stop the worker server
         workerRpcServer.start();
         logger.warn("Worker server restart PRC server due to reconnect to registry");

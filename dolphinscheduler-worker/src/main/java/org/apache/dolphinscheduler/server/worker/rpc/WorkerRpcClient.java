@@ -53,7 +53,7 @@ public class WorkerRpcClient implements AutoCloseable {
 
     private NettyRemotingClient nettyRemotingClient;
 
-    public void start() throws SSLException {
+    public void start()  {
         logger.info("Worker rpc client starting");
         NettyClientConfig nettyClientConfig = new NettyClientConfig();
         this.nettyRemotingClient = new NettyRemotingClient(nettyClientConfig);

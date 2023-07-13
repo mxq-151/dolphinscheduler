@@ -66,7 +66,7 @@ public class AlertServer implements Closeable {
     }
 
     @EventListener
-    public void run(ApplicationReadyEvent readyEvent) throws SSLException {
+    public void run(ApplicationReadyEvent readyEvent)  {
         logger.info("Alert server is staring ...");
 
         checkTable();
@@ -116,7 +116,7 @@ public class AlertServer implements Closeable {
         }
     }
 
-    private void startServer() throws SSLException {
+    private void startServer()  {
         NettyServerConfig serverConfig = new NettyServerConfig();
         serverConfig.setListenPort(alertConfig.getPort());
 

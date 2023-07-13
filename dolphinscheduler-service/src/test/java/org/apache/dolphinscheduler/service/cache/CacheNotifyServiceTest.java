@@ -60,7 +60,7 @@ public class CacheNotifyServiceTest {
     private RegistryClient registryClient;
 
     @Test
-    public void testNotifyMaster() throws SSLException {
+    public void testNotifyMaster()  {
         User user1 = new User();
         user1.setId(100);
         Command cacheExpireCommand = new CacheExpireCommand(CacheType.USER, "100").convert2Command();
