@@ -27,7 +27,6 @@ import org.apache.dolphinscheduler.server.master.processor.queue.TaskExecuteRunn
 import org.apache.dolphinscheduler.server.master.runner.WorkflowExecuteRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.Errors;
@@ -94,10 +93,6 @@ public class MasterConfig implements Validator {
 
     private Duration workerGroupRefreshInterval = Duration.ofSeconds(10L);
 
-    //ip
-    @Value("${ipConfig.ip}")
-    private String ipAddress;
-
     // ip:listenPort
     private String masterAddress;
 
@@ -149,7 +144,7 @@ public class MasterConfig implements Validator {
             errors.rejectValue("worker-group-refresh-interval", null, "should >= 10s");
         }
 
-        masterConfig.setMasterAddress(NetUtils.getAddr(masterConfig.getIpAddress(),masterConfig.getListenPort()));
+        masterConfig.setMasterAddress(NetUtils.getAddr(masterConfig.getListenPort()));
         masterConfig.setMasterRegistryPath(REGISTRY_DOLPHINSCHEDULER_MASTERS + "/" + masterConfig.getMasterAddress());
         printConfig();
     }

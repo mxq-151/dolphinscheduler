@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.auto.service.AutoService;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * blocking task processor
@@ -69,15 +68,13 @@ public class BlockingTaskProcessor extends BaseTaskProcessor {
      */
     private Map<Long, TaskExecutionStatus> completeTaskList = new ConcurrentHashMap<>();
 
-
-
     private void initTaskParameters() {
         taskInstance.setLogPath(
                 LogUtils.getTaskLogPath(taskInstance.getFirstSubmitTime(), processInstance.getProcessDefinitionCode(),
                         processInstance.getProcessDefinitionVersion(),
                         taskInstance.getProcessInstanceId(),
                         taskInstance.getId()));
-        this.taskInstance.setHost(NetUtils.getAddr(masterConfig.getIpAddress(),masterConfig.getListenPort()));
+        this.taskInstance.setHost(NetUtils.getAddr(masterConfig.getListenPort()));
         this.taskInstance.setState(TaskExecutionStatus.RUNNING_EXECUTION);
         this.taskInstance.setStartTime(new Date());
         this.processService.saveTaskInstance(taskInstance);

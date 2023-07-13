@@ -135,7 +135,7 @@ public class ConditionTaskProcessor extends BaseTaskProcessor {
                         processInstance.getProcessDefinitionVersion(),
                         taskInstance.getProcessInstanceId(),
                         taskInstance.getId()));
-        this.taskInstance.setHost(NetUtils.getAddr(masterConfig.getIpAddress(),masterConfig.getListenPort()));
+        this.taskInstance.setHost(NetUtils.getAddr(masterConfig.getListenPort()));
         taskInstance.setState(TaskExecutionStatus.RUNNING_EXECUTION);
         taskInstance.setStartTime(new Date());
         this.processService.saveTaskInstance(taskInstance);

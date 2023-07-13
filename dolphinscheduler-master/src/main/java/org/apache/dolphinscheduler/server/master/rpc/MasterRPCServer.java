@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.net.ssl.SSLException;
-
 /**
  * Master RPC Server, used to send/receive request to other system.
  */
@@ -82,7 +80,7 @@ public class MasterRPCServer implements AutoCloseable {
     @Autowired
     private TaskExecuteStartProcessor taskExecuteStartProcessor;
 
-    public void start() throws SSLException {
+    public void start() {
         logger.info("Starting Master RPC Server...");
         // init remoting server
         NettyServerConfig serverConfig = new NettyServerConfig();

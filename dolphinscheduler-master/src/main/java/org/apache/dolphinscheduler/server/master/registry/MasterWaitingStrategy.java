@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import javax.net.ssl.SSLException;
 import java.time.Duration;
 
 /**
@@ -130,7 +129,7 @@ public class MasterWaitingStrategy implements MasterConnectStrategy {
 
     }
 
-    private void reStartMasterResource() throws SSLException {
+    private void reStartMasterResource() {
         // reopen the resource, if reopen failed should stop the worker server
         masterRPCServer.start();
         logger.warn("Master restarted RPC server due to reconnect to registry");
