@@ -59,8 +59,6 @@ public class WorkerConfig implements Validator {
      * This field doesn't need to set at config file, it will be calculated by workerIp:listenPort
      */
     //ip
-    @Value("${ipConfig.ip}")
-    private String ipAddress;
     //ip:port
     private String workerAddress;
     private String workerRegistryPath;
@@ -84,7 +82,7 @@ public class WorkerConfig implements Validator {
         if (workerConfig.getMaxCpuLoadAvg() <= 0) {
             workerConfig.setMaxCpuLoadAvg(Runtime.getRuntime().availableProcessors() * 2);
         }
-        workerConfig.setWorkerAddress(NetUtils.getAddr(workerConfig.getIpAddress(),workerConfig.getListenPort()));
+        workerConfig.setWorkerAddress(NetUtils.getAddr(workerConfig.getListenPort()));
 
         workerConfig.setWorkerRegistryPath(REGISTRY_DOLPHINSCHEDULER_WORKERS + "/" + workerConfig.getWorkerAddress());
         printConfig();
