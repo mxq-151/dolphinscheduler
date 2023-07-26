@@ -54,7 +54,7 @@ public class AlertClientService implements AutoCloseable {
     /**
      * alert client
      */
-    public AlertClientService()  {
+    public AlertClientService() throws SSLException {
         this.clientConfig = new NettyClientConfig();
         this.client = new NettyRemotingClient(clientConfig);
         this.isRunning = new AtomicBoolean(true);
@@ -63,7 +63,7 @@ public class AlertClientService implements AutoCloseable {
     /**
      * alert client
      */
-    public AlertClientService(String host, int port)  {
+    public AlertClientService(String host, int port) throws SSLException {
         this();
         this.host = host;
         this.port = port;

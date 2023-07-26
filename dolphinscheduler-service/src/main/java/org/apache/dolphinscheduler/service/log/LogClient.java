@@ -59,7 +59,7 @@ public class LogClient implements AutoCloseable {
 
     private static final long LOG_REQUEST_TIMEOUT = 10 * 1000L;
 
-    public LogClient()  {
+    public LogClient() throws SSLException {
         NettyClientConfig nettyClientConfig = new NettyClientConfig();
         this.client = new NettyRemotingClient(nettyClientConfig);
         logger.info("Initialized LogClientService with config: {}", nettyClientConfig);

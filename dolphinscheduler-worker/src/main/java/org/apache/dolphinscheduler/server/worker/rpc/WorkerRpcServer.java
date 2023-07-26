@@ -73,7 +73,7 @@ public class WorkerRpcServer implements Closeable {
 
     private NettyRemotingServer nettyRemotingServer;
 
-    public void start()  {
+    public void start() throws SSLException {
         LOGGER.info("Worker rpc server starting");
         NettyServerConfig serverConfig = new NettyServerConfig();
         serverConfig.setListenPort(workerConfig.getListenPort());

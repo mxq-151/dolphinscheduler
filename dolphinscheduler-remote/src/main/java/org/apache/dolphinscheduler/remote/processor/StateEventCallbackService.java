@@ -56,7 +56,7 @@ public class StateEventCallbackService {
      */
     private final NettyRemotingClient nettyRemotingClient;
 
-    public StateEventCallbackService()  {
+    public StateEventCallbackService() throws SSLException {
         final NettyClientConfig clientConfig = new NettyClientConfig();
         this.nettyRemotingClient = new NettyRemotingClient(clientConfig);
     }

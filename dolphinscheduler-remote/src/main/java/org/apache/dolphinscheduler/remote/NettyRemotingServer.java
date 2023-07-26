@@ -108,7 +108,7 @@ public class NettyRemotingServer {
      *
      * @param serverConfig server config
      */
-    public NettyRemotingServer(final NettyServerConfig serverConfig)  {
+    public NettyRemotingServer(final NettyServerConfig serverConfig) {
         this.serverConfig = serverConfig;
         ThreadFactory bossThreadFactory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("NettyServerBossThread_%s").build();
         ThreadFactory workerThreadFactory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("NettyServerWorkerThread_%s").build();
@@ -124,17 +124,17 @@ public class NettyRemotingServer {
     /**
      * server start
      */
-    public void start() {
+    public void start() throws SSLException {
         if (isStarted.compareAndSet(false, true)) {
-//            String basePath = "/opt/dolphinscheduler/tls/";
-//            File certChainFile = new File(basePath+"server/server.crt");
-//            File keyFile = new File(basePath+"pkcs8_server.key");
-//            File rootFile = new File(basePath+"ca.crt");
-//            //生成sslContext对象
-//            SslContext sslContext = SslContextBuilder.forServer(certChainFile, keyFile)
-//                    .trustManager(rootFile)
-//                    .clientAuth(ClientAuth.REQUIRE)
-//                    .build();
+            String basePath = "/opt/soft/dolphinscheduler/tls/";
+            File certChainFile = new File(basePath + "server.crt");
+            File keyFile = new File(basePath + "pkcs8_server.key");
+            File rootFile = new File(basePath + "ca.crt");
+            //生成sslContext对象
+            SslContext sslContext = SslContextBuilder.forServer(certChainFile, keyFile)
+                    .trustManager(rootFile)
+                    .clientAuth(ClientAuth.REQUIRE)
+                    .build();
 
             this.serverBootstrap
                     .group(this.bossGroup, this.workGroup)
@@ -148,8 +148,8 @@ public class NettyRemotingServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
 
                         @Override
-                        protected void initChannel(SocketChannel ch)  {
-                            initNettyChannel(ch);
+                        protected void initChannel(SocketChannel ch) {
+                            initNettyChannel(ch, sslContext);
                         }
                     });
 
@@ -176,15 +176,14 @@ public class NettyRemotingServer {
      * @param ch         socket channel
      * @param sslContext
      */
-    private void initNettyChannel(SocketChannel ch)  {
+    private void initNettyChannel(SocketChannel ch, SslContext sslContext) {
         ch.pipeline()
                 //添加ssl安全验证
-//                .addFirst(sslContext.newHandler(ch.alloc()))
+                .addFirst(sslContext.newHandler(ch.alloc()))
                 .addLast("encoder", new NettyEncoder())
                 .addLast("decoder", new NettyDecoder())
                 .addLast("server-idle-handle", new IdleStateHandler(0, 0, Constants.NETTY_SERVER_HEART_BEAT_TIME, TimeUnit.MILLISECONDS))
                 .addLast("handler", serverHandler);
-        System.out.println("tls服务端已经加密111");
     }
 
     /**

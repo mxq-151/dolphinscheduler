@@ -28,7 +28,7 @@ import javax.net.ssl.SSLException;
 public class BeanConfig {
 
     @Bean
-    public AlertClientService alertClientService(WorkerConfig workerConfig)  {
+    public AlertClientService alertClientService(WorkerConfig workerConfig) throws SSLException {
         return new AlertClientService(
                 workerConfig.getAlertListenHost(),
                 workerConfig.getAlertListenPort());
