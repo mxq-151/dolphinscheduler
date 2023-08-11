@@ -62,7 +62,7 @@ public class CacheNotifyServiceImpl implements CacheNotifyService {
      */
     private final NettyRemotingClient nettyRemotingClient;
 
-    public CacheNotifyServiceImpl()  {
+    public CacheNotifyServiceImpl() throws SSLException {
         final NettyClientConfig clientConfig = new NettyClientConfig();
         this.nettyRemotingClient = new NettyRemotingClient(clientConfig);
     }
