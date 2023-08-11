@@ -31,6 +31,7 @@ import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.apache.dolphinscheduler.common.utils.PropertyUtils;
 import org.apache.dolphinscheduler.remote.codec.NettyDecoder;
 import org.apache.dolphinscheduler.remote.codec.NettyEncoder;
 import org.apache.dolphinscheduler.remote.command.Command;
@@ -55,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -112,20 +114,27 @@ public class NettyRemotingClient implements AutoCloseable {
     }
 
     private void start() throws SSLException {
-        String basePath = "/opt/soft/dolphinscheduler/tls/";
-        File certChainFile = new File(basePath+"client.crt");
-        File keyFile = new File(basePath+"pkcs8_client.key");
-        File rootFile = new File(basePath+"ca.crt");
-        //生成SslContext对象
-        SslContext sslContext = SslContextBuilder.forClient()
-                //客户端crt+key.pk8
-                .keyManager(certChainFile, keyFile)
-                //ca根证书
-                .trustManager(rootFile)
-                //双向验证
-                .clientAuth(ClientAuth.REQUIRE)
-                .build();
 
+        SslContext sslContext = null;
+        final boolean enableSSL=PropertyUtils.getBoolean("communicate.ssl",false);
+        if(enableSSL)
+        {
+            String basePath = "/opt/soft/dolphinscheduler/tls/";
+            File certChainFile = new File(basePath+"client.crt");
+            File keyFile = new File(basePath+"pkcs8_client.key");
+            File rootFile = new File(basePath+"ca.crt");
+            //生成SslContext对象
+            sslContext = SslContextBuilder.forClient()
+                    //客户端crt+key.pk8
+                    .keyManager(certChainFile, keyFile)
+                    //ca根证书
+                    .trustManager(rootFile)
+                    //双向验证
+                    .clientAuth(ClientAuth.REQUIRE)
+                    .build();
+        }
+
+        SslContext finalSslContext = sslContext;
         this.bootstrap
                 .group(this.workerGroup)
                 .channel(NettyUtils.getSocketChannelClass())
@@ -137,12 +146,22 @@ public class NettyRemotingClient implements AutoCloseable {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch){
-                        ch.pipeline()
-                                //添加ssl安全验证
-                                .addFirst(sslContext.newHandler(ch.alloc()))
-                                .addLast("client-idle-handler", new IdleStateHandler(Constants.NETTY_CLIENT_HEART_BEAT_TIME, 0, 0, TimeUnit.MILLISECONDS))
-                                .addLast(new NettyDecoder(), clientHandler, encoder)
-                                ;
+                        if(enableSSL)
+                        {
+                            ch.pipeline()
+                                    //添加ssl安全验证
+                                    .addFirst(finalSslContext.newHandler(ch.alloc()))
+                                    .addLast("client-idle-handler", new IdleStateHandler(Constants.NETTY_CLIENT_HEART_BEAT_TIME, 0, 0, TimeUnit.MILLISECONDS))
+                                    .addLast(new NettyDecoder(), clientHandler, encoder);
+
+                        }else {
+                            ch.pipeline()
+                                    //添加ssl安全验证
+                                    .addLast("client-idle-handler", new IdleStateHandler(Constants.NETTY_CLIENT_HEART_BEAT_TIME, 0, 0, TimeUnit.MILLISECONDS))
+                                    .addLast(new NettyDecoder(), clientHandler, encoder)
+                            ;
+                        }
+
                     }
                 });
         this.responseFutureExecutor.scheduleAtFixedRate(ResponseFuture::scanFutureTable, 5000, 1000, TimeUnit.MILLISECONDS);

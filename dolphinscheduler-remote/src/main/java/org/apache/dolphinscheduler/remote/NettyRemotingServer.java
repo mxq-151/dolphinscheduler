@@ -20,6 +20,7 @@ package org.apache.dolphinscheduler.remote;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import org.apache.dolphinscheduler.common.utils.PropertyUtils;
 import org.apache.dolphinscheduler.remote.codec.NettyDecoder;
 import org.apache.dolphinscheduler.remote.codec.NettyEncoder;
 import org.apache.dolphinscheduler.remote.command.CommandType;
@@ -126,16 +127,23 @@ public class NettyRemotingServer {
      */
     public void start() throws SSLException {
         if (isStarted.compareAndSet(false, true)) {
-            String basePath = "/opt/soft/dolphinscheduler/tls/";
-            File certChainFile = new File(basePath + "server.crt");
-            File keyFile = new File(basePath + "pkcs8_server.key");
-            File rootFile = new File(basePath + "ca.crt");
-            //生成sslContext对象
-            SslContext sslContext = SslContextBuilder.forServer(certChainFile, keyFile)
-                    .trustManager(rootFile)
-                    .clientAuth(ClientAuth.REQUIRE)
-                    .build();
+            final boolean enableSSL= PropertyUtils.getBoolean("communicate.ssl",false);
+            SslContext sslContext=null;
+            if(enableSSL)
+            {
+                String basePath = "/opt/soft/dolphinscheduler/tls/";
+                File certChainFile = new File(basePath + "server.crt");
+                File keyFile = new File(basePath + "pkcs8_server.key");
+                File rootFile = new File(basePath + "ca.crt");
+                //生成sslContext对象
+                sslContext = SslContextBuilder.forServer(certChainFile, keyFile)
+                        .trustManager(rootFile)
+                        .clientAuth(ClientAuth.REQUIRE)
+                        .build();
+            }
 
+
+            SslContext finalSslContext = sslContext;
             this.serverBootstrap
                     .group(this.bossGroup, this.workGroup)
                     .channel(NettyUtils.getServerSocketChannelClass())
@@ -149,7 +157,7 @@ public class NettyRemotingServer {
 
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            initNettyChannel(ch, sslContext);
+                            initNettyChannel(ch, finalSslContext,enableSSL);
                         }
                     });
 
@@ -176,14 +184,24 @@ public class NettyRemotingServer {
      * @param ch         socket channel
      * @param sslContext
      */
-    private void initNettyChannel(SocketChannel ch, SslContext sslContext) {
-        ch.pipeline()
-                //添加ssl安全验证
-                .addFirst(sslContext.newHandler(ch.alloc()))
-                .addLast("encoder", new NettyEncoder())
-                .addLast("decoder", new NettyDecoder())
-                .addLast("server-idle-handle", new IdleStateHandler(0, 0, Constants.NETTY_SERVER_HEART_BEAT_TIME, TimeUnit.MILLISECONDS))
-                .addLast("handler", serverHandler);
+    private void initNettyChannel(SocketChannel ch, SslContext sslContext,boolean enableSSL) {
+        if(enableSSL)
+        {
+            ch.pipeline()
+                    //添加ssl安全验证
+                    .addFirst(sslContext.newHandler(ch.alloc()))
+                    .addLast("encoder", new NettyEncoder())
+                    .addLast("decoder", new NettyDecoder())
+                    .addLast("server-idle-handle", new IdleStateHandler(0, 0, Constants.NETTY_SERVER_HEART_BEAT_TIME, TimeUnit.MILLISECONDS))
+                    .addLast("handler", serverHandler);
+        }else {
+            ch.pipeline()
+                    .addLast("encoder", new NettyEncoder())
+                    .addLast("decoder", new NettyDecoder())
+                    .addLast("server-idle-handle", new IdleStateHandler(0, 0, Constants.NETTY_SERVER_HEART_BEAT_TIME, TimeUnit.MILLISECONDS))
+                    .addLast("handler", serverHandler);
+        }
+
     }
 
     /**
