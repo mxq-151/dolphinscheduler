@@ -184,7 +184,6 @@ public class NettyRemotingServer {
                 .addLast("decoder", new NettyDecoder())
                 .addLast("server-idle-handle", new IdleStateHandler(0, 0, Constants.NETTY_SERVER_HEART_BEAT_TIME, TimeUnit.MILLISECONDS))
                 .addLast("handler", serverHandler);
-        System.out.println("tls服务端已经加密111");
     }
 
     /**

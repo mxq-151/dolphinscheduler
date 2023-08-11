@@ -92,18 +92,7 @@ import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.dao.entity.TaskMainInfo;
 import org.apache.dolphinscheduler.dao.entity.Tenant;
 import org.apache.dolphinscheduler.dao.entity.User;
-import org.apache.dolphinscheduler.dao.mapper.DataSourceMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProcessDefinitionLogMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProcessDefinitionMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProcessTaskRelationLogMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProcessTaskRelationMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProjectMapper;
-import org.apache.dolphinscheduler.dao.mapper.ScheduleMapper;
-import org.apache.dolphinscheduler.dao.mapper.TaskDefinitionLogMapper;
-import org.apache.dolphinscheduler.dao.mapper.TaskDefinitionMapper;
-import org.apache.dolphinscheduler.dao.mapper.TaskInstanceMapper;
-import org.apache.dolphinscheduler.dao.mapper.TenantMapper;
-import org.apache.dolphinscheduler.dao.mapper.UserMapper;
+import org.apache.dolphinscheduler.dao.mapper.*;
 import org.apache.dolphinscheduler.dao.model.PageListingResult;
 import org.apache.dolphinscheduler.dao.repository.ProcessDefinitionDao;
 import org.apache.dolphinscheduler.plugin.task.api.enums.SqlType;
@@ -225,6 +214,9 @@ public class ProcessDefinitionServiceImpl extends BaseServiceImpl implements Pro
 
     @Autowired
     private DataSourceMapper dataSourceMapper;
+
+    @Autowired
+    private CommandMapper commandMapper;
 
     @Autowired
     private TaskPluginManager taskPluginManager;
@@ -946,8 +938,10 @@ public class ProcessDefinitionServiceImpl extends BaseServiceImpl implements Pro
             putMsg(result, Status.PROCESS_DEFINE_NOT_EXIST, String.valueOf(code));
             return result;
         }
+        Schedule schedule = scheduleMapper.queryByProcessDefinitionCode(code);
         switch (releaseState) {
             case ONLINE:
+
                 List<ProcessTaskRelation> relationList =
                         processService.findRelationByCode(code, processDefinition.getVersion());
                 if (CollectionUtils.isEmpty(relationList)) {
@@ -955,6 +949,10 @@ public class ProcessDefinitionServiceImpl extends BaseServiceImpl implements Pro
                     return result;
                 }
                 processDefinition.setReleaseState(releaseState);
+                if(schedule!=null)
+                {
+                    this.commandMapper.makeCommandOnline(schedule.getId());
+                }
                 processDefinitionMapper.updateById(processDefinition);
                 logger.info("Set process definition online, projectCode:{}, processDefinitionCode:{}.", projectCode,
                         code);
@@ -962,7 +960,10 @@ public class ProcessDefinitionServiceImpl extends BaseServiceImpl implements Pro
             case OFFLINE:
                 processDefinition.setReleaseState(releaseState);
                 int updateProcess = processDefinitionMapper.updateById(processDefinition);
-                Schedule schedule = scheduleMapper.queryByProcessDefinitionCode(code);
+                if(schedule!=null)
+                {
+                    this.commandMapper.makeCommandOffline(schedule.getId());
+                }
                 if (updateProcess > 0) {
                     logger.info("Set process definition offline, projectCode:{}, processDefinitionCode:{}.",
                             projectCode, code);

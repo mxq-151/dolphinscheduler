@@ -222,6 +222,11 @@ public class ProcessAlertManager {
             return;
         }
 
+        if(processInstance.getRunTimes() <processInstance.getMaxTryTimes())
+        {
+            return;
+        }
+
         Alert alert = new Alert();
 
         String cmdName = getCommandCnName(processInstance.getCommandType());
@@ -332,6 +337,11 @@ public class ProcessAlertManager {
      * send data quality task error alert
      */
     public void sendTaskErrorAlert(TaskInstance taskInstance, ProcessInstance processInstance) {
+
+        if(taskInstance.getRetryTimes()<taskInstance.getMaxRetryTimes())
+        {
+            return;
+        }
         Alert alert = new Alert();
         alert.setTitle("Task [" + taskInstance.getName() + "] Failure Warning");
         String content = getTaskAlterContent(taskInstance);

@@ -18,6 +18,7 @@
 package org.apache.dolphinscheduler.server.master.runner;
 
 import org.apache.dolphinscheduler.common.constants.Constants;
+import org.apache.dolphinscheduler.common.enums.CommandState;
 import org.apache.dolphinscheduler.common.enums.SlotCheckState;
 import org.apache.dolphinscheduler.common.lifecycle.ServerLifeCycleManager;
 import org.apache.dolphinscheduler.common.thread.BaseDaemonThread;
@@ -43,9 +44,7 @@ import org.apache.dolphinscheduler.service.process.ProcessService;
 import org.apache.dolphinscheduler.service.utils.LoggerUtils;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -53,6 +52,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Master scheduler thread, this thread will consume the commands from database and trigger processInstance executed.
@@ -101,6 +102,7 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
     private ServerNodeManager serverNodeManager;
 
     private String masterAddress;
+
 
     protected MasterSchedulerBootstrap() {
         super("MasterCommandLoopThread");
@@ -204,8 +206,10 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
         logger.info("Master schedule bootstrap transforming command to ProcessInstance, commandSize: {}",
                 commands.size());
         List<ProcessInstance> processInstances = Collections.synchronizedList(new ArrayList<>(commands.size()));
+
         CountDownLatch latch = new CountDownLatch(commands.size());
         for (final Command command : commands) {
+
             masterPrepareExecService.execute(() -> {
                 try {
                     // Note: this check is not safe, the slot may change after command transform.
@@ -214,14 +218,15 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
                     // by only one master
                     SlotCheckState slotCheckState = slotCheck(command);
                     if (slotCheckState.equals(SlotCheckState.CHANGE) || slotCheckState.equals(SlotCheckState.INJECT)) {
-                        logger.info("Master handle command {} skip, slot check state: {}", command.getId(),
+                        logger.warn("Master handle command {} skip, slot check state: {}", command.getId(),
                                 slotCheckState);
                         return;
                     }
+
                     ProcessInstance processInstance = processService.handleCommand(masterAddress, command);
                     if (processInstance != null) {
                         processInstances.add(processInstance);
-                        logger.info("Master handle command {} end, create process instance {}", command.getId(),
+                        logger.warn("Master handle command {} end, create process instance {}", command.getId(),
                                 processInstance.getId());
                     }
                 } catch (Exception e) {
@@ -233,39 +238,41 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
             });
         }
 
-        // make sure to finish handling command each time before next scan
-        latch.await();
-        logger.info(
+        logger.warn(
                 "Master schedule bootstrap transformed command to ProcessInstance, commandSize: {}, processInstanceSize: {}",
                 commands.size(), processInstances.size());
+        // make sure to finish handling command each time before next scan
+        latch.await();
         ProcessInstanceMetrics
                 .recordProcessInstanceGenerateTime(System.currentTimeMillis() - commandTransformStartTime);
         return processInstances;
     }
 
-    private List<Command> findCommands() throws MasterException {
-        try {
-            long scheduleStartTime = System.currentTimeMillis();
-            int thisMasterSlot = serverNodeManager.getSlot();
-            int masterCount = serverNodeManager.getMasterSize();
-            if (masterCount <= 0) {
-                logger.warn("Master count: {} is invalid, the current slot: {}", masterCount, thisMasterSlot);
-                return Collections.emptyList();
+    List<Command> findCommands() throws MasterException {
+
+            try {
+                long scheduleStartTime = System.currentTimeMillis();
+                int thisMasterSlot = serverNodeManager.getSlot();
+                int masterCount = serverNodeManager.getMasterSize();
+                if (masterCount <= 0) {
+                    logger.warn("Master count: {} is invalid, the current slot: {}", masterCount, thisMasterSlot);
+                    return Collections.emptyList();
+                }
+                int pageNumber = 0;
+                int pageSize = masterConfig.getFetchCommandNum();
+                final List<Command> result =
+                        processService.findCommandPageBySlot(pageSize, pageNumber, masterCount, thisMasterSlot);
+
+                if (CollectionUtils.isNotEmpty(result)) {
+                    logger.warn(
+                            "Master schedule bootstrap loop command success, command size: {}, current slot: {}, total slot size: {}",
+                            result.size(), thisMasterSlot, masterCount);
+                }
+                ProcessInstanceMetrics.recordCommandQueryTime(System.currentTimeMillis() - scheduleStartTime);
+                return result;
+            } catch (Exception ex) {
+                throw new MasterException("Master loop command from database error", ex);
             }
-            int pageNumber = 0;
-            int pageSize = masterConfig.getFetchCommandNum();
-            final List<Command> result =
-                    processService.findCommandPageBySlot(pageSize, pageNumber, masterCount, thisMasterSlot);
-            if (CollectionUtils.isNotEmpty(result)) {
-                logger.info(
-                        "Master schedule bootstrap loop command success, command size: {}, current slot: {}, total slot size: {}",
-                        result.size(), thisMasterSlot, masterCount);
-            }
-            ProcessInstanceMetrics.recordCommandQueryTime(System.currentTimeMillis() - scheduleStartTime);
-            return result;
-        } catch (Exception ex) {
-            throw new MasterException("Master loop command from database error", ex);
-        }
     }
 
     private SlotCheckState slotCheck(Command command) {

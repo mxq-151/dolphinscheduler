@@ -92,6 +92,9 @@ public interface ProcessService {
 
     int deleteWorkProcessInstanceById(int processInstanceId);
 
+    int updateCommandById(List<Command> commands,int cstate);
+
+
     int deleteAllSubWorkProcessByParentId(int processInstanceId);
 
     void removeTaskLogFile(Integer processInstanceId);

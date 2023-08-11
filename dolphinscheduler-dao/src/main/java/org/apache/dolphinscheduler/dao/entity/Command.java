@@ -90,14 +90,25 @@ public class Command {
     @TableField("process_instance_id")
     private int processInstanceId;
 
+    @TableField("schedule_id")
+    private int scheduleId;
+
     @TableField("process_definition_version")
     private int processDefinitionVersion;
+
+
+    @TableField("manual_run")
+    private boolean manualRun=false;
+
+    @TableField("cstate")
+    private boolean cstate=false;
 
     public Command() {
         this.taskDependType = TaskDependType.TASK_POST;
         this.failureStrategy = FailureStrategy.CONTINUE;
         this.startTime = new Date();
         this.updateTime = new Date();
+        this.manualRun=false;
     }
 
     public Command(

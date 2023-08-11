@@ -44,6 +44,18 @@ public interface CommandMapper extends BaseMapper<Command> {
             @Param("endTime") Date endTime,
             @Param("projectCodeArray") Long[] projectCodeArray);
 
+    int insert(@Param("command") Command command);
+
+    void deleteCommandByScheduleId(@Param("scheduleId")int scheduleId);
+
+    int updateCommandState(@Param("commands")List<Command> commands,@Param("cstate")int cstate);
+
+    List<Command> queryCommandByCommandType();
+
+    int makeCommandOffline(@Param("scheduleId")int scheduleId);
+
+    int makeCommandOnline(@Param("scheduleId")int scheduleId);
+
     /**
      * query command page
      * @return

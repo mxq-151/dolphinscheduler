@@ -29,10 +29,7 @@ import org.apache.dolphinscheduler.service.process.ProcessService;
 
 import java.util.Date;
 
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +51,13 @@ public class ProcessScheduleTask extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
+        context.getScheduledFireTime();
         int projectId = dataMap.getInt(QuartzTaskUtils.PROJECT_ID);
         int scheduleId = dataMap.getInt(QuartzTaskUtils.SCHEDULE_ID);
 
         Date scheduledFireTime = context.getScheduledFireTime();
+        Trigger trigger=context.getTrigger();
+
 
         Date fireTime = context.getFireTime();
 
@@ -82,6 +82,9 @@ public class ProcessScheduleTask extends QuartzJobBean {
         Command command = new Command();
         command.setCommandType(CommandType.SCHEDULER);
         command.setExecutorId(schedule.getUserId());
+        command.setManualRun(false);
+
+        command.setScheduleId(scheduleId);
         command.setFailureStrategy(schedule.getFailureStrategy());
         command.setProcessDefinitionCode(schedule.getProcessDefinitionCode());
         command.setScheduleTime(scheduledFireTime);
@@ -95,6 +98,37 @@ public class ProcessScheduleTask extends QuartzJobBean {
         command.setProcessDefinitionVersion(processDefinition.getVersion());
 
         processService.createCommand(command);
+
+        Date now=new Date();
+
+        //预先创建50个实例
+        for (int i = 0; i < 50; i++) {
+            scheduledFireTime=trigger.getFireTimeAfter(scheduledFireTime);
+            command = new Command();
+            command.setScheduleId(scheduleId);
+            command.setCommandType(CommandType.SCHEDULER);
+            command.setExecutorId(schedule.getUserId());
+            command.setFailureStrategy(schedule.getFailureStrategy());
+            command.setProcessDefinitionCode(schedule.getProcessDefinitionCode());
+            command.setScheduleTime(scheduledFireTime);
+            command.setStartTime(fireTime);
+            command.setWarningGroupId(schedule.getWarningGroupId());
+            workerGroup = StringUtils.isEmpty(schedule.getWorkerGroup()) ? Constants.DEFAULT_WORKER_GROUP : schedule.getWorkerGroup();
+            command.setWorkerGroup(workerGroup);
+            command.setEnvironmentCode(schedule.getEnvironmentCode());
+            command.setWarningType(schedule.getWarningType());
+            command.setProcessInstancePriority(schedule.getProcessInstancePriority());
+            command.setProcessDefinitionVersion(processDefinition.getVersion());
+            processService.createCommand(command);
+
+            //不会预先创建超过12小时的实例
+            if(scheduledFireTime.getTime()-now.getTime()>12*60*60*1000)
+            {
+                break;
+            }
+        }
+
+
     }
 
     private void deleteJob(JobExecutionContext context, int projectId, int scheduleId) {

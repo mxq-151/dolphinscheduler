@@ -26,16 +26,7 @@ import static org.apache.dolphinscheduler.plugin.task.api.utils.DataQualityConst
 
 import org.apache.dolphinscheduler.common.constants.CommandKeyConstants;
 import org.apache.dolphinscheduler.common.constants.Constants;
-import org.apache.dolphinscheduler.common.enums.AuthorizationType;
-import org.apache.dolphinscheduler.common.enums.CommandType;
-import org.apache.dolphinscheduler.common.enums.FailureStrategy;
-import org.apache.dolphinscheduler.common.enums.Flag;
-import org.apache.dolphinscheduler.common.enums.ReleaseState;
-import org.apache.dolphinscheduler.common.enums.TaskDependType;
-import org.apache.dolphinscheduler.common.enums.TaskGroupQueueStatus;
-import org.apache.dolphinscheduler.common.enums.TimeoutFlag;
-import org.apache.dolphinscheduler.common.enums.WarningType;
-import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
+import org.apache.dolphinscheduler.common.enums.*;
 import org.apache.dolphinscheduler.common.graph.DAG;
 import org.apache.dolphinscheduler.common.model.TaskNodeRelation;
 import org.apache.dolphinscheduler.common.utils.CodeGenerateUtils;
@@ -135,18 +126,8 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -229,6 +210,7 @@ public class ProcessServiceImpl implements ProcessService {
     @Autowired
     private DqRuleMapper dqRuleMapper;
 
+
     @Autowired
     private DqRuleInputEntryMapper dqRuleInputEntryMapper;
 
@@ -307,14 +289,14 @@ public class ProcessServiceImpl implements ProcessService {
             saveSerialProcess(processInstance, processDefinition);
             if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
                 setSubProcessParam(processInstance);
-                deleteCommandWithCheck(command.getId());
+                this.updateCommandById(Arrays.asList(command),CommandState.RUNNING.getCode());
                 return null;
             }
         } else {
             processInstanceDao.upsertProcessInstance(processInstance);
         }
         setSubProcessParam(processInstance);
-        deleteCommandWithCheck(command.getId());
+        this.updateCommandById(Arrays.asList(command), CommandState.RUNNING.getCode());
         return processInstance;
     }
 
@@ -392,7 +374,7 @@ public class ProcessServiceImpl implements ProcessService {
     public void moveToErrorCommand(Command command, String message) {
         ErrorCommand errorCommand = new ErrorCommand(command, message);
         this.errorCommandMapper.insert(errorCommand);
-        this.commandMapper.deleteById(command.getId());
+        this.commandMapper.updateCommandState(Arrays.asList(command),CommandState.ERROR.getCode());
     }
 
     /**
@@ -408,6 +390,21 @@ public class ProcessServiceImpl implements ProcessService {
         if (command == null) {
             return result;
         }
+
+        CommandType ct=command.getCommandType();
+        switch (ct){
+            case REPEAT_RUNNING:
+            case START_FAILURE_TASK_PROCESS:
+            case START_PROCESS:
+            case START_CURRENT_TASK_PROCESS:
+                command.setManualRun(true);
+                break;
+            default:
+                command.setManualRun(false);
+                break;
+        }
+
+        logger.info("manual_run:{}",command.getCommandType());
         // add command timezone
         Schedule schedule = scheduleMapper.queryByProcessDefinitionCode(command.getProcessDefinitionCode());
         if (schedule != null) {
@@ -460,7 +457,7 @@ public class ProcessServiceImpl implements ProcessService {
             ObjectNode cmdParamObj = JSONUtils.parseObject(command.getCommandParam());
             int processInstanceId = cmdParamObj.path(CMD_PARAM_RECOVER_PROCESS_ID_STRING).asInt();
 
-            List<Command> commands = commandMapper.selectList(null);
+            List<Command> commands = commandMapper.queryCommandByCommandType();
             // for all commands
             for (Command tmpCommand : commands) {
                 if (cmdTypeMap.containsKey(tmpCommand.getCommandType())) {
@@ -573,6 +570,11 @@ public class ProcessServiceImpl implements ProcessService {
     @Override
     public int deleteWorkProcessInstanceById(int processInstanceId) {
         return processInstanceMapper.deleteById(processInstanceId);
+    }
+
+    @Override
+    public int updateCommandById(List<Command> commands,int cstate) {
+        return this.commandMapper.updateCommandState(commands,cstate);
     }
 
     /**
@@ -925,6 +927,8 @@ public class ProcessServiceImpl implements ProcessService {
         ProcessDefinition processDefinition;
         CommandType commandType = command.getCommandType();
 
+
+
         processDefinition =
                 this.findProcessDefinition(command.getProcessDefinitionCode(), command.getProcessDefinitionVersion());
         if (processDefinition == null) {
@@ -989,6 +993,7 @@ public class ProcessServiceImpl implements ProcessService {
                 break;
             case START_FAILURE_TASK_PROCESS:
                 // find failed tasks and init these tasks
+                logger.warn("processInstance:"+processInstance);
                 List<Integer> failedList =
                         this.findTaskIdByInstanceState(processInstance.getId(), TaskExecutionStatus.FAILURE);
                 List<Integer> toleranceList = this.findTaskIdByInstanceState(processInstance.getId(),
@@ -1065,6 +1070,9 @@ public class ProcessServiceImpl implements ProcessService {
                 break;
         }
         processInstance.setStateWithDesc(runStatus, commandType.getDescp());
+
+        logger.info("manual_run:{}",command.isManualRun());
+        processInstance.setManualRun(command.isManualRun());
         return processInstance;
     }
 
@@ -3190,6 +3198,7 @@ public class ProcessServiceImpl implements ProcessService {
         return this.processInstanceMapper.loadNextProcess4Serial(code, state, id);
     }
 
+    @Transactional
     protected void deleteCommandWithCheck(int commandId) {
         int delete = this.commandMapper.deleteById(commandId);
         if (delete != 1) {

@@ -88,13 +88,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -621,8 +615,22 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
             cmdParam.put(CMD_PARAM_START_PARAMS, startParams);
         }
 
+        ProcessInstance instance=this.processInstanceMapper.queryDetailById(instanceId);
+        if(instance==null)
+        {
+            putMsg(result, Status.EXECUTE_PROCESS_INSTANCE_ERROR);
+            return result;
+        }
         Command command = new Command();
         command.setCommandType(commandType);
+        if(instance.getScheduleTime()==null)
+        {
+            command.setScheduleTime(new Date());
+        }else {
+            command.setScheduleTime(instance.getScheduleTime());
+        }
+
+
         command.setProcessDefinitionCode(processDefinitionCode);
         command.setCommandParam(JSONUtils.toJsonString(cmdParam));
         command.setExecutorId(loginUser.getId());
@@ -753,6 +761,7 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
         command.setWarningGroupId(warningGroupId);
         command.setProcessInstancePriority(processInstancePriority);
         command.setWorkerGroup(workerGroup);
+        command.setScheduleTime(new Date());
         command.setEnvironmentCode(environmentCode);
         command.setDryRun(dryRun);
         ProcessDefinition processDefinition = processService.findProcessDefinitionByCode(processDefineCode);

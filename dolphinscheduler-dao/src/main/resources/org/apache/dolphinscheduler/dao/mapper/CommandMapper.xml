@@ -33,18 +33,46 @@
         </if>
         group by cmd.command_type
     </select>
+    <insert id="insert">
+        INSERT INTO `t_ds_command` ( `command_type`, `process_instance_id`,`process_definition_code`, `process_definition_version`, `command_param`, `task_depend_type`, `failure_strategy`, `warning_type`, `warning_group_id`, `schedule_time`, `start_time`, `process_instance_priority`, `worker_group`, `environment_code`, `dry_run`, `manual_run`,`schedule_id`,`executor_id`)
+        VALUE(#{command.commandType},#{command.processInstanceId},#{command.processDefinitionCode},#{command.processDefinitionVersion},#{command.commandParam},#{command.taskDependType},#{command.failureStrategy},#{command.warningType},#{command.warningGroupId},#{command.scheduleTime},#{command.startTime},#{command.processInstancePriority},#{command.workerGroup},#{command.environmentCode},#{command.dryRun},#{command.manualRun},#{command.scheduleId},#{command.executorId})
+        on duplicate key update `executor_id` = #{command.executorId},`schedule_id`=#{command.scheduleId},`command_param`=#{command.commandParam}, `task_depend_type`=#{command.taskDependType},`warning_group_id`=#{command.warningGroupId},`process_instance_priority`=#{command.processInstancePriority}, `worker_group`=#{command.workerGroup}, `environment_code`=#{command.environmentCode},`dry_run`=#{command.dryRun},`process_definition_version`=#{command.processDefinitionVersion}, `failure_strategy`=#{command.failureStrategy}
+    </insert>
+
+    <delete id="deleteCommandByScheduleId">
+        delete from t_ds_command where schedule_id=#{scheduleId}
+    </delete>
     <select id="queryCommandPage" resultType="org.apache.dolphinscheduler.dao.entity.Command">
         select *
-        from t_ds_command
+        from t_ds_command where  (now() >= schedule_time ) and cstate=0
         order by process_instance_priority, id asc
         limit #{limit} offset #{offset}
+    </select>
+
+    <select id="queryCommandByCommandType" resultType="org.apache.dolphinscheduler.dao.entity.Command">
+        select *
+        from t_ds_command where  command_type in (3,4,7)
     </select>
 
     <select id="queryCommandPageBySlot" resultType="org.apache.dolphinscheduler.dao.entity.Command">
         select *
         from t_ds_command
-        where id % #{masterCount} = #{thisMasterSlot}
+        where  (now() >= schedule_time) and cstate=0 and id % #{masterCount} = #{thisMasterSlot}
         order by process_instance_priority, id asc
             limit #{limit} offset #{offset}
     </select>
+
+    <update id="updateCommandState">
+        update t_ds_command set cstate=#{cstate} where id in (<foreach collection="commands" item="comm" separator=",">
+        #{comm.id}
+    </foreach>)
+    </update>
+
+    <update id="makeCommandOffline">
+        update t_ds_command set cstate=3 where cstate=0 and schedule_id=#{scheduleId}
+    </update>
+
+    <update id="makeCommandOnline">
+        update t_ds_command set cstate=0 where cstate=3 and schedule_id=#{scheduleId}
+    </update>
 </mapper>

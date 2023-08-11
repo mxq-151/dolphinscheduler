@@ -57,15 +57,6 @@ public class Host implements Serializable {
     }
 
     public Host(String ip, int port) {
-       try {
-           if (isValidIPAddress(ip)){
-               logger.info("ip的值含有数字："+ ip);
-               throw new RuntimeException("ip is number...");
-           }
-       }catch (Exception e){
-           logger.error(e.getMessage());
-           logger.error(Arrays.toString(e.getStackTrace()));
-       }
 
         this.ip = ip;
         this.port = port;
@@ -83,15 +74,6 @@ public class Host implements Serializable {
         this.ip = parts[0];
         this.port = Integer.parseInt(parts[1]);
         this.address = address;
-        try {
-            if (isValidIPAddress(ip)){
-                logger.info("ip的值含有数字："+ ip);
-                throw new RuntimeException("ip is number...");
-            }
-        }catch (Exception e){
-            logger.error(e.getMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-        }
     }
 
     public String getAddress() {

@@ -24,8 +24,15 @@ import org.apache.dolphinscheduler.dao.repository.ProcessInstanceDao;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 @Repository
@@ -33,6 +40,10 @@ public class ProcessInstanceDaoImpl implements ProcessInstanceDao {
 
     @Autowired
     private ProcessInstanceMapper processInstanceMapper;
+
+    Set<String> hash=new HashSet<>();
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public int insertProcessInstance(ProcessInstance processInstance) {
@@ -52,4 +63,5 @@ public class ProcessInstanceDaoImpl implements ProcessInstanceDao {
             return insertProcessInstance(processInstance);
         }
     }
+
 }

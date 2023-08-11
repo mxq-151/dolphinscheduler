@@ -19,6 +19,8 @@ package org.apache.dolphinscheduler.dao.repository;
 
 import org.apache.dolphinscheduler.dao.entity.ProcessInstance;
 
+import java.util.Date;
+
 public interface ProcessInstanceDao {
 
     public int insertProcessInstance(ProcessInstance processInstance);
@@ -31,4 +33,5 @@ public interface ProcessInstanceDao {
      * @param processInstance processInstance
      */
     public int upsertProcessInstance(ProcessInstance processInstance);
+
 }

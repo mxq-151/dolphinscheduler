@@ -278,6 +278,10 @@ public class ProcessInstance {
     @TableField(exist = false)
     private boolean isBlocked;
 
+
+    @TableField("manual_run")
+    private boolean manualRun=false;
+
     /**
      * set the process name with process define version and timestamp
      *

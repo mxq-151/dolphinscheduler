@@ -43,10 +43,7 @@ import org.apache.dolphinscheduler.dao.entity.ProcessTaskRelation;
 import org.apache.dolphinscheduler.dao.entity.Project;
 import org.apache.dolphinscheduler.dao.entity.Schedule;
 import org.apache.dolphinscheduler.dao.entity.User;
-import org.apache.dolphinscheduler.dao.mapper.ProcessDefinitionMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProcessTaskRelationMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProjectMapper;
-import org.apache.dolphinscheduler.dao.mapper.ScheduleMapper;
+import org.apache.dolphinscheduler.dao.mapper.*;
 import org.apache.dolphinscheduler.scheduler.api.SchedulerApi;
 import org.apache.dolphinscheduler.service.cron.CronUtils;
 import org.apache.dolphinscheduler.service.exceptions.CronParseException;
@@ -100,6 +97,9 @@ public class SchedulerServiceImpl extends BaseServiceImpl implements SchedulerSe
 
     @Autowired
     private ProjectMapper projectMapper;
+
+    @Autowired
+    private CommandMapper commandMapper;
 
     @Autowired
     private ProcessDefinitionMapper processDefinitionMapper;
@@ -358,17 +358,20 @@ public class SchedulerServiceImpl extends BaseServiceImpl implements SchedulerSe
 
         scheduleMapper.updateById(scheduleObj);
 
+
         try {
             switch (scheduleStatus) {
                 case ONLINE:
                     logger.info("Call master client set schedule online, project id: {}, flow id: {},host: {}",
                             project.getId(), processDefinition.getId(), masterServers);
                     setSchedule(project.getId(), scheduleObj);
+                    this.commandMapper.makeCommandOnline(scheduleObj.getId());
                     break;
                 case OFFLINE:
                     logger.info("Call master client set schedule offline, project id: {}, flow id: {},host: {}",
                             project.getId(), processDefinition.getId(), masterServers);
                     deleteSchedule(project.getId(), id);
+                    this.commandMapper.makeCommandOffline(scheduleObj.getId());
                     break;
                 default:
                     throw new ServiceException(Status.SCHEDULE_STATUS_UNKNOWN, scheduleStatus.toString());
