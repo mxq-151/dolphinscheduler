@@ -264,6 +264,7 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
                         processService.findCommandPageBySlot(pageSize, pageNumber, masterCount, thisMasterSlot);
 
                 if (CollectionUtils.isNotEmpty(result)) {
+                    this.processService.updateCommandById(result,CommandState.RUNNING.getCode());
                     logger.warn(
                             "Master schedule bootstrap loop command success, command size: {}, current slot: {}, total slot size: {}",
                             result.size(), thisMasterSlot, masterCount);

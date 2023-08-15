@@ -404,7 +404,6 @@ public class ProcessServiceImpl implements ProcessService {
                 break;
         }
 
-        logger.info("manual_run:{}",command.getCommandType());
         // add command timezone
         Schedule schedule = scheduleMapper.queryByProcessDefinitionCode(command.getProcessDefinitionCode());
         if (schedule != null) {
@@ -1071,7 +1070,6 @@ public class ProcessServiceImpl implements ProcessService {
         }
         processInstance.setStateWithDesc(runStatus, commandType.getDescp());
 
-        logger.info("manual_run:{}",command.isManualRun());
         processInstance.setManualRun(command.isManualRun());
         return processInstance;
     }
