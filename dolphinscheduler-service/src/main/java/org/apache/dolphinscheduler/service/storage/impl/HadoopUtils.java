@@ -54,6 +54,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.PrivilegedExceptionAction;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -470,8 +471,8 @@ public class HadoopUtils implements Closeable, StorageOperate {
 
         String responseContent = Boolean.TRUE
                 .equals(PropertyUtils.getBoolean(Constants.HADOOP_SECURITY_AUTHENTICATION_STARTUP_STATE, false))
-                        ? KerberosHttpClient.get(applicationUrl)
-                        : HttpUtils.get(applicationUrl);
+                ? KerberosHttpClient.get(applicationUrl)
+                : HttpUtils.get(applicationUrl);
         if (responseContent != null) {
             ObjectNode jsonObject = JSONUtils.parseObject(responseContent);
             if (!jsonObject.has("app")) {
@@ -485,8 +486,8 @@ public class HadoopUtils implements Closeable, StorageOperate {
             logger.debug("generate yarn job history application url, jobHistoryUrl={}", jobHistoryUrl);
             responseContent = Boolean.TRUE
                     .equals(PropertyUtils.getBoolean(Constants.HADOOP_SECURITY_AUTHENTICATION_STARTUP_STATE, false))
-                            ? KerberosHttpClient.get(jobHistoryUrl)
-                            : HttpUtils.get(jobHistoryUrl);
+                    ? KerberosHttpClient.get(jobHistoryUrl)
+                    : HttpUtils.get(jobHistoryUrl);
 
             if (null != responseContent) {
                 ObjectNode jsonObject = JSONUtils.parseObject(responseContent);
@@ -680,9 +681,10 @@ public class HadoopUtils implements Closeable, StorageOperate {
     private static final class YarnHAAdminUtils {
 
         /**
-         *  get active resourcemanager node
+         * get active resourcemanager node
+         *
          * @param protocol http protocol
-         * @param rmIds yarn ha ids
+         * @param rmIds    yarn ha ids
          * @return yarn active node
          */
         public static String getActiveRMName(String protocol, String rmIds) {
@@ -717,8 +719,8 @@ public class HadoopUtils implements Closeable, StorageOperate {
 
             String retStr = Boolean.TRUE
                     .equals(PropertyUtils.getBoolean(Constants.HADOOP_SECURITY_AUTHENTICATION_STARTUP_STATE, false))
-                            ? KerberosHttpClient.get(url)
-                            : HttpUtils.get(url);
+                    ? KerberosHttpClient.get(url)
+                    : HttpUtils.get(url);
 
             if (StringUtils.isEmpty(retStr)) {
                 return null;
@@ -749,4 +751,20 @@ public class HadoopUtils implements Closeable, StorageOperate {
     public ResUploadType returnStorageType() {
         return ResUploadType.HDFS;
     }
+
+    /**
+     * get LastModifiedTime
+     * @param filename
+     * @return LastModifiedTime
+     * @throws IOException
+     */
+    @Override
+    public Date getLastModifiedTime(String filename) throws IOException {
+        // 构造 HDFS 文件路径,获取文件的状态信息
+        Path hdfsDir = new Path(filename);
+        FileStatus status = fs.getFileStatus(hdfsDir);
+        return new Date(status.getModificationTime());
+    }
+
+
 }

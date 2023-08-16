@@ -23,6 +23,7 @@ import org.apache.dolphinscheduler.common.utils.PropertyUtils;
 import org.apache.dolphinscheduler.spi.enums.ResourceType;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 public interface StorageOperate {
@@ -167,4 +168,9 @@ public interface StorageOperate {
      */
     ResUploadType returnStorageType();
 
+    /**
+     * return file last Modified time
+     * @return
+     */
+    Date getLastModifiedTime(String objectKey) throws IOException;
 }

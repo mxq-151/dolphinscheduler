@@ -34,6 +34,10 @@ public final class Constants {
      */
     public static final String COMMON_PROPERTIES_PATH = "/common.properties";
 
+    public static final String RESOURCE_CACHE_PATH = "resource.cache.path";
+
+    public static final String RESOURCE_CACHE_ENABLE = "resource.cache.enable";
+
     /**
      * registry properties
      */
@@ -49,6 +53,8 @@ public final class Constants {
     public static final String FOLDER_SEPARATOR = "/";
 
     public static final String RESOURCE_TYPE_FILE = "resources";
+
+    public static final String RESOURCE_S3_BUCKET_NAME = "resource.aws.s3.bucket.name";
 
     public static final String RESOURCE_TYPE_UDF = "udfs";
 

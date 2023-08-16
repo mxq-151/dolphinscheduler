@@ -25,6 +25,7 @@ import static org.apache.dolphinscheduler.common.constants.Constants.RESOURCE_TY
 import static org.apache.dolphinscheduler.common.constants.Constants.RESOURCE_TYPE_UDF;
 import static org.apache.dolphinscheduler.common.constants.Constants.STORAGE_S3;
 
+import com.amazonaws.services.s3.model.*;
 import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.ResUploadType;
 import org.apache.dolphinscheduler.common.utils.PropertyUtils;
@@ -45,6 +46,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,12 +61,6 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.transfer.MultipleFileDownload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -322,7 +318,7 @@ public class S3Utils implements Closeable, StorageOperate {
      * upload local directory to S3
      *
      * @param tenantCode
-     * @param keyPrefix the name of directory
+     * @param keyPrefix  the name of directory
      * @param strPath
      */
     private void uploadDirectory(String tenantCode, String keyPrefix, String strPath) {
@@ -334,7 +330,7 @@ public class S3Utils implements Closeable, StorageOperate {
      * download S3 Directory to local
      *
      * @param tenantCode
-     * @param keyPrefix the name of directory
+     * @param keyPrefix  the name of directory
      * @param srcPath
      */
     private void downloadDirectory(String tenantCode, String keyPrefix, String srcPath) {
@@ -384,4 +380,18 @@ public class S3Utils implements Closeable, StorageOperate {
     public ResUploadType returnStorageType() {
         return ResUploadType.S3;
     }
+
+    /**
+     * get LastModifiedTime
+     *
+     * @param objectKey
+     * @return LastModifiedTime
+     * @throws IOException
+     */
+    @Override
+    public Date getLastModifiedTime(String objectKey) {
+        return s3Client.getObject(BUCKET_NAME, objectKey).getObjectMetadata().getLastModified();
+    }
+
+
 }

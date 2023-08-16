@@ -22,6 +22,8 @@ import static org.apache.dolphinscheduler.common.constants.Constants.FORMAT_S_S;
 import static org.apache.dolphinscheduler.common.constants.Constants.RESOURCE_TYPE_FILE;
 import static org.apache.dolphinscheduler.common.constants.Constants.RESOURCE_TYPE_UDF;
 
+import com.aliyun.oss.model.*;
+import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.ResUploadType;
 import org.apache.dolphinscheduler.common.factory.OssClientFactory;
@@ -44,6 +46,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,10 +58,6 @@ import org.slf4j.LoggerFactory;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSException;
-import com.aliyun.oss.model.Bucket;
-import com.aliyun.oss.model.OSSObject;
-import com.aliyun.oss.model.ObjectMetadata;
-import com.aliyun.oss.model.PutObjectRequest;
 
 @Data
 public class OssOperator implements Closeable, StorageOperate {
@@ -204,7 +203,7 @@ public class OssOperator implements Closeable, StorageOperate {
         } catch (OSSException e) {
             throw new IOException(e);
         } catch (FileNotFoundException e) {
-            logger.error("cannot fin the destination file {}", dstFilePath);
+            logger.error("cannot find the destination file {}", dstFilePath);
             throw e;
         }
     }
@@ -273,6 +272,18 @@ public class OssOperator implements Closeable, StorageOperate {
     public ResUploadType returnStorageType() {
         return ResUploadType.OSS;
     }
+
+    /**
+     * get LastModifiedTime
+     * @param objectKey
+     * @return LastModifiedTime
+     * @throws IOException
+     */
+    @Override
+    public Date getLastModifiedTime(String objectKey) {
+        return ossClient.getObject(bucketName,objectKey).getObjectMetadata().getLastModified();
+    }
+
 
     @Override
     public void deleteTenant(String tenantCode) throws Exception {
