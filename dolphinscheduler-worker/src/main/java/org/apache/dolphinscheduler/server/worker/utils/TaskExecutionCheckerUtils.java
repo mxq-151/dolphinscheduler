@@ -121,7 +121,7 @@ public class TaskExecutionCheckerUtils {
                         logger.info("get cache resource file from path:{}", resCachePath);
                         Path sourcePath = cachefile.toPath();  // 获取源文件路径
                         Path destinationPath = new File(execLocalPath, fullName).toPath();  // 构造目标文件路径
-                        // 创建所有缺失的父目录
+                        // Create missing parent directories
                         Files.createDirectories(destinationPath.getParent());
                         try {
                             FileUtils.createSymbolicLink(sourcePath, destinationPath);
@@ -141,7 +141,7 @@ public class TaskExecutionCheckerUtils {
                             try {
                                 Path downloadPath = new File(execLocalPath + File.separator + fullName).toPath();
                                 Path cachePath = new File(resCachePath,fullName).toPath();
-                                // 创建所有缺失的父目录
+                                // Create missing parent directories
                                 Files.createDirectories(cachePath.getParent());
                                 Files.copy(downloadPath, cachePath, StandardCopyOption.REPLACE_EXISTING);
 //                            // persistent file md5 to local disk
