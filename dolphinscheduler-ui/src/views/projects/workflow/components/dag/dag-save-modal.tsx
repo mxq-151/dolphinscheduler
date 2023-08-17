@@ -243,8 +243,8 @@ export default defineComponent({
             >
               <NSelect
                 options={[
-                  { value: 'PARALLEL', label: t('project.dag.parallel') },
                   { value: 'SERIAL_WAIT', label: t('project.dag.serial_wait') },
+                  { value: 'PARALLEL', label: t('project.dag.parallel') },
                   {
                     value: 'SERIAL_DISCARD',
                     label: t('project.dag.serial_discard')
