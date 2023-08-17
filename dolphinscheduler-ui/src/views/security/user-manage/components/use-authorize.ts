@@ -24,6 +24,10 @@ import {
   unAuthDatasource
 } from '@/service/modules/data-source'
 import {
+  queryAuthEnvironmentByUserId,
+  queryUnauthEnvironmentByUserId
+} from '@/service/modules/environment'
+import {
   authorizedFile,
   authorizeResourceTree,
   authUDFFunc,
@@ -37,6 +41,7 @@ import {
   grantProject,
   grantResource,
   grantDataSource,
+  grantEnv,
   grantUDFFunc,
   grantNamespaceFunc
 } from '@/service/modules/users'
@@ -51,6 +56,8 @@ export function useAuthorize() {
     unauthorizedProjects: [] as IOption[],
     authorizedDatasources: [] as number[],
     unauthorizedDatasources: [] as IOption[],
+    authorizedEnvs: [] as number[],
+    unauthorizedEnvs: [] as IOption[],
     authorizedUdfs: [] as number[],
     unauthorizedUdfs: [] as IOption[],
     authorizedNamespaces: [] as number[],
@@ -93,6 +100,26 @@ export function useAuthorize() {
       (item: { name: string; id: number }) => item.id
     )
     state.unauthorizedDatasources = [...datasources[0], ...datasources[1]].map(
+      (item: { name: string; id: number }) => ({
+        label: item.name,
+        value: item.id
+      })
+    )
+  }
+
+  const getEnvs = async (userId: number) => {
+    if (state.loading) return
+    state.loading = true
+    const envs = await Promise.all([
+      queryAuthEnvironmentByUserId({ userId }),
+      queryUnauthEnvironmentByUserId({ userId })
+    ])
+
+    state.loading = false
+    state.authorizedEnvs = envs[0].map(
+      (item: { name: string; id: number }) => item.id
+    )
+    state.unauthorizedEnvs = [...envs[0], ...envs[1]].map(
       (item: { name: string; id: number }) => ({
         label: item.name,
         value: item.id
@@ -181,6 +208,9 @@ export function useAuthorize() {
     if (type === 'authorize_namespace') {
       getNamespaces(userId)
     }
+    if (type === 'authorize_env') {
+      getEnvs(userId)
+    }
   }
 
   /*
@@ -226,6 +256,12 @@ export function useAuthorize() {
       await grantDataSource({
         userId,
         datasourceIds: state.authorizedDatasources.join(',')
+      })
+    }
+    if (type === 'authorize_env') {
+      await grantEnv({
+        userId,
+        envIds: state.authorizedEnvs.join(',')
       })
     }
     if (type === 'authorize_udf') {

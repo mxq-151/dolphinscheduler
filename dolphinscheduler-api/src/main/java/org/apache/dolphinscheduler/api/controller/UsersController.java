@@ -384,6 +384,30 @@ public class UsersController extends BaseController {
     }
 
     /**
+     * grant env
+     *
+     * @param loginUser login user
+     * @param userId user id
+     * @param envIds env id array
+     * @return grant result code
+     */
+    @ApiOperation(value = "grantEnv", notes = "GRANT_ENV_NOTES")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "USER_ID", required = true, dataTypeClass = int.class, example = "100"),
+            @ApiImplicitParam(name = "envs", value = "ENV_IDS", required = true, dataTypeClass = String.class)
+    })
+    @PostMapping(value = "/grant-env")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(GRANT_DATASOURCE_ERROR)
+    @AccessLogAnnotation
+    public Result grantEnv(@ApiIgnore @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
+                                  @RequestParam(value = "userId") int userId,
+                                  @RequestParam(value = "envIds") String envIds) {
+        Map<String, Object> result = usersService.grantEnv(loginUser, userId, envIds);
+        return returnDataList(result);
+    }
+
+    /**
      * get user info
      *
      * @param loginUser login user

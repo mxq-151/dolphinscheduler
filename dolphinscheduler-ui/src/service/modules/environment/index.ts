@@ -21,6 +21,7 @@ import {
   EnvironmentCodeReq,
   EnvironmentNameReq,
   ListReq,
+  UserIdReq,
   CodeReq
 } from './types'
 
@@ -51,6 +52,22 @@ export function queryEnvironmentListPaging(params: ListReq): any {
 export function queryEnvironmentByCode(params: EnvironmentCodeReq): any {
   return axios({
     url: '/environment/query-by-code',
+    method: 'get',
+    params
+  })
+}
+
+export function queryAuthEnvironmentByUserId(params: UserIdReq): any {
+  return axios({
+    url: '/environment/auth-env/',
+    method: 'get',
+    params
+  })
+}
+
+export function queryUnauthEnvironmentByUserId(params: UserIdReq): any {
+  return axios({
+    url: '/environment/unauth-env/',
     method: 'get',
     params
   })

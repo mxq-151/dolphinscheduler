@@ -38,6 +38,8 @@ public interface EnvironmentService {
      */
     Map<String, Object> createEnvironment(User loginUser, String name, String config, String desc, String workerGroups);
 
+
+
     /**
      * query environment
      *
@@ -72,6 +74,10 @@ public interface EnvironmentService {
      * @param workerGroups worker groups
      */
     Map<String, Object> updateEnvironmentByCode(User loginUser, Long code, String name, String config, String desc, String workerGroups);
+
+    Map<String, Object> authedEnv(User loginUser, Integer userId);
+
+    Map<String, Object> unauthEnv(User loginUser, Integer userId);
 
     /**
      * query environment paging

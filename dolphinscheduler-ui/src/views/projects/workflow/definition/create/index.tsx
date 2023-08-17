@@ -63,6 +63,16 @@ export default defineComponent({
         }
       })
 
+      for (let index = 0; index < taskDefinitions.length; index++) {
+        const item = taskDefinitions[index];
+        if(item.workerGroup==null || item.workerGroup.length<=0 || item.workerGroup=='default')
+        {
+          message.error('worker分组为空或default,请选择worker分组');
+          return;
+        }
+        
+      }
+
       createProcessDefinition(
         {
           taskDefinitionJson: JSON.stringify(taskDefinitions),

@@ -17,7 +17,7 @@
 
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { queryAllWorkerGroups } from '@/service/modules/worker-groups'
+import { queryAuthWorkerGroups } from '@/service/modules/worker-groups'
 import type { IJsonItem } from '../types'
 
 export function useWorkerGroup(): IJsonItem {
@@ -29,7 +29,7 @@ export function useWorkerGroup(): IJsonItem {
   const getWorkerGroups = async () => {
     if (loading.value) return
     loading.value = true
-    const res = await queryAllWorkerGroups()
+    const res = await queryAuthWorkerGroups()
     options.value = res.map((item: string) => ({ label: item, value: item }))
     loading.value = false
   }
@@ -49,8 +49,8 @@ export function useWorkerGroup(): IJsonItem {
     validate: {
       trigger: ['input', 'blur'],
       required: true,
-      message: t('project.node.worker_group_tips')
+      message: t('project.node.worker_group_tips'),
     },
-    value: 'default'
+    value: ''
   }
 }

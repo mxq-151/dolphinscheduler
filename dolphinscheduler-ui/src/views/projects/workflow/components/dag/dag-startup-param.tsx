@@ -19,7 +19,7 @@ import _ from 'lodash'
 import { defineComponent, onMounted, PropType, ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { listAlertGroupById } from '@/service/modules/alert-group'
-import { queryAllWorkerGroups } from '@/service/modules/worker-groups'
+import { queryAuthWorkerGroups } from '@/service/modules/worker-groups'
 import { runningType, warningTypeList } from '@/common/common'
 import { IStartupParam } from './types'
 import styles from './startup.module.scss'
@@ -48,7 +48,7 @@ export default defineComponent({
     }
 
     const getWorkerGroupList = () => {
-      queryAllWorkerGroups().then((res: any) => {
+      queryAuthWorkerGroups().then((res: any) => {
         workerGroupListRef.value = res
       })
     }

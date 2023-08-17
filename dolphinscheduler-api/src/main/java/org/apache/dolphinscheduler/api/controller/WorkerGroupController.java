@@ -144,6 +144,22 @@ public class WorkerGroupController extends BaseController {
     }
 
     /**
+     * query auth worker groups
+     *
+     * @param loginUser login user
+     * @return auth worker group list
+     */
+    @ApiOperation(value = "queryAuthWorkerGroups", notes = "QUERY_WORKER_GROUP_LIST_NOTES")
+    @GetMapping(value = "/auth")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(QUERY_WORKER_GROUP_FAIL)
+    @AccessLogAnnotation(ignoreRequestArgs = "loginUser")
+    public Result queryAuthWorkerGroups(@ApiIgnore @RequestAttribute(value = Constants.SESSION_USER) User loginUser) {
+        Map<String, Object> result = workerGroupService.queryAuthGroup(loginUser);
+        return returnDataList(result);
+    }
+
+    /**
      * delete worker group by id
      *
      * @param loginUser login user

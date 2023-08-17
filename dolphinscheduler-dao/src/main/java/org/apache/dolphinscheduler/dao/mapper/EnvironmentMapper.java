@@ -23,7 +23,6 @@ import org.apache.dolphinscheduler.dao.entity.Environment;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Set;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -79,4 +78,9 @@ public interface EnvironmentMapper extends BaseMapper<Environment> {
      * @return
      */
     IPage<Environment> queryEnvironmentListPagingByIds(Page<Environment> page, @Param("ids")List<Integer> ids, @Param("searchName")String searchVal);
+
+    List<Environment> queryEnvExceptUserId(Integer userId);
+
+    List<Environment> queryAuthedEnv(Integer userId);
+
 }

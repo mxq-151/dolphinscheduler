@@ -28,10 +28,8 @@ import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.AuthorizationType;
 import org.apache.dolphinscheduler.common.enums.NodeType;
 import org.apache.dolphinscheduler.common.enums.UserType;
-import org.apache.dolphinscheduler.dao.entity.EnvironmentWorkerGroupRelation;
-import org.apache.dolphinscheduler.dao.entity.ProcessInstance;
-import org.apache.dolphinscheduler.dao.entity.User;
-import org.apache.dolphinscheduler.dao.entity.WorkerGroup;
+import org.apache.dolphinscheduler.dao.entity.*;
+import org.apache.dolphinscheduler.dao.mapper.EnvironmentMapper;
 import org.apache.dolphinscheduler.dao.mapper.EnvironmentWorkerGroupRelationMapper;
 import org.apache.dolphinscheduler.dao.mapper.ProcessInstanceMapper;
 import org.apache.dolphinscheduler.dao.mapper.WorkerGroupMapper;
@@ -73,6 +71,9 @@ public class WorkerGroupServiceImpl extends BaseServiceImpl implements WorkerGro
 
     @Autowired
     private ProcessInstanceMapper processInstanceMapper;
+
+    @Autowired
+    private EnvironmentMapper environmentMapper;
 
     @Autowired
     private RegistryClient registryClient;
@@ -241,6 +242,30 @@ public class WorkerGroupServiceImpl extends BaseServiceImpl implements WorkerGro
         pageInfo.setTotalList(resultDataList);
 
         result.setData(pageInfo);
+        putMsg(result, Status.SUCCESS);
+        return result;
+    }
+
+    /**
+     * query all worker group
+     *
+     * @param loginUser
+     * @return all worker group list
+     */
+    @Override
+    public Map<String, Object> queryAuthGroup(User loginUser) {
+        Map<String, Object> result = new HashMap<>();
+
+        List<String> availableWorkerGroupList=new ArrayList<>();
+
+        List<Environment> envs=this.environmentMapper.queryAuthedEnv(loginUser.getId());
+        for (int i = 0; i < envs.size(); i++) {
+            List<EnvironmentWorkerGroupRelation> relations=this.environmentWorkerGroupRelationMapper.queryByEnvironmentCode(envs.get(i).getCode());
+            List<String> tmp=relations.stream().map(x->{return x.getWorkerGroup();}).collect(Collectors.toList());
+            availableWorkerGroupList.addAll(tmp);
+        }
+
+        result.put(Constants.DATA_LIST, availableWorkerGroupList);
         putMsg(result, Status.SUCCESS);
         return result;
     }

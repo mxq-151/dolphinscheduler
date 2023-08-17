@@ -30,10 +30,7 @@ import org.apache.dolphinscheduler.common.enums.UserType;
 import org.apache.dolphinscheduler.common.utils.CodeGenerateUtils;
 import org.apache.dolphinscheduler.common.utils.CodeGenerateUtils.CodeGenerateException;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
-import org.apache.dolphinscheduler.dao.entity.Environment;
-import org.apache.dolphinscheduler.dao.entity.EnvironmentWorkerGroupRelation;
-import org.apache.dolphinscheduler.dao.entity.TaskDefinition;
-import org.apache.dolphinscheduler.dao.entity.User;
+import org.apache.dolphinscheduler.dao.entity.*;
 import org.apache.dolphinscheduler.dao.mapper.EnvironmentMapper;
 import org.apache.dolphinscheduler.dao.mapper.EnvironmentWorkerGroupRelationMapper;
 import org.apache.dolphinscheduler.dao.mapper.TaskDefinitionMapper;
@@ -42,15 +39,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -135,6 +124,8 @@ public class EnvironmentServiceImpl extends BaseServiceImpl implements Environme
             return result;
         }
 
+
+
         if (environmentMapper.insert(env) > 0) {
             if (!StringUtils.isEmpty(workerGroups)) {
                 List<String> workerGroupList = JSONUtils.parseObject(workerGroups, new TypeReference<List<String>>() {
@@ -160,6 +151,52 @@ public class EnvironmentServiceImpl extends BaseServiceImpl implements Environme
         } else {
             putMsg(result, Status.CREATE_ENVIRONMENT_ERROR);
         }
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> authedEnv(User loginUser, Integer userId) {
+        Map<String, Object> result = new HashMap<>();
+
+        List<Environment> authedDatasourceList = this.environmentMapper.queryAuthedEnv(userId);
+        result.put(Constants.DATA_LIST, authedDatasourceList);
+        putMsg(result, Status.SUCCESS);
+        return result;
+    }
+
+
+    /**
+     * unauthorized datasource
+     *
+     * @param loginUser login user
+     * @param userId user id
+     * @return unauthed data source result code
+     */
+    @Override
+    public Map<String, Object> unauthEnv(User loginUser, Integer userId) {
+        Map<String, Object> result = new HashMap<>();
+        List<Environment> envList;
+        if (canOperatorPermissions(loginUser,null,AuthorizationType.ENVIRONMENT,null)) {
+            // admin gets all data sources except userId
+            envList = environmentMapper.queryEnvExceptUserId(userId);
+        } else {
+            // non-admins users get their own data sources
+            envList = environmentMapper.selectByMap(Collections.singletonMap("operator", loginUser.getId()));
+        }
+        List<Environment> resultList = new ArrayList<>();
+        Set<Environment> envSet;
+        if (envList != null && !envList.isEmpty()) {
+            envSet = new HashSet<>(envList);
+            List<Environment> authedEnvList = environmentMapper.queryAuthedEnv(userId);
+            Set<Environment> authedEnvSet;
+            if (authedEnvList != null && !authedEnvList.isEmpty()) {
+                authedEnvSet = new HashSet<>(authedEnvList);
+                envSet.removeAll(authedEnvSet);
+            }
+            resultList = new ArrayList<>(envSet);
+        }
+        result.put(Constants.DATA_LIST, resultList);
+        putMsg(result, Status.SUCCESS);
         return result;
     }
 
@@ -225,14 +262,7 @@ public class EnvironmentServiceImpl extends BaseServiceImpl implements Environme
     @Override
     public Map<String, Object> queryAllEnvironmentList(User loginUser) {
         Map<String, Object> result = new HashMap<>();
-        Set<Integer> ids = resourcePermissionCheckService.userOwnedResourceIdsAcquisition(AuthorizationType.ENVIRONMENT,
-                loginUser.getId(), logger);
-        if (ids.isEmpty()) {
-            result.put(Constants.DATA_LIST, Collections.emptyList());
-            putMsg(result, Status.SUCCESS);
-            return result;
-        }
-        List<Environment> environmentList = environmentMapper.selectBatchIds(ids);
+        List<Environment> environmentList = this.environmentMapper.queryAuthedEnv(loginUser.getId());
         if (CollectionUtils.isNotEmpty(environmentList)) {
             Map<Long, List<String>> relationMap = relationMapper.selectList(null).stream()
                     .collect(Collectors.groupingBy(EnvironmentWorkerGroupRelation::getEnvironmentCode,

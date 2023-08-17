@@ -36,7 +36,7 @@ import {
   QuestionCircleTwotone,
   BranchesOutlined
 } from '@vicons/antd'
-import { NIcon } from 'naive-ui'
+import { NIcon,useMessage } from 'naive-ui'
 import { TASK_TYPES_MAP } from '../../constants/task-type'
 import { Router, useRouter } from 'vue-router'
 import { querySubProcessInstanceByTaskCode } from '@/service/modules/process-instances'
@@ -100,8 +100,16 @@ const NodeDetailModal = defineComponent({
     }
     const detailRef = ref()
 
+    const message=useMessage()
+
     const onConfirm = async () => {
       await detailRef.value.value.validate()
+      const tmp= detailRef.value.value.getValues();
+      if(tmp?.workerGroup=='default' || tmp?.workerGroup.length<=0)
+      {
+        message.error("worker分组为空或default,请选择worker分组");
+        return;
+      }
       emit('submit', { data: detailRef.value.value.getValues() })
     }
     const onCancel = () => {

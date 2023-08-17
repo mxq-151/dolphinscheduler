@@ -215,6 +215,8 @@ public interface UsersService {
      */
     Map<String, Object> grantDataSource(User loginUser, int userId, String datasourceIds);
 
+    Map<String, Object> grantEnv(User loginUser, int userId, String envIds);
+
     /**
      * query user info
      *

@@ -60,6 +60,20 @@
         order by create_time desc
     </select>
 
+    <select id="queryEnvExceptUserId" resultType="org.apache.dolphinscheduler.dao.entity.Environment">
+        select
+        <include refid="baseSql"/>
+        from t_ds_environment
+        where operator <![CDATA[ <> ]]> #{userId}
+    </select>
+
+    <select id="queryAuthedEnv" resultType="org.apache.dolphinscheduler.dao.entity.Environment">
+        select
+            ds.id, ds.code, ds.name, ds.config, ds.description, ds.operator, ds.create_time, ds.update_time
+        from t_ds_environment ds, t_ds_relation_environment_user rel
+        where ds.id = rel.env_id AND rel.user_id = #{userId}
+    </select>
+
     <select id="queryByEnvironmentCode" resultType="org.apache.dolphinscheduler.dao.entity.Environment">
         select
         <include refid="baseSql"/>

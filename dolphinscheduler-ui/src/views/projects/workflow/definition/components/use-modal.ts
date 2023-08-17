@@ -26,7 +26,7 @@ import {
   importProcessDefinition,
   queryProcessDefinitionByCode
 } from '@/service/modules/process-definition'
-import { queryAllWorkerGroups } from '@/service/modules/worker-groups'
+import { queryAuthWorkerGroups } from '@/service/modules/worker-groups'
 import { queryAllEnvironmentList } from '@/service/modules/environment'
 import { listAlertGroupById } from '@/service/modules/alert-group'
 import { startProcessInstance } from '@/service/modules/executors'
@@ -38,6 +38,7 @@ import {
 import { parseTime } from '@/common/common'
 import { EnvironmentItem } from '@/service/modules/environment/types'
 import { ITimingState, ProcessInstanceReq } from './types'
+import { useMessage } from 'naive-ui'
 
 export function useModal(
   state: any,
@@ -65,6 +66,8 @@ export function useModal(
     state.importForm.file = ''
   }
 
+  const message=useMessage()
+
   const handleImportDefinition = async () => {
     await state.importFormRef.validate()
 
@@ -87,6 +90,12 @@ export function useModal(
 
   const handleStartDefinition = async (code: number) => {
     await state.startFormRef.validate()
+
+    if( state.startForm.workerGroup=='default' || state.startForm.workerGroup.length<=0)
+    {
+      message.error("worker分组为空或default,请选择worker分组");
+      return;
+    }
 
     if (state.saving) return
     state.saving = true
@@ -143,6 +152,14 @@ export function useModal(
     state.saving = true
     try {
       const data: any = getTimingData()
+
+      if(data?.workerGroup=='default' || data?.workerGroup.length<=0)
+      {
+        message.error("worker分组为空或default,请选择worker分组");
+        return;
+      }
+
+
       data.processDefinitionCode = code
 
       await createSchedule(data, variables.projectCode)
@@ -163,6 +180,11 @@ export function useModal(
     try {
       const data: any = getTimingData()
       data.id = id
+      if(data?.workerGroup=='default' || data?.workerGroup.length<=0)
+      {
+        message.error("worker分组为空或default,请选择worker分组");
+        return;
+      }
 
       await updateSchedule(data, variables.projectCode, id)
       window.$message.success(t('project.workflow.success'))
@@ -225,7 +247,7 @@ export function useModal(
   }
 
   const getWorkerGroups = () => {
-    queryAllWorkerGroups().then((res: any) => {
+    queryAuthWorkerGroups().then((res: any) => {
       variables.workerGroups = res.map((item: string) => ({
         label: item,
         value: item

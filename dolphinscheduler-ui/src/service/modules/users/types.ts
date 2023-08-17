@@ -50,6 +50,10 @@ interface GrantDataSourceReq extends UserIdReq {
   datasourceIds: string
 }
 
+interface GrantDataEnvReq extends UserIdReq {
+  envIds: string
+}
+
 interface GrantResourceReq extends UserIdReq {
   resourceIds: string
 }
@@ -136,5 +140,6 @@ export {
   ListReq,
   RegisterUserReq,
   UserInfoRes,
+  GrantDataEnvReq,
   UserListRes
 }

@@ -141,6 +141,10 @@ export function useColumns(onCallback: Function) {
                     {
                       label: t('security.user.namespace'),
                       key: 'authorize_namespace'
+                    },
+                    {
+                      label: t('security.user.env_name'),
+                      key: 'authorize_env'
                     }
                   ],
                   onSelect: (key) =>

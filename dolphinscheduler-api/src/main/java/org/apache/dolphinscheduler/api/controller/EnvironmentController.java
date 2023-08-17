@@ -17,13 +17,6 @@
 
 package org.apache.dolphinscheduler.api.controller;
 
-import static org.apache.dolphinscheduler.api.enums.Status.CREATE_ENVIRONMENT_ERROR;
-import static org.apache.dolphinscheduler.api.enums.Status.DELETE_ENVIRONMENT_ERROR;
-import static org.apache.dolphinscheduler.api.enums.Status.QUERY_ENVIRONMENT_BY_CODE_ERROR;
-import static org.apache.dolphinscheduler.api.enums.Status.QUERY_ENVIRONMENT_ERROR;
-import static org.apache.dolphinscheduler.api.enums.Status.UPDATE_ENVIRONMENT_ERROR;
-import static org.apache.dolphinscheduler.api.enums.Status.VERIFY_ENVIRONMENT_ERROR;
-
 import org.apache.dolphinscheduler.api.aspect.AccessLogAnnotation;
 import org.apache.dolphinscheduler.api.exceptions.ApiException;
 import org.apache.dolphinscheduler.api.service.EnvironmentService;
@@ -51,6 +44,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+
+import static org.apache.dolphinscheduler.api.enums.Status.*;
 
 /**
  * environment controller
@@ -93,6 +88,50 @@ public class EnvironmentController extends BaseController {
                 environmentService.createEnvironment(loginUser, name, config, description, workerGroups);
         return returnDataList(result);
     }
+
+
+    /**
+     * unauthorized env
+     *
+     * @param loginUser login user
+     * @param userId user id
+     * @return unauthed env result code
+     */
+    @ApiOperation(value = "unauthEnv", notes = "UNAUTHORIZED_ENV_NOTES")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "USER_ID", required = true, dataTypeClass = int.class, example = "100")
+    })
+    @GetMapping(value = "/unauth-env")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(UNAUTHORIZED_DATASOURCE)
+    @AccessLogAnnotation(ignoreRequestArgs = "loginUser")
+    public Result unauthDatasource(@ApiIgnore @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
+                                   @RequestParam("userId") Integer userId) {
+        Map<String, Object> result = this.environmentService.unauthEnv(loginUser, userId);
+        return returnDataList(result);
+    }
+
+    /**
+     * authorized env
+     *
+     * @param loginUser login user
+     * @param userId user id
+     * @return authed env result code
+     */
+    @ApiOperation(value = "authEnv", notes = "AUTHORIZED_ENV_NOTES")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "USER_ID", required = true, dataTypeClass = int.class, example = "100")
+    })
+    @GetMapping(value = "/auth-env")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(UNAUTHORIZED_DATASOURCE)
+    @AccessLogAnnotation(ignoreRequestArgs = "loginUser")
+    public Result authDatasource(@ApiIgnore @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
+                                   @RequestParam("userId") Integer userId) {
+        Map<String, Object> result = this.environmentService.authedEnv(loginUser, userId);
+        return returnDataList(result);
+    }
+
 
     /**
      * update environment

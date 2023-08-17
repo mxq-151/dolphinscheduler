@@ -106,6 +106,15 @@ export const AuthorizeModal = defineComponent({
             class={styles.transfer}
           />
         )}
+        {type === 'authorize_env' && (
+          <NTransfer
+            virtualScroll
+            options={this.unauthorizedEnvs}
+            filterable
+            v-model:value={this.authorizedEnvs}
+            class={styles.transfer}
+          />
+        )}
         {type === 'authorize_udf' && (
           <NTransfer
             virtualScroll

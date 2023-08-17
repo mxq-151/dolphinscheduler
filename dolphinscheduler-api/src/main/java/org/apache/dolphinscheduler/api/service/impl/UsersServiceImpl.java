@@ -32,28 +32,8 @@ import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.UserType;
 import org.apache.dolphinscheduler.common.utils.EncryptionUtils;
 import org.apache.dolphinscheduler.common.utils.PropertyUtils;
-import org.apache.dolphinscheduler.dao.entity.AlertGroup;
-import org.apache.dolphinscheduler.dao.entity.DatasourceUser;
-import org.apache.dolphinscheduler.dao.entity.K8sNamespaceUser;
-import org.apache.dolphinscheduler.dao.entity.Project;
-import org.apache.dolphinscheduler.dao.entity.ProjectUser;
-import org.apache.dolphinscheduler.dao.entity.Resource;
-import org.apache.dolphinscheduler.dao.entity.ResourcesUser;
-import org.apache.dolphinscheduler.dao.entity.Tenant;
-import org.apache.dolphinscheduler.dao.entity.UDFUser;
-import org.apache.dolphinscheduler.dao.entity.User;
-import org.apache.dolphinscheduler.dao.mapper.AccessTokenMapper;
-import org.apache.dolphinscheduler.dao.mapper.AlertGroupMapper;
-import org.apache.dolphinscheduler.dao.mapper.DataSourceUserMapper;
-import org.apache.dolphinscheduler.dao.mapper.K8sNamespaceUserMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProcessDefinitionMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProjectMapper;
-import org.apache.dolphinscheduler.dao.mapper.ProjectUserMapper;
-import org.apache.dolphinscheduler.dao.mapper.ResourceMapper;
-import org.apache.dolphinscheduler.dao.mapper.ResourceUserMapper;
-import org.apache.dolphinscheduler.dao.mapper.TenantMapper;
-import org.apache.dolphinscheduler.dao.mapper.UDFUserMapper;
-import org.apache.dolphinscheduler.dao.mapper.UserMapper;
+import org.apache.dolphinscheduler.dao.entity.*;
+import org.apache.dolphinscheduler.dao.mapper.*;
 import org.apache.dolphinscheduler.dao.utils.ResourceProcessDefinitionUtils;
 import org.apache.dolphinscheduler.service.storage.StorageOperate;
 import org.apache.commons.collections.CollectionUtils;
@@ -110,6 +90,9 @@ public class UsersServiceImpl extends BaseServiceImpl implements UsersService {
 
     @Autowired
     private DataSourceUserMapper datasourceUserMapper;
+
+    @Autowired
+    private EnvironmentUserMapper  environmentUserMapper;
 
     @Autowired
     private UDFUserMapper udfUserMapper;
@@ -840,6 +823,58 @@ public class UsersServiceImpl extends BaseServiceImpl implements UsersService {
         putMsg(result, Status.SUCCESS);
 
         return result;
+    }
+
+
+    /**
+     * grant env
+     *
+     * @param loginUser     login user
+     * @param userId        user id
+     * @param envIds data source id array
+     * @return grant result code
+     */
+    @Override
+    @Transactional
+    public Map<String, Object> grantEnv(User loginUser, int userId, String envIds) {
+
+        Map<String, Object> result = new HashMap<>();
+        result.put(Constants.STATUS, false);
+
+        if (resourcePermissionCheckService.functionDisabled()) {
+            putMsg(result, Status.FUNCTION_DISABLED);
+            return result;
+        }
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            putMsg(result, Status.USER_NOT_EXIST, userId);
+            return result;
+        }
+
+        this.environmentUserMapper.deleteByUserId(userId);
+
+        if (check(result, StringUtils.isEmpty(envIds), Status.SUCCESS)) {
+            return result;
+        }
+
+        String[] envIdArr = envIds.split(",");
+
+        for (String datasourceId : envIdArr) {
+            Date now = new Date();
+
+            EnvironmentUser environmentUser = new EnvironmentUser();
+            environmentUser.setUserId(userId);
+            environmentUser.setEnvId(Integer.parseInt(datasourceId));
+            environmentUser.setPerm(Constants.AUTHORIZE_WRITABLE_PERM);
+            environmentUser.setCreateTime(now);
+            environmentUser.setUpdateTime(now);
+            environmentUserMapper.insert(environmentUser);
+        }
+
+        putMsg(result, Status.SUCCESS);
+
+        return result;
+
     }
 
     /**

@@ -41,6 +41,13 @@ export function queryAllWorkerGroups(): any {
   })
 }
 
+export function queryAuthWorkerGroups(): any {
+  return axios({
+    url: '/worker-groups/auth',
+    method: 'get'
+  })
+}
+
 export function queryWorkerAddressList(): any {
   return axios({
     url: '/worker-groups/worker-address-list',

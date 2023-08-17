@@ -51,6 +51,8 @@ public interface WorkerGroupService {
      */
     Result queryAllGroupPaging(User loginUser, Integer pageNo, Integer pageSize, String searchVal);
 
+    Map<String, Object> queryAuthGroup(User loginUser);
+
     /**
      * query all worker group
      *

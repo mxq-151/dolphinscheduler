@@ -26,6 +26,10 @@ interface EnvironmentCodeReq {
   environmentCode: number
 }
 
+interface UserIdReq {
+  userId: number
+}
+
 interface EnvironmentNameReq {
   environmentName: string
 }
@@ -67,6 +71,7 @@ export {
   EnvironmentNameReq,
   ListReq,
   CodeReq,
+  UserIdReq,
   EnvironmentItem,
   EnvironmentRes
 }

@@ -96,6 +96,7 @@ export default defineComponent({
     }
 
     const handleTiming = () => {
+      
       if (props.type === 'create') {
         handleCreateTiming(props.row.code as number)
       } else {

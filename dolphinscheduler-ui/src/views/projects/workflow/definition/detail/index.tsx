@@ -88,7 +88,6 @@ export default defineComponent({
           type: 'VARCHAR'
         }
       })
-
       updateProcessDefinition(
         {
           taskDefinitionJson: JSON.stringify(taskDefinitions),

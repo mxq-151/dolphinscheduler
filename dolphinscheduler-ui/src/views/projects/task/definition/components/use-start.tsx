@@ -21,11 +21,15 @@ import { reactive, ref, SetupContext } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { queryProcessDefinitionByCode } from '@/service/modules/process-definition'
-import { queryAllWorkerGroups } from '@/service/modules/worker-groups'
+import { queryAuthWorkerGroups } from '@/service/modules/worker-groups'
 import { queryAllEnvironmentList } from '@/service/modules/environment'
 import { listAlertGroupById } from '@/service/modules/alert-group'
 import type { EnvironmentItem } from '@/service/modules/environment/types'
 import type { IStartState } from '../types'
+
+import {
+  useMessage
+} from 'naive-ui'
 
 export const useStart = (
   ctx: SetupContext<('update:show' | 'update:row' | 'updateList')[]>
@@ -39,7 +43,7 @@ export const useStart = (
       version: 1,
       warningType: 'NONE',
       warningGroupId: null,
-      workerGroup: 'default',
+      workerGroup: '',
       environmentCode: null,
       startParams: null as null | string,
       dryRun: 0
@@ -59,7 +63,7 @@ export const useStart = (
   }
 
   const getWorkerGroups = () => {
-    queryAllWorkerGroups().then((res: any) => {
+    queryAuthWorkerGroups().then((res: any) => {
       variables.startState.workerGroups = res.map((item: string) => ({
         label: item,
         value: item
@@ -104,8 +108,15 @@ export const useStart = (
     )
   }
 
+  const message=useMessage()
   const handleStartDefinition = async (code: number) => {
     await variables.startFormRef.validate()
+
+    if( variables.startFormRef.startForm.workerGroup=='default' || variables.startFormRef.startForm.workerGroup.length<=0)
+    {
+      message.error("worker分组为空或default,请选择worker分组");
+      return;
+    }
 
     if (variables.saving) return
     variables.saving = true

@@ -30,6 +30,7 @@ import {
   GrantUDFReq,
   GrantNamespaceReq,
   ListAllReq,
+  GrantDataEnvReq,
   ListReq,
   RegisterUserReq
 } from './types'
@@ -84,6 +85,14 @@ export function getUserInfo(): any {
 export function grantDataSource(data: GrantDataSourceReq) {
   return axios({
     url: '/users/grant-datasource',
+    method: 'post',
+    data
+  })
+}
+
+export function grantEnv(data: GrantDataEnvReq) {
+  return axios({
+    url: '/users/grant-env',
     method: 'post',
     data
   })
