@@ -207,6 +207,9 @@ public interface ProcessInstanceMapper extends BaseMapper<ProcessInstance> {
                                             @Param("endTime") Date endTime,
                                             @Param("states") int[] stateArray);
 
+    ProcessInstance queryRunningProcess(@Param("processDefinitionCode") Long definitionCode,
+                                @Param("states") int[] stateArray);
+
     /**
      * query last manual process instance
      *

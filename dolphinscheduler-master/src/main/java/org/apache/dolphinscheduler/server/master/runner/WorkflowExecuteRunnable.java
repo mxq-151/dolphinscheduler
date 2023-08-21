@@ -715,10 +715,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
      */
     public void endProcess() {
         this.stateEvents.clear();
-        if (processDefinition.getExecutionType().typeIsSerialWait() || processDefinition.getExecutionType()
-                .typeIsSerialPriority()) {
-            checkSerialProcess(processDefinition);
-        }
         ProjectUser projectUser = processService.queryProjectWithUserByProcessInstanceId(processInstance.getId());
         if (processAlertManager.isNeedToSendWarning(processInstance)) {
             processAlertManager.sendAlertProcessInstance(processInstance, getValidTaskList(), projectUser);
@@ -732,37 +728,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
         }
     }
 
-    public void checkSerialProcess(ProcessDefinition processDefinition) {
-        int nextInstanceId = processInstance.getNextProcessInstanceId();
-        if (nextInstanceId == 0) {
-            ProcessInstance nextProcessInstance =
-                    this.processService.loadNextProcess4Serial(processInstance.getProcessDefinition().getCode(),
-                            WorkflowExecutionStatus.SERIAL_WAIT.getCode(), processInstance.getId());
-            if (nextProcessInstance == null) {
-                return;
-            }
-            ProcessInstance nextReadyStopProcessInstance =
-                    this.processService.loadNextProcess4Serial(processInstance.getProcessDefinition().getCode(),
-                            WorkflowExecutionStatus.READY_STOP.getCode(), processInstance.getId());
-            if (processDefinition.getExecutionType().typeIsSerialPriority() && nextReadyStopProcessInstance != null) {
-                return;
-            }
-            nextInstanceId = nextProcessInstance.getId();
-        }
-        ProcessInstance nextProcessInstance = this.processService.findProcessInstanceById(nextInstanceId);
-        if (nextProcessInstance.getState().isFinished() || nextProcessInstance.getState().isRunning()) {
-            return;
-        }
-        Map<String, Object> cmdParam = new HashMap<>();
-        cmdParam.put(CMD_PARAM_RECOVER_PROCESS_ID_STRING, nextInstanceId);
-        Command command = new Command();
-        command.setCommandType(CommandType.RECOVER_SERIAL_WAIT);
-        command.setProcessInstanceId(nextProcessInstance.getId());
-        command.setProcessDefinitionCode(processDefinition.getCode());
-        command.setProcessDefinitionVersion(processDefinition.getVersion());
-        command.setCommandParam(JSONUtils.toJsonString(cmdParam));
-        processService.createCommand(command);
-    }
 
     /**
      * Generate process dag

@@ -416,7 +416,7 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
         switch (executeType) {
             case REPEAT_RUNNING:
                 result = insertCommand(loginUser, processInstanceId, processDefinition.getCode(),
-                        processDefinition.getVersion(), CommandType.REPEAT_RUNNING, startParams);
+                        processDefinition.getVersion(), CommandType.START_PROCESS, startParams);
                 break;
             case RECOVER_SUSPENDED_PROCESS:
                 result = insertCommand(loginUser, processInstanceId, processDefinition.getCode(),

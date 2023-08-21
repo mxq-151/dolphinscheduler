@@ -143,7 +143,7 @@ public class MasterFailoverService {
             return;
         }
 
-        LOGGER.info(
+        LOGGER.warn(
                 "Master[{}] failover starting there are {} workflowInstance may need to failover, will do a deep check, workflowInstanceIds: {}",
                 masterHost,
                 needFailoverProcessInstanceList.size(),
@@ -154,7 +154,7 @@ public class MasterFailoverService {
                 LoggerUtils.setWorkflowInstanceIdMDC(processInstance.getId());
                 LOGGER.info("WorkflowInstance failover starting");
                 if (!checkProcessInstanceNeedFailover(masterStartupTimeOptional, processInstance)) {
-                    LOGGER.info("WorkflowInstance doesn't need to failover");
+                    LOGGER.warn("WorkflowInstance doesn't need to failover");
                     continue;
                 }
                 // todo: use batch query

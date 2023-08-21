@@ -20,10 +20,12 @@ package org.apache.dolphinscheduler.service.process;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.*;
 import static org.apache.dolphinscheduler.common.constants.Constants.LOCAL_PARAMS;
+import static org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus.*;
 import static org.apache.dolphinscheduler.plugin.task.api.enums.DataType.VARCHAR;
 import static org.apache.dolphinscheduler.plugin.task.api.enums.Direct.IN;
 import static org.apache.dolphinscheduler.plugin.task.api.utils.DataQualityConstants.TASK_INSTANCE_ID;
 
+import com.google.common.base.Preconditions;
 import org.apache.dolphinscheduler.common.constants.CommandKeyConstants;
 import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.*;
@@ -262,6 +264,8 @@ public class ProcessServiceImpl implements ProcessService {
     @Autowired
     private LogClient logClient;
 
+    private HashMap<Long,Integer> runningProcessCache=new HashMap<>();
+
     /**
      * handle Command (construct ProcessInstance from Command) , wrapped in transaction
      *
@@ -273,7 +277,10 @@ public class ProcessServiceImpl implements ProcessService {
     @Transactional
     public ProcessInstance handleCommand(String host,
                                          Command command) throws CronParseException, CodeGenerateException {
-        ProcessInstance processInstance = constructProcessInstance(command, host);
+
+        ProcessDefinition processDefinition =
+                this.findProcessDefinition(command.getProcessDefinitionCode(), command.getProcessDefinitionVersion());
+        ProcessInstance processInstance = constructProcessInstance(command, host,processDefinition);
         // cannot construct process instance, return null
         if (processInstance == null) {
             logger.error("scan command, command parameter is error: {}", command);
@@ -283,24 +290,70 @@ public class ProcessServiceImpl implements ProcessService {
         processInstance.setCommandType(command.getCommandType());
         processInstance.addHistoryCmd(command.getCommandType());
         // if the processDefinition is serial
-        ProcessDefinition processDefinition = this.findProcessDefinition(processInstance.getProcessDefinitionCode(),
-                processInstance.getProcessDefinitionVersion());
         if (processDefinition.getExecutionType().typeIsSerial()) {
-            saveSerialProcess(processInstance, processDefinition);
-            if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
-                setSubProcessParam(processInstance);
-                this.updateCommandById(Arrays.asList(command),CommandState.RUNNING.getCode());
-                return null;
+            if(this.runningProcessCache.containsKey(command.getProcessDefinitionCode()))
+            {
+                Integer processId=this.runningProcessCache.get(command.getProcessDefinitionCode());
+                ProcessInstance runningInstance=this.processInstanceMapper.queryDetailById(processId);
+                Preconditions.checkArgument(processId.intValue()==runningInstance.getId().intValue(),"cache process is not the same with the running process");
+                if(runningInstance.getState().isFinished())
+                {
+                    logger.warn("serial process {} is finish,instanceId:{}",command.getProcessDefinitionCode(),processId);
+                    this.runningProcessCache.remove(command.getProcessDefinitionCode());
+                    saveSerialProcess(processInstance, processDefinition);
+                    if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
+                        setSubProcessParam(processInstance);
+                        return null;
+                    }
+
+
+                    ProcessInstance pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
+                    logger.warn("create next serial process {},instanceId:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
+                    this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
+                    this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
+                    return pi;
+                }else {
+                    logger.info("serial process {} is running,instanceId:{}",command.getProcessDefinitionCode(),processId);
+                    return null;
+                }
+            }else {
+                ProcessInstance pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
+                if(pi!=null)
+                {
+                    if(command.getCommandType()==CommandType.SCHEDULER)
+                    {
+                        logger.warn("serial process must recover frist,recover instanceId:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
+                        return null;
+                    }
+
+                    this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
+                    this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
+                    logger.warn("serial process {} recover,instanceId:{}",command.getProcessDefinitionCode(),pi.getId());
+                    return pi;
+                }else {
+                    saveSerialProcess(processInstance, processDefinition);
+                    pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
+                    if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
+                        setSubProcessParam(processInstance);
+                        return null;
+                    }
+                    logger.warn("create new serial process {},time:{}",command.getProcessDefinitionCode(),pi.getScheduleTime());
+                    this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
+                    this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
+                    return pi;
+                }
+
             }
         } else {
             processInstanceDao.upsertProcessInstance(processInstance);
         }
         setSubProcessParam(processInstance);
-        this.updateCommandById(Arrays.asList(command), CommandState.RUNNING.getCode());
+        this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
         return processInstance;
     }
 
     protected void saveSerialProcess(ProcessInstance processInstance, ProcessDefinition processDefinition) {
+
         processInstance.setStateWithDesc(WorkflowExecutionStatus.SERIAL_WAIT, "wait by serial_wait strategy");
         processInstanceDao.upsertProcessInstance(processInstance);
         // serial wait
@@ -342,7 +395,7 @@ public class ProcessServiceImpl implements ProcessService {
             for (ProcessInstance info : runningProcessInstances) {
                 info.setCommandType(CommandType.STOP);
                 info.addHistoryCmd(CommandType.STOP);
-                info.setStateWithDesc(WorkflowExecutionStatus.READY_STOP, "ready stop by serial_priority strategy");
+                info.setStateWithDesc(READY_STOP, "ready stop by serial_priority strategy");
                 int update = processInstanceDao.updateProcessInstance(info);
                 // determine whether the process is normal
                 if (update > 0) {
@@ -374,7 +427,7 @@ public class ProcessServiceImpl implements ProcessService {
     public void moveToErrorCommand(Command command, String message) {
         ErrorCommand errorCommand = new ErrorCommand(command, message);
         this.errorCommandMapper.insert(errorCommand);
-        this.commandMapper.updateCommandState(Arrays.asList(command),CommandState.ERROR.getCode());
+        this.commandMapper.updateCommandState(command.getId(),CommandState.ERROR.getCode());
     }
 
     /**
@@ -414,8 +467,14 @@ public class ProcessServiceImpl implements ProcessService {
             command.setCommandParam(JSONUtils.toJsonString(commandParams));
         }
         command.setId(null);
+
         result = commandMapper.insert(command);
         return result;
+    }
+
+    @Override
+    public List<Command> queryCommands(long processDefinitionCode,Date scheduleTime) {
+        return this.commandMapper.queryCommands(processDefinitionCode,scheduleTime);
     }
 
     /**
@@ -572,8 +631,8 @@ public class ProcessServiceImpl implements ProcessService {
     }
 
     @Override
-    public int updateCommandById(List<Command> commands,int cstate) {
-        return this.commandMapper.updateCommandState(commands,cstate);
+    public int updateCommandById(int commandId,int cstate) {
+        return this.commandMapper.updateCommandState(commandId,cstate);
     }
 
     /**
@@ -921,19 +980,15 @@ public class ProcessServiceImpl implements ProcessService {
      * @return process instance
      */
     protected @Nullable ProcessInstance constructProcessInstance(Command command,
-                                                                 String host) throws CronParseException, CodeGenerateException {
+                                                                 String host,ProcessDefinition processDefinition) throws CronParseException, CodeGenerateException {
         ProcessInstance processInstance;
-        ProcessDefinition processDefinition;
         CommandType commandType = command.getCommandType();
-
-
-
-        processDefinition =
-                this.findProcessDefinition(command.getProcessDefinitionCode(), command.getProcessDefinitionVersion());
         if (processDefinition == null) {
             logger.error("cannot find the work process define! define code : {}", command.getProcessDefinitionCode());
             throw new IllegalArgumentException("Cannot find the process definition for this workflowInstance");
         }
+
+
         Map<String, String> cmdParam = JSONUtils.toMap(command.getCommandParam());
         int processInstanceId = command.getProcessInstanceId();
         if (processInstanceId == 0) {
@@ -992,7 +1047,6 @@ public class ProcessServiceImpl implements ProcessService {
                 break;
             case START_FAILURE_TASK_PROCESS:
                 // find failed tasks and init these tasks
-                logger.warn("processInstance:"+processInstance);
                 List<Integer> failedList =
                         this.findTaskIdByInstanceState(processInstance.getId(), TaskExecutionStatus.FAILURE);
                 List<Integer> toleranceList = this.findTaskIdByInstanceState(processInstance.getId(),
@@ -1585,14 +1639,14 @@ public class ProcessServiceImpl implements ProcessService {
     @Override
     public TaskInstance submitTaskInstanceToDB(TaskInstance taskInstance, ProcessInstance processInstance) {
         WorkflowExecutionStatus processInstanceState = processInstance.getState();
-        if (processInstanceState.isFinished() || processInstanceState == WorkflowExecutionStatus.READY_STOP) {
+        if (processInstanceState.isFinished() || processInstanceState == READY_STOP) {
             logger.warn("processInstance: {} state was: {}, skip submit this task, taskCode: {}",
                     processInstance.getId(),
                     processInstanceState,
                     taskInstance.getTaskCode());
             return null;
         }
-        if (processInstanceState == WorkflowExecutionStatus.READY_PAUSE) {
+        if (processInstanceState == READY_PAUSE) {
             taskInstance.setState(TaskExecutionStatus.PAUSE);
         }
         taskInstance.setExecutorId(processInstance.getExecutorId());
@@ -1636,9 +1690,9 @@ public class ProcessServiceImpl implements ProcessService {
         }
         // return pasue /stop if process instance state is ready pause / stop
         // or return submit success
-        if (processInstance.getState() == WorkflowExecutionStatus.READY_PAUSE) {
+        if (processInstance.getState() == READY_PAUSE) {
             state = TaskExecutionStatus.PAUSE;
-        } else if (processInstance.getState() == WorkflowExecutionStatus.READY_STOP
+        } else if (processInstance.getState() == READY_STOP
                 || !checkProcessStrategy(taskInstance, processInstance)) {
             state = TaskExecutionStatus.KILL;
         } else {
@@ -2081,22 +2135,18 @@ public class ProcessServiceImpl implements ProcessService {
     @Override
     @Transactional
     public void processNeedFailoverProcessInstances(ProcessInstance processInstance) {
-        // 1 update processInstance host is null
-        processInstance.setHost(Constants.NULL);
-        processInstanceMapper.updateById(processInstance);
-
-        ProcessDefinition processDefinition = findProcessDefinition(processInstance.getProcessDefinitionCode(),
-                processInstance.getProcessDefinitionVersion());
-
         // 2 insert into recover command
         Command cmd = new Command();
-        cmd.setProcessDefinitionCode(processDefinition.getCode());
-        cmd.setProcessDefinitionVersion(processDefinition.getVersion());
+        cmd.setScheduleTime(processInstance.getScheduleTime());
+        cmd.setProcessDefinitionCode(processInstance.getProcessDefinitionCode());
+        cmd.setProcessDefinitionVersion(processInstance.getProcessDefinitionVersion());
         cmd.setProcessInstanceId(processInstance.getId());
-        cmd.setCommandParam(
-                String.format("{\"%s\":%d}", CMD_PARAM_RECOVER_PROCESS_ID_STRING, processInstance.getId()));
         cmd.setExecutorId(processInstance.getExecutorId());
         cmd.setCommandType(CommandType.RECOVER_TOLERANCE_FAULT_PROCESS);
+        cmd.setWarningType(processInstance.getWarningType());
+        cmd.setWarningGroupId(processInstance.getWarningGroupId());
+        cmd.setWorkerGroup(processInstance.getWorkerGroup());
+        cmd.setEnvironmentCode(processInstance.getEnvironmentCode());
         cmd.setProcessInstancePriority(processInstance.getProcessInstancePriority());
         createCommand(cmd);
     }
@@ -2231,6 +2281,21 @@ public class ProcessServiceImpl implements ProcessService {
                 startTime,
                 endTime,
                 WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
+    }
+
+    @Override
+    public ProcessInstance queryRunningProcess(Long definitionCode) {
+
+        int[] NEED_FAILOVER_STATES = new int[]{
+                READY_STOP.getCode(),
+                STOP.getCode(),
+                FAILURE.getCode(),
+                READY_PAUSE.getCode(),
+                PAUSE.getCode(),
+                SUCCESS.getCode()
+                };
+        return processInstanceMapper.queryRunningProcess(definitionCode,
+                NEED_FAILOVER_STATES);
     }
 
     /**

@@ -223,6 +223,19 @@
         </if>
         order by start_time desc limit 1
     </select>
+
+    <select id="queryRunningProcess" resultType="org.apache.dolphinscheduler.dao.entity.ProcessInstance">
+        select
+        <include refid="baseSql"/>
+        from t_ds_process_instance
+        where process_definition_code=#{processDefinitionCode}
+        and state not in
+        <foreach collection="states" item="i" index="index" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        order by schedule_time desc limit 1
+    </select>
+
     <select id="queryLastManualProcess" resultType="org.apache.dolphinscheduler.dao.entity.ProcessInstance">
         select
         <include refid="baseSql"/>

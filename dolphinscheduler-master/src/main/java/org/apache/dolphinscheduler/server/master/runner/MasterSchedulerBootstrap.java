@@ -78,11 +78,6 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
     @Autowired
     private NettyExecutorManager nettyExecutorManager;
 
-    /**
-     * master prepare exec service
-     */
-    private ThreadPoolExecutor masterPrepareExecService;
-
     @Autowired
     private ProcessInstanceExecCacheManager processInstanceExecCacheManager;
 
@@ -112,8 +107,6 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
      * constructor of MasterSchedulerService
      */
     public void init() {
-        this.masterPrepareExecService = (ThreadPoolExecutor) ThreadUtils
-                .newDaemonFixedThreadExecutor("MasterPreExecThread", masterConfig.getPreExecThreads());
         this.masterAddress = NetUtils.getAddr(masterConfig.getListenPort());
     }
 
@@ -206,11 +199,7 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
         logger.info("Master schedule bootstrap transforming command to ProcessInstance, commandSize: {}",
                 commands.size());
         List<ProcessInstance> processInstances = Collections.synchronizedList(new ArrayList<>(commands.size()));
-
-        CountDownLatch latch = new CountDownLatch(commands.size());
         for (final Command command : commands) {
-
-            masterPrepareExecService.execute(() -> {
                 try {
                     // Note: this check is not safe, the slot may change after command transform.
                     // We use the database transaction in `handleCommand` so that we can guarantee the command will
@@ -220,7 +209,7 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
                     if (slotCheckState.equals(SlotCheckState.CHANGE) || slotCheckState.equals(SlotCheckState.INJECT)) {
                         logger.warn("Master handle command {} skip, slot check state: {}", command.getId(),
                                 slotCheckState);
-                        return;
+                        continue;
                     }
 
                     ProcessInstance processInstance = processService.handleCommand(masterAddress, command);
@@ -232,17 +221,13 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
                 } catch (Exception e) {
                     logger.error("Master handle command {} error ", command.getId(), e);
                     processService.moveToErrorCommand(command, e.toString());
-                } finally {
-                    latch.countDown();
                 }
-            });
         }
 
-        logger.warn(
+        logger.info(
                 "Master schedule bootstrap transformed command to ProcessInstance, commandSize: {}, processInstanceSize: {}",
                 commands.size(), processInstances.size());
         // make sure to finish handling command each time before next scan
-        latch.await();
         ProcessInstanceMetrics
                 .recordProcessInstanceGenerateTime(System.currentTimeMillis() - commandTransformStartTime);
         return processInstances;
@@ -264,8 +249,7 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
                         processService.findCommandPageBySlot(pageSize, pageNumber, masterCount, thisMasterSlot);
 
                 if (CollectionUtils.isNotEmpty(result)) {
-                    this.processService.updateCommandById(result,CommandState.RUNNING.getCode());
-                    logger.warn(
+                    logger.info(
                             "Master schedule bootstrap loop command success, command size: {}, current slot: {}, total slot size: {}",
                             result.size(), thisMasterSlot, masterCount);
                 }

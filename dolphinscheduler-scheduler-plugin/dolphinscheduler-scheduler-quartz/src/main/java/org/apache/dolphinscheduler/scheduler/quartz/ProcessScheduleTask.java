@@ -28,6 +28,7 @@ import org.apache.dolphinscheduler.scheduler.quartz.utils.QuartzTaskUtils;
 import org.apache.dolphinscheduler.service.process.ProcessService;
 
 import java.util.Date;
+import java.util.List;
 
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -79,11 +80,13 @@ public class ProcessScheduleTask extends QuartzJobBean {
             return;
         }
 
+
+        List<Command> commandList=
+                this.processService.queryCommands(schedule.getProcessDefinitionCode(),scheduledFireTime);
         Command command = new Command();
         command.setCommandType(CommandType.SCHEDULER);
         command.setExecutorId(schedule.getUserId());
         command.setManualRun(false);
-
         command.setScheduleId(scheduleId);
         command.setFailureStrategy(schedule.getFailureStrategy());
         command.setProcessDefinitionCode(schedule.getProcessDefinitionCode());
@@ -97,7 +100,20 @@ public class ProcessScheduleTask extends QuartzJobBean {
         command.setProcessInstancePriority(schedule.getProcessInstancePriority());
         command.setProcessDefinitionVersion(processDefinition.getVersion());
 
-        processService.createCommand(command);
+        boolean find=false;
+        for (int j = 0; j < commandList.size(); j++) {
+            Command tmp=commandList.get(j);
+            if(tmp.getScheduleTime().compareTo(scheduledFireTime)==0)
+            {
+                find=true;
+                break;
+            }
+        }
+        if(!find)
+        {
+            processService.createCommand(command);
+        }
+
 
         Date now=new Date();
 
@@ -119,8 +135,22 @@ public class ProcessScheduleTask extends QuartzJobBean {
             command.setWarningType(schedule.getWarningType());
             command.setProcessInstancePriority(schedule.getProcessInstancePriority());
             command.setProcessDefinitionVersion(processDefinition.getVersion());
-            processService.createCommand(command);
 
+            find=false;
+            for (int j = 0; j < commandList.size(); j++) {
+                Command tmp=commandList.get(j);
+                if(tmp.getScheduleTime().compareTo(scheduledFireTime)==0)
+                {
+                    find=true;
+                    break;
+                }
+            }
+            if(find)
+            {
+                continue;
+            }
+
+            processService.createCommand(command);
             //不会预先创建超过12小时的实例
             if(scheduledFireTime.getTime()-now.getTime()>12*60*60*1000)
             {

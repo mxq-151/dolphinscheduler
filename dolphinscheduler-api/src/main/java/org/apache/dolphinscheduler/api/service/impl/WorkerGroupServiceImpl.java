@@ -258,7 +258,15 @@ public class WorkerGroupServiceImpl extends BaseServiceImpl implements WorkerGro
 
         List<String> availableWorkerGroupList=new ArrayList<>();
 
-        List<Environment> envs=this.environmentMapper.queryAuthedEnv(loginUser.getId());
+        List<Environment> envs=null;
+
+        if(loginUser.getUserType()==UserType.ADMIN_USER)
+        {
+            envs=this.environmentMapper.queryAllEnvironmentList();
+        }else {
+            envs=this.environmentMapper.queryAuthedEnv(loginUser.getId());
+        }
+
         for (int i = 0; i < envs.size(); i++) {
             List<EnvironmentWorkerGroupRelation> relations=this.environmentWorkerGroupRelationMapper.queryByEnvironmentCode(envs.get(i).getCode());
             List<String> tmp=relations.stream().map(x->{return x.getWorkerGroup();}).collect(Collectors.toList());

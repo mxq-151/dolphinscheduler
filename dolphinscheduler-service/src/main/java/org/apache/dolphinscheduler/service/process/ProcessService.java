@@ -72,6 +72,8 @@ public interface ProcessService {
 
     int createCommand(Command command);
 
+    List<Command> queryCommands(long processDefinitionCode,Date scheduleTime);
+
     List<Command> findCommandPage(int pageSize, int pageNumber);
 
     List<Command> findCommandPageBySlot(int pageSize, int pageNumber, int masterCount, int thisMasterSlot);
@@ -92,7 +94,7 @@ public interface ProcessService {
 
     int deleteWorkProcessInstanceById(int processInstanceId);
 
-    int updateCommandById(List<Command> commands,int cstate);
+    int updateCommandById(int commandId,int cstate);
 
 
     int deleteAllSubWorkProcessByParentId(int processInstanceId);
@@ -198,6 +200,8 @@ public interface ProcessService {
     ProcessInstance findLastManualProcessInterval(Long definitionCode, DateInterval dateInterval);
 
     ProcessInstance findLastRunningProcess(Long definitionCode, Date startTime, Date endTime);
+
+    ProcessInstance queryRunningProcess(Long definitionCode);
 
     String queryUserQueueByProcessInstance(ProcessInstance processInstance);
 

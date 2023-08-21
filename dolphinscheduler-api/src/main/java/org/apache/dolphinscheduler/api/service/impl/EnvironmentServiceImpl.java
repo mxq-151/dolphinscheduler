@@ -157,8 +157,13 @@ public class EnvironmentServiceImpl extends BaseServiceImpl implements Environme
     @Override
     public Map<String, Object> authedEnv(User loginUser, Integer userId) {
         Map<String, Object> result = new HashMap<>();
-
-        List<Environment> authedDatasourceList = this.environmentMapper.queryAuthedEnv(userId);
+        List<Environment> authedDatasourceList;
+        if(loginUser.getUserType()==UserType.ADMIN_USER)
+        {
+            authedDatasourceList=this.environmentMapper.queryAllEnvironmentList();
+        }else {
+            authedDatasourceList = this.environmentMapper.queryAuthedEnv(userId);
+        }
         result.put(Constants.DATA_LIST, authedDatasourceList);
         putMsg(result, Status.SUCCESS);
         return result;

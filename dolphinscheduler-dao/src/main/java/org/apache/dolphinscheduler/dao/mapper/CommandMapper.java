@@ -48,7 +48,7 @@ public interface CommandMapper extends BaseMapper<Command> {
 
     void deleteCommandByScheduleId(@Param("scheduleId")int scheduleId);
 
-    int updateCommandState(@Param("commands")List<Command> commands,@Param("cstate")int cstate);
+    int updateCommandState(@Param("commandId")int commandId,@Param("cstate")int cstate);
 
     List<Command> queryCommandByCommandType();
 
@@ -61,6 +61,9 @@ public interface CommandMapper extends BaseMapper<Command> {
      * @return
      */
     List<Command> queryCommandPage(@Param("limit") int limit, @Param("offset") int offset);
+
+
+    List<Command> queryCommands(@Param("processDefinitionCode")long processDefinitionCode,@Param("scheduleTime") Date scheduleTime);
 
 
     /**
