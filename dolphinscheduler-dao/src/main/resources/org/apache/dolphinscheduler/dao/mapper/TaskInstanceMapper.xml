@@ -173,15 +173,44 @@
         </if>
     </select>
     <select id="queryTaskInstanceListPaging" resultType="org.apache.dolphinscheduler.dao.entity.TaskInstance">
-        select
-        <include refid="baseSqlV2">
-            <property name="alias" value="instance"/>
-        </include>
-        ,
-        process.name as process_instance_name
-        from t_ds_task_instance instance
-        left join t_ds_task_definition_log define on define.code=instance.task_code and define.version=instance.task_definition_version
-        left join t_ds_process_instance process on process.id=instance.process_instance_id
+        SELECT
+        instance.id,
+        instance.name,
+        instance.task_type,
+        instance.task_code,
+        instance.task_definition_version,
+        instance.process_instance_id,
+        instance.state,
+        instance.submit_time,
+        instance.start_time,
+        instance.end_time,
+        instance.host,
+        instance.execute_path,
+        instance.log_path,
+        instance.alert_flag,
+        instance.retry_times,
+        instance.pid,
+        instance.app_link,
+        instance.flag,
+        instance.retry_interval,
+        instance.max_retry_times,
+        instance.task_instance_priority,
+        instance.worker_group,
+        instance.environment_code,
+        instance.executor_id,
+        instance.first_submit_time,
+        instance.delay_time,
+        instance.task_params,
+        instance.var_pool,
+        instance.dry_run,
+        instance.task_group_id,
+        instance.task_execute_type,
+        process.name AS process_instance_name
+        FROM
+        t_ds_task_definition_log define
+        LEFT JOIN t_ds_task_instance instance ON define.code = instance.task_code
+        AND define.version = instance.task_definition_version
+        LEFT JOIN t_ds_process_instance process ON process.id = instance.process_instance_id
         where define.project_code = #{projectCode}
         <if test="startTime != null">
             and instance.start_time <![CDATA[ >=]]> #{startTime}
@@ -225,8 +254,8 @@
         </include>
         ,
         process.name as process_definition_name
-        from t_ds_task_instance instance
-        left join t_ds_task_definition_log define on define.code=instance.task_code and define.version=instance.task_definition_version
+        from t_ds_task_definition_log define
+        left join t_ds_task_instance instance on define.code=instance.task_code and define.version=instance.task_definition_version
         left join t_ds_process_task_relation relation on relation.post_task_code = define.code and relation.post_task_version = define.version
         left join t_ds_process_definition process on process.code=relation.process_definition_code and process.version = relation.process_definition_version
         where define.project_code = #{projectCode}

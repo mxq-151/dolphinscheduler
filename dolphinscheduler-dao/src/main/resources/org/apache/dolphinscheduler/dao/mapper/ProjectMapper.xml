@@ -81,32 +81,43 @@
         limit 1
     </select>
     <select id="queryProjectListPaging" resultType="org.apache.dolphinscheduler.dao.entity.Project">
-        select
-        <include refid="baseSqlV2">
-            <property name="alias" value="p"/>
-        </include>
-        ,
-        u.user_name as user_name,
-        (SELECT COUNT(*) FROM t_ds_process_definition AS def WHERE def.project_code = p.code) AS def_count,
-        (SELECT COUNT(*) FROM t_ds_process_definition_log def, t_ds_process_instance inst WHERE def.code =
-        inst.process_definition_code and def.version = inst.process_definition_version AND def.project_code = p.code
-        AND inst.state=1 ) as inst_running_count
-        from t_ds_project p
-        left join t_ds_user u on u.id=p.user_id
-        where 1=1
+
+        SELECT p.id,
+        p.name,
+        p.code,
+        p.description,
+        p.user_id,
+        p.flag,
+        p.create_time,
+        p.update_time,
+        u.user_name AS user_name,
+
+        (SELECT COUNT(1)
+        FROM t_ds_process_definition AS def
+        WHERE def.project_code = p.code) AS def_count, sum(ifnull(inst.state,0)) AS inst_running_count
+        FROM t_ds_project p
+        LEFT JOIN t_ds_process_definition def
+        ON def.project_code = p.code
+        LEFT JOIN t_ds_process_instance inst
+        ON def.code = inst.process_definition_code
+        AND inst.state = 1
+        LEFT JOIN t_ds_user u
+        ON u.id = p.user_id
+        WHERE 1=1
         <if test="projectsIds != null and projectsIds.size() > 0">
             and p.id  in
             <foreach item="id" index="index" collection="projectsIds" open="(" separator="," close=")">
                 #{id}
             </foreach>
         </if>
+
         <if test="searchName!=null and searchName != ''">
             AND (p.name LIKE concat('%', #{searchName}, '%')
             OR p.description LIKE concat('%', #{searchName}, '%')
             )
         </if>
-        group by p.id,u.user_name
-        order by p.id desc
+        GROUP BY  p.id, p.name, p.code, p.description, p.user_id, p.flag, p.create_time, p.update_time, u.user_name
+        ORDER BY  p.id desc
     </select>
     <select id="queryAuthedProjectListByUserId" resultType="org.apache.dolphinscheduler.dao.entity.Project">
         select
