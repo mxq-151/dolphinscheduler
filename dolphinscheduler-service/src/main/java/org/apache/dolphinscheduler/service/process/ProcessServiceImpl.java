@@ -493,7 +493,15 @@ public class ProcessServiceImpl implements ProcessService {
         if (masterCount <= 0) {
             return Lists.newArrayList();
         }
-        return commandMapper.queryCommandPageBySlot(pageSize, pageNumber * pageSize, masterCount, thisMasterSlot);
+        pageSize=2;
+        List<Command> result=new ArrayList<>(10);
+        List<Command> commands=commandMapper.queryProcess(masterCount,thisMasterSlot);
+        for (int i = 0; i < commands.size(); i++) {
+            Command command=commands.get(i);
+            List<Command> tmp=commandMapper.queryCommandPageBySlot(pageSize, pageNumber * pageSize,command.getProcessDefinitionCode());
+            result.addAll(tmp);
+        }
+        return result;
     }
 
     /**

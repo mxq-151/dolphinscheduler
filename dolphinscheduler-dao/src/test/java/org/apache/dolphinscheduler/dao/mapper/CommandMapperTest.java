@@ -183,7 +183,7 @@ public class CommandMapperTest extends BaseDaoTest {
         Command command = createCommand();
         Integer id = command.getId();
         boolean hit = id % masterCount == thisMasterSlot;
-        List<Command> commandList = commandMapper.queryCommandPageBySlot(1, 0, masterCount, thisMasterSlot);
+        List<Command> commandList = commandMapper.queryCommandPageBySlot(1, 0,0);
         if (hit) {
             assertEquals(id, commandList.get(0).getId());
         } else {
