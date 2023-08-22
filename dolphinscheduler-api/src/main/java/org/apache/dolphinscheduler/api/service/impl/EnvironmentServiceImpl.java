@@ -158,12 +158,7 @@ public class EnvironmentServiceImpl extends BaseServiceImpl implements Environme
     public Map<String, Object> authedEnv(User loginUser, Integer userId) {
         Map<String, Object> result = new HashMap<>();
         List<Environment> authedDatasourceList;
-        if(loginUser.getUserType()==UserType.ADMIN_USER)
-        {
-            authedDatasourceList=this.environmentMapper.queryAllEnvironmentList();
-        }else {
-            authedDatasourceList = this.environmentMapper.queryAuthedEnv(userId);
-        }
+        authedDatasourceList = this.environmentMapper.queryAuthedEnv(userId);
         result.put(Constants.DATA_LIST, authedDatasourceList);
         putMsg(result, Status.SUCCESS);
         return result;
@@ -186,7 +181,7 @@ public class EnvironmentServiceImpl extends BaseServiceImpl implements Environme
             envList = environmentMapper.queryEnvExceptUserId(userId);
         } else {
             // non-admins users get their own data sources
-            envList = environmentMapper.selectByMap(Collections.singletonMap("operator", loginUser.getId()));
+            envList = environmentMapper.selectByMap(Collections.singletonMap("operator", userId));
         }
         List<Environment> resultList = new ArrayList<>();
         Set<Environment> envSet;
@@ -267,7 +262,13 @@ public class EnvironmentServiceImpl extends BaseServiceImpl implements Environme
     @Override
     public Map<String, Object> queryAllEnvironmentList(User loginUser) {
         Map<String, Object> result = new HashMap<>();
-        List<Environment> environmentList = this.environmentMapper.queryAuthedEnv(loginUser.getId());
+        List<Environment> environmentList;
+        if(loginUser.getUserType()==UserType.ADMIN_USER)
+        {
+            environmentList=this.environmentMapper.queryAllEnvironmentList();
+        }else {
+            environmentList = this.environmentMapper.queryAuthedEnv(loginUser.getId());
+        }
         if (CollectionUtils.isNotEmpty(environmentList)) {
             Map<Long, List<String>> relationMap = relationMapper.selectList(null).stream()
                     .collect(Collectors.groupingBy(EnvironmentWorkerGroupRelation::getEnvironmentCode,

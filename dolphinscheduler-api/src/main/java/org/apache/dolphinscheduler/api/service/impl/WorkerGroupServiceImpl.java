@@ -38,15 +38,7 @@ import org.apache.dolphinscheduler.service.registry.RegistryClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -256,7 +248,7 @@ public class WorkerGroupServiceImpl extends BaseServiceImpl implements WorkerGro
     public Map<String, Object> queryAuthGroup(User loginUser) {
         Map<String, Object> result = new HashMap<>();
 
-        List<String> availableWorkerGroupList=new ArrayList<>();
+        HashSet<String> availableWorkerGroupList=new HashSet<>();
 
         List<Environment> envs=null;
 
@@ -273,7 +265,7 @@ public class WorkerGroupServiceImpl extends BaseServiceImpl implements WorkerGro
             availableWorkerGroupList.addAll(tmp);
         }
 
-        result.put(Constants.DATA_LIST, availableWorkerGroupList);
+        result.put(Constants.DATA_LIST, new ArrayList<>(availableWorkerGroupList));
         putMsg(result, Status.SUCCESS);
         return result;
     }
