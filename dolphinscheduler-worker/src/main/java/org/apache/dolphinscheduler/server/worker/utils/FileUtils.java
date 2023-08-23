@@ -43,6 +43,7 @@ public class FileUtils {
         try {
             FileWriter writer = new FileWriter(filename);
             writer.write(content);
+            writer.flush();
             writer.close();
         } catch (IOException e) {
             logger.error("write content to file error: {}", e.getMessage());
@@ -63,7 +64,6 @@ public class FileUtils {
     }
 
     public static void createSymbolicLink(Path sourcePath, Path destinationPath) throws IOException {
-
 
         // 删除目标路径上的文件（如果存在）
         if (Files.exists(destinationPath)) {

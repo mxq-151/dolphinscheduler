@@ -390,7 +390,7 @@ public class S3Utils implements Closeable, StorageOperate {
      */
     @Override
     public Date getLastModifiedTime(String objectKey) {
-        return s3Client.getObject(BUCKET_NAME, objectKey).getObjectMetadata().getLastModified();
+        return s3Client.getObjectMetadata(BUCKET_NAME, objectKey).getLastModified();
     }
 
 
