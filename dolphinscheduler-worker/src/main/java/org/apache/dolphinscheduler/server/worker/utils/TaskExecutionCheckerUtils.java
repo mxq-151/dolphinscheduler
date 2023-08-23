@@ -17,7 +17,6 @@
 
 package org.apache.dolphinscheduler.server.worker.utils;
 
-import com.amazonaws.util.Md5Utils;
 import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.exception.StorageOperateNoConfiguredException;
 import org.apache.dolphinscheduler.common.utils.OSUtils;

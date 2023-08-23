@@ -262,11 +262,11 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
 
     private SlotCheckState slotCheck(Command command) {
         int slot = serverNodeManager.getSlot();
-        int masterSize = serverNodeManager.getMasterSize();
+        long masterSize =new Integer(serverNodeManager.getMasterSize()).longValue();
         SlotCheckState state;
         if (masterSize <= 0) {
             state = SlotCheckState.CHANGE;
-        } else if (command.getId() % masterSize == slot) {
+        } else if (command.getProcessDefinitionCode() % masterSize == slot) {
             state = SlotCheckState.PASS;
         } else {
             state = SlotCheckState.INJECT;
