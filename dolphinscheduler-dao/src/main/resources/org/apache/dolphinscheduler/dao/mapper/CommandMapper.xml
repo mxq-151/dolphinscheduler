@@ -67,10 +67,9 @@
     </select>
 
     <select id="queryProcess" resultType="org.apache.dolphinscheduler.dao.entity.Command">
-        select distinct process_definition_code,process_instance_priority
+        select distinct process_definition_code
         from t_ds_command
         where  (now() >= schedule_time) and cstate=0 and process_definition_code % #{masterCount} = #{thisMasterSlot}
-        order by process_instance_priority asc
     </select>
 
     <update id="updateCommandState">
