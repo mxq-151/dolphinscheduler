@@ -94,6 +94,7 @@ export function useModal(
     if( state.startForm.workerGroup=='default' || state.startForm.workerGroup.length<=0)
     {
       message.error("worker分组为空或default,请选择worker分组");
+      state.saving = false
       return;
     }
 
@@ -156,6 +157,7 @@ export function useModal(
       if(data?.workerGroup=='default' || data?.workerGroup.length<=0)
       {
         message.error("worker分组为空或default,请选择worker分组");
+        state.saving = false
         return;
       }
 
@@ -183,6 +185,7 @@ export function useModal(
       if(data?.workerGroup=='default' || data?.workerGroup.length<=0)
       {
         message.error("worker分组为空或default,请选择worker分组");
+        state.saving = false
         return;
       }
 

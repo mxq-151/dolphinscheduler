@@ -115,6 +115,7 @@ export const useStart = (
     if( variables.startFormRef.startForm.workerGroup=='default' || variables.startFormRef.startForm.workerGroup.length<=0)
     {
       message.error("worker分组为空或default,请选择worker分组");
+      variables.saving = false
       return;
     }
 

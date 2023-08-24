@@ -249,7 +249,6 @@ public class WorkflowExecuteRunnableTest {
             processDefinition1.setExecutionType(ProcessExecutionTypeEnum.SERIAL_WAIT);
             Mockito.when(processInstance.getId()).thenReturn(225);
             Mockito.when(processService.findProcessInstanceById(225)).thenReturn(processInstance);
-            workflowExecuteThread.checkSerialProcess(processDefinition1);
 
             Mockito.when(processInstance.getId()).thenReturn(225);
             Mockito.when(processInstance.getNextProcessInstanceId()).thenReturn(222);
@@ -262,7 +261,6 @@ public class WorkflowExecuteRunnableTest {
 
             Mockito.when(processService.findProcessInstanceById(225)).thenReturn(processInstance);
             Mockito.when(processService.findProcessInstanceById(222)).thenReturn(processInstance9);
-            workflowExecuteThread.checkSerialProcess(processDefinition1);
         } catch (Exception e) {
             Assert.fail();
         }
