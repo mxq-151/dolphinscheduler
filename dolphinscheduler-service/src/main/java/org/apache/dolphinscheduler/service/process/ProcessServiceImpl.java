@@ -289,6 +289,14 @@ public class ProcessServiceImpl implements ProcessService {
         }
         processInstance.setCommandType(command.getCommandType());
         processInstance.addHistoryCmd(command.getCommandType());
+
+        if(command.getCommandType()==CommandType.COMPLEMENT_DATA_SERIAL_WAIT)
+        {
+            processDefinition.setExecutionType(ProcessExecutionTypeEnum.SERIAL_WAIT);
+        }else if(command.getCommandType()==CommandType.COMPLEMENT_DATA){
+            processDefinition.setExecutionType(ProcessExecutionTypeEnum.PARALLEL);
+        }
+
         // if the processDefinition is serial
         if (processDefinition.getExecutionType().typeIsSerial()) {
             if(this.runningProcessCache.containsKey(command.getProcessDefinitionCode()))
@@ -298,7 +306,7 @@ public class ProcessServiceImpl implements ProcessService {
                 Preconditions.checkArgument(processId.intValue()==runningInstance.getId().intValue(),"cache process is not the same with the running process");
                 if(runningInstance.getState().isFinished())
                 {
-                    logger.warn("serial process {} is finish,instanceId:{}",command.getProcessDefinitionCode(),processId);
+                    logger.info("serial process {} is finish,instanceId:{}",command.getProcessDefinitionCode(),processId);
                     this.runningProcessCache.remove(command.getProcessDefinitionCode());
                     saveSerialProcess(processInstance, processDefinition);
                     if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
@@ -308,7 +316,7 @@ public class ProcessServiceImpl implements ProcessService {
 
 
                     ProcessInstance pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
-                    logger.warn("create next serial process {},instanceId:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
+                    logger.info("create next serial process {},instanceId:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
                     this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
                     this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
                     return pi;
@@ -328,7 +336,7 @@ public class ProcessServiceImpl implements ProcessService {
 
                     this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
                     this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
-                    logger.warn("serial process {} recover,instanceId:{}",command.getProcessDefinitionCode(),pi.getId());
+                    logger.info("serial process {} recover,instanceId:{}",command.getProcessDefinitionCode(),pi.getId());
                     return pi;
                 }else {
                     saveSerialProcess(processInstance, processDefinition);
@@ -337,7 +345,7 @@ public class ProcessServiceImpl implements ProcessService {
                         setSubProcessParam(processInstance);
                         return null;
                     }
-                    logger.warn("create new serial process {},time:{}",command.getProcessDefinitionCode(),pi.getScheduleTime());
+                    logger.info("create new serial process {},time:{}",command.getProcessDefinitionCode(),pi.getScheduleTime());
                     this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
                     this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
                     return pi;
@@ -794,25 +802,6 @@ public class ProcessServiceImpl implements ProcessService {
      * @param cmdParam cmdParam map
      * @return date
      */
-    private Date getScheduleTime(Command command, Map<String, String> cmdParam) throws CronParseException {
-        Date scheduleTime = command.getScheduleTime();
-        if (scheduleTime == null && cmdParam != null && cmdParam.containsKey(CMD_PARAM_COMPLEMENT_DATA_START_DATE)) {
-
-            Date start = DateUtils.stringToDate(cmdParam.get(CMD_PARAM_COMPLEMENT_DATA_START_DATE));
-            Date end = DateUtils.stringToDate(cmdParam.get(CMD_PARAM_COMPLEMENT_DATA_END_DATE));
-            List<Schedule> schedules =
-                    queryReleaseSchedulerListByProcessDefinitionCode(command.getProcessDefinitionCode());
-            List<Date> complementDateList = CronUtils.getSelfFireDateList(start, end, schedules);
-
-            if (CollectionUtils.isNotEmpty(complementDateList)) {
-                scheduleTime = complementDateList.get(0);
-            } else {
-                logger.error("set scheduler time error: complement date list is empty, command: {}",
-                        command.toString());
-            }
-        }
-        return scheduleTime;
-    }
 
     /**
      * generate a new work process instance from command.
@@ -1123,7 +1112,6 @@ public class ProcessServiceImpl implements ProcessService {
                 processInstance.setRestartTime(processInstance.getStartTime());
                 processInstance.setEndTime(null);
                 processInstance.setRunTimes(runTime + 1);
-                initComplementDataParam(processDefinition, processInstance, cmdParam);
                 break;
             case SCHEDULER:
                 break;
@@ -1186,45 +1174,6 @@ public class ProcessServiceImpl implements ProcessService {
         }
     }
 
-    /**
-     * initialize complement data parameters
-     *
-     * @param processDefinition processDefinition
-     * @param processInstance   processInstance
-     * @param cmdParam          cmdParam
-     */
-    private void initComplementDataParam(ProcessDefinition processDefinition,
-                                         ProcessInstance processInstance,
-                                         Map<String, String> cmdParam) throws CronParseException {
-        if (!processInstance.isComplementData()) {
-            return;
-        }
-
-        Date start = DateUtils.stringToDate(cmdParam.get(CMD_PARAM_COMPLEMENT_DATA_START_DATE));
-        Date end = DateUtils.stringToDate(cmdParam.get(CMD_PARAM_COMPLEMENT_DATA_END_DATE));
-        List<Date> complementDate = Lists.newLinkedList();
-        if (start != null && end != null) {
-            List<Schedule> listSchedules =
-                    queryReleaseSchedulerListByProcessDefinitionCode(processInstance.getProcessDefinitionCode());
-            complementDate = CronUtils.getSelfFireDateList(start, end, listSchedules);
-        }
-        if (cmdParam.containsKey(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST)) {
-            complementDate = CronUtils.getSelfScheduleDateList(cmdParam);
-        }
-
-        if (CollectionUtils.isNotEmpty(complementDate) && Flag.NO == processInstance.getIsSubProcess()) {
-            processInstance.setScheduleTime(complementDate.get(0));
-        }
-
-        // time zone
-        String timezoneId = cmdParam.get(Constants.SCHEDULE_TIMEZONE);
-
-        String globalParams = curingGlobalParamsService.curingGlobalParams(processInstance.getId(),
-                processDefinition.getGlobalParamMap(),
-                processDefinition.getGlobalParamList(),
-                CommandType.COMPLEMENT_DATA, processInstance.getScheduleTime(), timezoneId);
-        processInstance.setGlobalParams(globalParams);
-    }
 
     /**
      * set sub work process parameters.

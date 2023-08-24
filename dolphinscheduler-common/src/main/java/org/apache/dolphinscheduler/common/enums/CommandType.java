@@ -53,6 +53,7 @@ public enum CommandType {
     STOP(9, "stop a process"),
     RECOVER_WAITING_THREAD(10, "recover waiting thread"),
     RECOVER_SERIAL_WAIT(11, "recover serial wait"),
+    COMPLEMENT_DATA_SERIAL_WAIT(12, "complement data serial wait")
     ;
 
     CommandType(int code, String descp) {

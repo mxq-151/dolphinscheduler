@@ -17,12 +17,16 @@
 
 package org.apache.dolphinscheduler.server.master.runner;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.dolphinscheduler.common.constants.CommandKeyConstants;
 import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.CommandState;
+import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.SlotCheckState;
 import org.apache.dolphinscheduler.common.lifecycle.ServerLifeCycleManager;
 import org.apache.dolphinscheduler.common.thread.BaseDaemonThread;
 import org.apache.dolphinscheduler.common.thread.ThreadUtils;
+import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.common.utils.NetUtils;
 import org.apache.dolphinscheduler.common.utils.OSUtils;
 import org.apache.dolphinscheduler.dao.entity.Command;
@@ -201,6 +205,23 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
         List<ProcessInstance> processInstances = Collections.synchronizedList(new ArrayList<>(commands.size()));
         for (final Command command : commands) {
                 try {
+                    if(command.getCommandType()== CommandType.COMPLEMENT_DATA)
+                    {
+                        String str=command.getCommandParam();
+                        Map<String,String> map=JSONUtils.toMap(str);
+                        String tmp=map.get(CommandKeyConstants.CMD_PARAM_COMPLEMENT_DATA_EXPECTED_PARAL_NUM);
+                        int limit =5;
+                        if (StringUtils.isNotBlank(tmp))
+                        {
+                            limit=Integer.valueOf(tmp);
+                        }
+                        int count=this.processInstanceExecCacheManager.processCount(command.getProcessDefinitionCode());
+                        if(count>=limit)
+                        {
+                            logger.warn("process:{} complement data instance num reach {},will ignore",command.getProcessDefinitionCode(),limit);
+                            continue;
+                        }
+                    }
                     // Note: this check is not safe, the slot may change after command transform.
                     // We use the database transaction in `handleCommand` so that we can guarantee the command will
                     // always be executed
@@ -215,7 +236,7 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
                     ProcessInstance processInstance = processService.handleCommand(masterAddress, command);
                     if (processInstance != null) {
                         processInstances.add(processInstance);
-                        logger.warn("Master handle command {} end, create process instance {}", command.getId(),
+                        logger.info("Master handle command {} end, create process instance {}", command.getId(),
                                 processInstance.getId());
                     }
                 } catch (Exception e) {

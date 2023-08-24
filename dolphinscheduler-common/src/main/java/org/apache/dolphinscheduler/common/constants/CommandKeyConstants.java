@@ -55,6 +55,8 @@ public class CommandKeyConstants {
      */
     public static final String CMD_PARAM_COMPLEMENT_DATA_END_DATE = "complementEndDate";
 
+    public static final String CMD_PARAM_COMPLEMENT_DATA_EXPECTED_PARAL_NUM = "expectedParallelismNumber";
+
     /**
      * complement data Schedule date
      */

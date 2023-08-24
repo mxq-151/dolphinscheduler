@@ -97,7 +97,6 @@ public class TaskExecutionContextBuilder {
         taskExecutionContext.setScheduleTime(processInstance.getScheduleTime());
         taskExecutionContext.setGlobalParams(processInstance.getGlobalParams());
         taskExecutionContext.setExecutorId(processInstance.getExecutorId());
-        taskExecutionContext.setCmdTypeIfComplement(processInstance.getCmdTypeIfComplement().getCode());
         taskExecutionContext.setTenantCode(processInstance.getTenantCode());
         taskExecutionContext.setQueue(processInstance.getQueue());
         return this;

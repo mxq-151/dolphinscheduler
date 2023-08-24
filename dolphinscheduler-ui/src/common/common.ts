@@ -98,6 +98,10 @@ export const runningType = (t: any) => [
     code: 'COMPLEMENT_DATA'
   },
   {
+    desc: `${t('project.workflow.complement_data_serial_wait')}`,
+    code: 'COMPLEMENT_DATA_SERIAL_WAIT'
+  },
+  {
     desc: `${t('project.workflow.scheduling_execution')}`,
     code: 'SCHEDULER'
   },

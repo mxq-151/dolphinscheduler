@@ -24,7 +24,6 @@ import com.cronutils.parser.CronParser;
 import lombok.NonNull;
 
 import static com.cronutils.model.CronType.QUARTZ;
-import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST;
 import static org.apache.dolphinscheduler.common.constants.Constants.COMMA;
 import static org.apache.dolphinscheduler.service.cron.CycleFactory.day;
 import static org.apache.dolphinscheduler.service.cron.CycleFactory.hour;
@@ -284,22 +283,15 @@ public class CronUtils {
         return end.getTime();
     }
 
-    /**
-     * get Schedule Date
-     *
-     * @param param
-     * @return date list
-     */
-    public static List<Date> getSelfScheduleDateList(Map<String, String> param) {
+    public static List<Date> getSelfScheduleDateList(String scheduleDates) {
         List<Date> result = new ArrayList<>();
-        String scheduleDates = param.get(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST);
         if (StringUtils.isNotEmpty(scheduleDates)) {
             for (String stringDate : scheduleDates.split(COMMA)) {
                 result.add(DateUtils.stringToDate(stringDate.trim()));
             }
             return result;
         }
-        return null;
+        return result;
     }
 
 }

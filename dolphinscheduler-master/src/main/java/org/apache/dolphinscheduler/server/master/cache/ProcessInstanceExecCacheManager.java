@@ -67,5 +67,7 @@ public interface ProcessInstanceExecCacheManager {
      */
     Collection<WorkflowExecuteRunnable> getAll();
 
+    int processCount(Long processDefinitionCode);
+
     void clearCache();
 }

@@ -127,10 +127,6 @@ public class TaskExecutionContext implements Serializable {
      */
     private int executorId;
 
-    /**
-     * command type if complement
-     */
-    private int cmdTypeIfComplement;
 
     /**
      * tenant code

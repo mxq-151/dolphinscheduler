@@ -17,23 +17,17 @@
 
 package org.apache.dolphinscheduler.server.master.runner;
 
-import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.CMD_PARAM_COMPLEMENT_DATA_END_DATE;
-import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST;
-import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.CMD_PARAM_COMPLEMENT_DATA_START_DATE;
 import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.CMD_PARAM_FATHER_PARAMS;
 import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.CMD_PARAM_RECOVERY_START_NODE_STRING;
-import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.CMD_PARAM_RECOVER_PROCESS_ID_STRING;
 import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.CMD_PARAM_START_NODES;
 import static org.apache.dolphinscheduler.common.constants.CommandKeyConstants.CMD_PARAM_START_PARAMS;
 import static org.apache.dolphinscheduler.common.constants.Constants.COMMA;
 import static org.apache.dolphinscheduler.common.constants.Constants.DEFAULT_WORKER_GROUP;
-import static org.apache.dolphinscheduler.common.constants.DateConstants.YYYY_MM_DD_HH_MM_SS;
 import static org.apache.dolphinscheduler.plugin.task.api.TaskConstants.TASK_TYPE_BLOCKING;
 import static org.apache.dolphinscheduler.plugin.task.api.enums.DataType.VARCHAR;
 import static org.apache.dolphinscheduler.plugin.task.api.enums.Direct.IN;
 
 import org.apache.dolphinscheduler.common.constants.Constants;
-import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.FailureStrategy;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.Priority;
@@ -44,16 +38,13 @@ import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.common.graph.DAG;
 import org.apache.dolphinscheduler.common.model.TaskNodeRelation;
 import org.apache.dolphinscheduler.common.thread.ThreadUtils;
-import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.common.utils.NetUtils;
-import org.apache.dolphinscheduler.dao.entity.Command;
 import org.apache.dolphinscheduler.dao.entity.Environment;
 import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
 import org.apache.dolphinscheduler.dao.entity.ProcessInstance;
 import org.apache.dolphinscheduler.dao.entity.ProcessTaskRelation;
 import org.apache.dolphinscheduler.dao.entity.ProjectUser;
-import org.apache.dolphinscheduler.dao.entity.Schedule;
 import org.apache.dolphinscheduler.dao.entity.TaskDefinitionLog;
 import org.apache.dolphinscheduler.dao.entity.TaskGroupQueue;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
@@ -79,7 +70,6 @@ import org.apache.dolphinscheduler.server.master.runner.task.ITaskProcessor;
 import org.apache.dolphinscheduler.server.master.runner.task.TaskAction;
 import org.apache.dolphinscheduler.server.master.runner.task.TaskProcessorFactory;
 import org.apache.dolphinscheduler.service.alert.ProcessAlertManager;
-import org.apache.dolphinscheduler.service.cron.CronUtils;
 import org.apache.dolphinscheduler.service.exceptions.CronParseException;
 import org.apache.dolphinscheduler.service.exceptions.ResourceNotExistsException;
 import org.apache.dolphinscheduler.service.expand.CuringParamsService;
@@ -199,10 +189,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
      */
     private final Map<String, TaskNode> skipTaskNodeMap = new ConcurrentHashMap<>();
 
-    /**
-     * complement date list
-     */
-    private List<Date> complementListDate = Lists.newLinkedList();
 
     /**
      * state event queue
@@ -594,84 +580,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
         logger.info("processInstance {} block alert send successful!", processInstance.getId());
     }
 
-    public boolean processComplementData() {
-        if (!needComplementProcess()) {
-            return false;
-        }
-
-        // when the serial complement is executed, the next complement instance is created,
-        // and this method does not need to be executed when the parallel complement is used.
-        if (processInstance.getState().isReadyStop() || !processInstance.getState().isFinished()) {
-            return false;
-        }
-
-        Date scheduleDate = processInstance.getScheduleTime();
-        if (scheduleDate == null) {
-            scheduleDate = complementListDate.get(0);
-        } else if (processInstance.getState().isFinished()) {
-            endProcess();
-            if (complementListDate.isEmpty()) {
-                logger.info("process complement end. process id:{}", processInstance.getId());
-                return true;
-            }
-            int index = complementListDate.indexOf(scheduleDate);
-            if (index >= complementListDate.size() - 1 || !processInstance.getState().isSuccess()) {
-                logger.info("process complement end. process id:{}", processInstance.getId());
-                // complement data ends || no success
-                return true;
-            }
-            logger.info("process complement continue. process id:{}, schedule time:{} complementListDate:{}",
-                    processInstance.getId(), processInstance.getScheduleTime(), complementListDate);
-            scheduleDate = complementListDate.get(index + 1);
-        }
-        // the next process complement
-        int create = this.createComplementDataCommand(scheduleDate);
-        if (create > 0) {
-            logger.info("create complement data command successfully.");
-        }
-        return true;
-    }
-
-    private int createComplementDataCommand(Date scheduleDate) {
-        Command command = new Command();
-        command.setScheduleTime(scheduleDate);
-        command.setCommandType(CommandType.COMPLEMENT_DATA);
-        command.setProcessDefinitionCode(processInstance.getProcessDefinitionCode());
-        Map<String, String> cmdParam = JSONUtils.toMap(processInstance.getCommandParam());
-        if (cmdParam.containsKey(CMD_PARAM_RECOVERY_START_NODE_STRING)) {
-            cmdParam.remove(CMD_PARAM_RECOVERY_START_NODE_STRING);
-        }
-
-        if (cmdParam.containsKey(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST)) {
-            cmdParam.replace(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST,
-                    cmdParam.get(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST)
-                            .substring(cmdParam.get(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST).indexOf(COMMA) + 1));
-        }
-
-        if (cmdParam.containsKey(CMD_PARAM_COMPLEMENT_DATA_START_DATE)) {
-            cmdParam.replace(CMD_PARAM_COMPLEMENT_DATA_START_DATE,
-                    DateUtils.format(scheduleDate, YYYY_MM_DD_HH_MM_SS, null));
-        }
-        command.setCommandParam(JSONUtils.toJsonString(cmdParam));
-        command.setTaskDependType(processInstance.getTaskDependType());
-        command.setFailureStrategy(processInstance.getFailureStrategy());
-        command.setWarningType(processInstance.getWarningType());
-        command.setWarningGroupId(processInstance.getWarningGroupId());
-        command.setStartTime(new Date());
-        command.setExecutorId(processInstance.getExecutorId());
-        command.setUpdateTime(new Date());
-        command.setProcessInstancePriority(processInstance.getProcessInstancePriority());
-        command.setWorkerGroup(processInstance.getWorkerGroup());
-        command.setEnvironmentCode(processInstance.getEnvironmentCode());
-        command.setDryRun(processInstance.getDryRun());
-        command.setProcessInstanceId(0);
-        command.setProcessDefinitionVersion(processInstance.getProcessDefinitionVersion());
-        return processService.createCommand(command);
-    }
-
-    private boolean needComplementProcess() {
-        return processInstance.isComplementData() && Flag.NO == processInstance.getIsSubProcess();
-    }
 
     /**
      * ProcessInstance start entrypoint.
@@ -843,49 +751,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             logger.info("The current workflowInstance is a newly running workflowInstance");
         }
 
-        if (processInstance.isComplementData() && complementListDate.isEmpty()) {
-            Map<String, String> cmdParam = JSONUtils.toMap(processInstance.getCommandParam());
-            if (cmdParam != null) {
-                // reset global params while there are start parameters
-                setGlobalParamIfCommanded(processDefinition, cmdParam);
-
-                Date start = null;
-                Date end = null;
-                if (cmdParam.containsKey(CMD_PARAM_COMPLEMENT_DATA_START_DATE)
-                        && cmdParam.containsKey(CMD_PARAM_COMPLEMENT_DATA_END_DATE)) {
-                    start = DateUtils.stringToDate(cmdParam.get(CMD_PARAM_COMPLEMENT_DATA_START_DATE));
-                    end = DateUtils.stringToDate(cmdParam.get(CMD_PARAM_COMPLEMENT_DATA_END_DATE));
-                }
-                if (complementListDate.isEmpty() && needComplementProcess()) {
-                    if (start != null && end != null) {
-                        List<Schedule> schedules = processService.queryReleaseSchedulerListByProcessDefinitionCode(
-                                processInstance.getProcessDefinitionCode());
-                        complementListDate = CronUtils.getSelfFireDateList(start, end, schedules);
-                    }
-                    if (cmdParam.containsKey(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST)) {
-                        complementListDate = CronUtils.getSelfScheduleDateList(cmdParam);
-                    }
-                    logger.info(" process definition code:{} complement data: {}",
-                            processInstance.getProcessDefinitionCode(), complementListDate);
-
-                    if (!complementListDate.isEmpty() && Flag.NO == processInstance.getIsSubProcess()) {
-                        processInstance.setScheduleTime(complementListDate.get(0));
-                        String globalParams = curingParamsService.curingGlobalParams(processInstance.getId(),
-                                processDefinition.getGlobalParamMap(),
-                                processDefinition.getGlobalParamList(),
-                                CommandType.COMPLEMENT_DATA,
-                                processInstance.getScheduleTime(),
-                                cmdParam.get(Constants.SCHEDULE_TIMEZONE));
-                        processInstance.setGlobalParams(globalParams);
-                        processInstanceDao.updateProcessInstance(processInstance);
-                    }
-                }
-            }
-        }
-        logger.info("Initialize task queue, dependFailedTaskSet: {}, completeTaskMap: {}, errorTaskMap: {}",
-                dependFailedTaskSet,
-                completeTaskMap,
-                errorTaskMap);
     }
 
     /**
@@ -1509,7 +1374,7 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
         }
 
         List<TaskInstance> pauseList = getCompleteTaskByState(TaskExecutionStatus.PAUSE);
-        if (CollectionUtils.isNotEmpty(pauseList) || processInstance.isBlocked() || !isComplementEnd()
+        if (CollectionUtils.isNotEmpty(pauseList) || processInstance.isBlocked()
                 || readyToSubmitTaskQueue.size() > 0) {
             return WorkflowExecutionStatus.PAUSE;
         } else {
@@ -1575,7 +1440,7 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             List<TaskInstance> killList = getCompleteTaskByState(TaskExecutionStatus.KILL);
             List<TaskInstance> failList = getCompleteTaskByState(TaskExecutionStatus.FAILURE);
             WorkflowExecutionStatus executionStatus;
-            if (CollectionUtils.isNotEmpty(killList) || CollectionUtils.isNotEmpty(failList) || !isComplementEnd()) {
+            if (CollectionUtils.isNotEmpty(killList) || CollectionUtils.isNotEmpty(failList)) {
                 executionStatus = WorkflowExecutionStatus.STOP;
             } else {
                 executionStatus = WorkflowExecutionStatus.SUCCESS;
@@ -1606,21 +1471,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
         }
 
         return state;
-    }
-
-    /**
-     * whether complement end
-     *
-     * @return Boolean whether is complement end
-     */
-    private boolean isComplementEnd() {
-        if (!processInstance.isComplementData()) {
-            return true;
-        }
-
-        Map<String, String> cmdParam = JSONUtils.toMap(processInstance.getCommandParam());
-        Date endTime = DateUtils.stringToDate(cmdParam.get(CMD_PARAM_COMPLEMENT_DATA_END_DATE));
-        return processInstance.getScheduleTime().equals(endTime);
     }
 
     /**

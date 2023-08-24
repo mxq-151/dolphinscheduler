@@ -36,6 +36,7 @@ import org.apache.dolphinscheduler.api.exceptions.ServiceException;
 import org.apache.dolphinscheduler.api.service.ExecutorService;
 import org.apache.dolphinscheduler.api.service.MonitorService;
 import org.apache.dolphinscheduler.api.service.ProjectService;
+import org.apache.dolphinscheduler.common.constants.CommandKeyConstants;
 import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.ComplementDependentMode;
@@ -347,8 +348,6 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
 
     /**
      * do action to process instance：pause, stop, repeat, recover from pause, recover from stop，rerun failed task
-    
-    
      *
      * @param loginUser         login user
      * @param projectCode       project code
@@ -615,18 +614,16 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
             cmdParam.put(CMD_PARAM_START_PARAMS, startParams);
         }
 
-        ProcessInstance instance=this.processInstanceMapper.queryDetailById(instanceId);
-        if(instance==null)
-        {
+        ProcessInstance instance = this.processInstanceMapper.queryDetailById(instanceId);
+        if (instance == null) {
             putMsg(result, Status.EXECUTE_PROCESS_INSTANCE_ERROR);
             return result;
         }
         Command command = new Command();
         command.setCommandType(commandType);
-        if(instance.getScheduleTime()==null)
-        {
+        if (instance.getScheduleTime() == null) {
             command.setScheduleTime(new Date());
-        }else {
+        } else {
             command.setScheduleTime(instance.getScheduleTime());
         }
 
@@ -788,6 +785,7 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
             } catch (CronParseException cronParseException) {
                 // We catch the exception here just to make compiler happy, since we have already validated the schedule
                 // cron expression before
+                logger.error("create command error:{}",cronParseException);
                 return 0;
             }
         } else {
@@ -813,7 +811,22 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
         String dateList = null;
         int dependentProcessDefinitionCreateCount = 0;
         runMode = (runMode == null) ? RunMode.RUN_MODE_SERIAL : runMode;
-        Map<String, String> cmdParam = JSONUtils.toMap(command.getCommandParam());
+
+        CommandType commandType=CommandType.COMPLEMENT_DATA_SERIAL_WAIT;
+        if (runMode!=RunMode.RUN_MODE_SERIAL)
+        {
+            if(expectedParallelismNumber!=null)
+            {
+                Map<String, String> commandParams =
+                        StringUtils.isNotBlank(command.getCommandParam()) ? JSONUtils.toMap(command.getCommandParam())
+                                : new HashMap<>();
+                commandParams.put(CommandKeyConstants.CMD_PARAM_COMPLEMENT_DATA_EXPECTED_PARAL_NUM,String.valueOf(expectedParallelismNumber));
+                command.setCommandParam(JSONUtils.toJsonString(commandParams));
+            }
+            commandType=CommandType.COMPLEMENT_DATA;
+        }
+
+        command.setCommandType(commandType);
         Map<String, String> scheduleParam = JSONUtils.toMap(scheduleTimeParam);
         if (scheduleParam.containsKey(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST)) {
             dateList = scheduleParam.get(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST);
@@ -824,139 +837,49 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
             startDate = scheduleParam.get(CMD_PARAM_COMPLEMENT_DATA_START_DATE);
             endDate = scheduleParam.get(CMD_PARAM_COMPLEMENT_DATA_END_DATE);
         }
-        switch (runMode) {
-            case RUN_MODE_SERIAL: {
-                logger.info("RunMode of {} command is serial run, processDefinitionCode:{}.",
-                        command.getCommandType().getDescp(), command.getProcessDefinitionCode());
-                if (StringUtils.isNotEmpty(dateList)) {
-                    cmdParam.put(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST, dateList);
-                    command.setCommandParam(JSONUtils.toJsonString(cmdParam));
-                    createCount = processService.createCommand(command);
-                    if (createCount > 0)
+
+        logger.info("RunMode of {} command is parallel run, processDefinitionCode:{}.",
+                command.getCommandType().getDescp(), command.getProcessDefinitionCode());
+        if (startDate != null && endDate != null) {
+            List<Schedule> schedules = processService.queryReleaseSchedulerListByProcessDefinitionCode(
+                    command.getProcessDefinitionCode());
+            List<ZonedDateTime> listDate = CronUtils.getSelfFireDateList(
+                    DateUtils.stringToZoneDateTime(startDate),
+                    DateUtils.stringToZoneDateTime(endDate),
+                    schedules);
+            int listDateSize = listDate.size();
+            if (!CollectionUtils.isEmpty(listDate)) {
+                for (int i = 0; i < listDateSize; i++) {
+                    ZonedDateTime dateTime=listDate.get(i);
+                    command.setScheduleTime(Date.from(dateTime.toInstant()));
+                    if (processService.createCommand(command) > 0) {
+                        createCount++;
                         logger.info("Create {} command complete, processDefinitionCode:{}",
                                 command.getCommandType().getDescp(), command.getProcessDefinitionCode());
-                    else
+                    }else
                         logger.error("Create {} command error, processDefinitionCode:{}",
                                 command.getCommandType().getDescp(), command.getProcessDefinitionCode());
                 }
-                if (startDate != null && endDate != null) {
-                    cmdParam.put(CMD_PARAM_COMPLEMENT_DATA_START_DATE, startDate);
-                    cmdParam.put(CMD_PARAM_COMPLEMENT_DATA_END_DATE, endDate);
-                    command.setCommandParam(JSONUtils.toJsonString(cmdParam));
-                    createCount = processService.createCommand(command);
-                    if (createCount > 0)
-                        logger.info("Create {} command complete, processDefinitionCode:{}",
-                                command.getCommandType().getDescp(), command.getProcessDefinitionCode());
-                    else
-                        logger.error("Create {} command error, processDefinitionCode:{}",
-                                command.getCommandType().getDescp(), command.getProcessDefinitionCode());
-                    // dependent process definition
-                    List<Schedule> schedules = processService.queryReleaseSchedulerListByProcessDefinitionCode(
-                            command.getProcessDefinitionCode());
-
-                    if (schedules.isEmpty() || complementDependentMode == ComplementDependentMode.OFF_MODE) {
-                        logger.info(
-                                "Complement dependent mode is off mode or Scheduler is empty, so skip create complement dependent command, processDefinitionCode:{}.",
-                                command.getProcessDefinitionCode());
-                    } else {
-                        logger.info(
-                                "Complement dependent mode is all dependent and Scheduler is not empty, need create complement dependent command, processDefinitionCode:{}.",
-                                command.getProcessDefinitionCode());
-                        dependentProcessDefinitionCreateCount += createComplementDependentCommand(schedules, command);
-                    }
-                }
-                break;
             }
-            case RUN_MODE_PARALLEL: {
-                logger.info("RunMode of {} command is parallel run, processDefinitionCode:{}.",
-                        command.getCommandType().getDescp(), command.getProcessDefinitionCode());
-                if (startDate != null && endDate != null) {
-                    List<Schedule> schedules = processService.queryReleaseSchedulerListByProcessDefinitionCode(
-                            command.getProcessDefinitionCode());
-                    List<ZonedDateTime> listDate = CronUtils.getSelfFireDateList(
-                            DateUtils.stringToZoneDateTime(startDate),
-                            DateUtils.stringToZoneDateTime(endDate),
-                            schedules);
-                    int listDateSize = listDate.size();
-                    createCount = listDate.size();
-                    if (!CollectionUtils.isEmpty(listDate)) {
-                        if (expectedParallelismNumber != null && expectedParallelismNumber != 0) {
-                            createCount = Math.min(createCount, expectedParallelismNumber);
-                        }
-                        logger.info("Complement command run in parallel mode, current expectedParallelismNumber:{}.",
-                                createCount);
-
-                        // Distribute the number of tasks equally to each command.
-                        // The last command with insufficient quantity will be assigned to the remaining tasks.
-                        int itemsPerCommand = (listDateSize / createCount);
-                        int remainingItems = (listDateSize % createCount);
-                        int startDateIndex = 0;
-                        int endDateIndex = 0;
-
-                        for (int i = 1; i <= createCount; i++) {
-                            int extra = (i <= remainingItems) ? 1 : 0;
-                            int singleCommandItems = (itemsPerCommand + extra);
-
-                            if (i == 1) {
-                                endDateIndex += singleCommandItems - 1;
-                            } else {
-                                startDateIndex = endDateIndex + 1;
-                                endDateIndex += singleCommandItems;
-                            }
-
-                            cmdParam.put(CMD_PARAM_COMPLEMENT_DATA_START_DATE,
-                                    DateUtils.dateToString(listDate.get(startDateIndex)));
-                            cmdParam.put(CMD_PARAM_COMPLEMENT_DATA_END_DATE,
-                                    DateUtils.dateToString(listDate.get(endDateIndex)));
-                            command.setCommandParam(JSONUtils.toJsonString(cmdParam));
-                            logger.info("Creating command, commandInfo:{}.", command);
-                            if (processService.createCommand(command) > 0)
-                                logger.info("Create {} command complete, processDefinitionCode:{}",
-                                        command.getCommandType().getDescp(), command.getProcessDefinitionCode());
-                            else
-                                logger.error("Create {} command error, processDefinitionCode:{}",
-                                        command.getCommandType().getDescp(), command.getProcessDefinitionCode());
-                            if (schedules.isEmpty() || complementDependentMode == ComplementDependentMode.OFF_MODE) {
-                                logger.info(
-                                        "Complement dependent mode is off mode or Scheduler is empty, so skip create complement dependent command, processDefinitionCode:{}.",
-                                        command.getProcessDefinitionCode());
-                            } else {
-                                logger.info(
-                                        "Complement dependent mode is all dependent and Scheduler is not empty, need create complement dependent command, processDefinitionCode:{}.",
-                                        command.getProcessDefinitionCode());
-                                dependentProcessDefinitionCreateCount +=
-                                        createComplementDependentCommand(schedules, command);
-                            }
-                        }
-                    }
-                }
-                if (StringUtils.isNotEmpty(dateList)) {
-                    List<String> listDate = Arrays.asList(dateList.split(COMMA));
-                    createCount = listDate.size();
-                    if (!CollectionUtils.isEmpty(listDate)) {
-                        if (expectedParallelismNumber != null && expectedParallelismNumber != 0) {
-                            createCount = Math.min(createCount, expectedParallelismNumber);
-                        }
-                        logger.info("Complement command run in parallel mode, current expectedParallelismNumber:{}.",
-                                createCount);
-                        for (List<String> stringDate : Lists.partition(listDate, createCount)) {
-                            cmdParam.put(CMD_PARAM_COMPLEMENT_DATA_SCHEDULE_DATE_LIST, String.join(COMMA, stringDate));
-                            command.setCommandParam(JSONUtils.toJsonString(cmdParam));
-                            logger.info("Creating command, commandInfo:{}.", command);
-                            if (processService.createCommand(command) > 0)
-                                logger.info("Create {} command complete, processDefinitionCode:{}",
-                                        command.getCommandType().getDescp(), command.getProcessDefinitionCode());
-                            else
-                                logger.error("Create {} command error, processDefinitionCode:{}",
-                                        command.getCommandType().getDescp(), command.getProcessDefinitionCode());
-                        }
-                    }
-                }
-                break;
-            }
-            default:
-                break;
         }
+        if (StringUtils.isNotEmpty(dateList)) {
+            List<String> listDate = Arrays.asList(dateList.split(COMMA));
+            createCount = listDate.size();
+            if (!CollectionUtils.isEmpty(listDate)) {
+                List<Date> dates= CronUtils.getSelfScheduleDateList(dateList);
+                for (Date date : dates) {
+                    command.setScheduleTime(date);
+                    if (processService.createCommand(command) > 0) {
+                        createCount++;
+                        logger.info("Create {} command complete, processDefinitionCode:{}",
+                                command.getCommandType().getDescp(), command.getProcessDefinitionCode());
+                    }else
+                        logger.error("Create {} command error, processDefinitionCode:{}",
+                                command.getCommandType().getDescp(), command.getProcessDefinitionCode());
+                }
+            }
+        }
+
         logger.info("create complement command count: {}, create dependent complement command count: {}", createCount,
                 dependentProcessDefinitionCreateCount);
         return createCount;
@@ -1015,10 +938,10 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
      * worker group
      */
     private List<DependentProcessDefinition> checkDependentProcessDefinitionValid(
-                                                                                  List<DependentProcessDefinition> dependentProcessDefinitionList,
-                                                                                  CycleEnum processDefinitionCycle,
-                                                                                  String workerGroup,
-                                                                                  long upstreamProcessDefinitionCode) {
+            List<DependentProcessDefinition> dependentProcessDefinitionList,
+            CycleEnum processDefinitionCycle,
+            String workerGroup,
+            long upstreamProcessDefinitionCode) {
         List<DependentProcessDefinition> validDependentProcessDefinitionList = new ArrayList<>();
 
         List<Long> processDefinitionCodeList =
@@ -1097,6 +1020,7 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
 
     /**
      * query executing data of processInstance by master
+     *
      * @param processInstanceId
      * @return
      */

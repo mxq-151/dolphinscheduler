@@ -53,9 +53,6 @@ public class WorkflowStateEventHandler implements StateEventHandler {
             workflowExecuteRunnable.updateProcessInstanceState(workflowStateEvent);
             return true;
         }
-        if (workflowExecuteRunnable.processComplementData()) {
-            return true;
-        }
         if (workflowStateEvent.getStatus().isFinished()) {
             workflowExecuteRunnable.endProcess();
         }

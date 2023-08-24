@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.server.master.cache.impl;
 
+import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.server.master.cache.ProcessInstanceExecCacheManager;
 import org.apache.dolphinscheduler.server.master.metrics.ProcessInstanceMetrics;
 import org.apache.dolphinscheduler.server.master.runner.WorkflowExecuteRunnable;
@@ -69,6 +70,19 @@ public class ProcessInstanceExecCacheManagerImpl implements ProcessInstanceExecC
     @Override
     public Collection<WorkflowExecuteRunnable> getAll() {
         return ImmutableList.copyOf(processInstanceExecMaps.values());
+    }
+
+    @Override
+    public int processCount(Long processDefinitionCode) {
+        int count=0;
+        Collection<WorkflowExecuteRunnable> list = processInstanceExecMaps.values();
+        for (WorkflowExecuteRunnable wr:list) {
+            if(wr.getProcessInstance().getCommandType()== CommandType.COMPLEMENT_DATA && wr.getProcessInstance().getProcessDefinitionCode().longValue()==processDefinitionCode.longValue())
+            {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Override
