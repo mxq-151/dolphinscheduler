@@ -951,7 +951,7 @@ public class ProcessDefinitionServiceImpl extends BaseServiceImpl implements Pro
                 processDefinition.setReleaseState(releaseState);
                 if(schedule!=null)
                 {
-                    this.commandMapper.makeCommandOnline(schedule.getId());
+                    this.commandMapper.makeCommandOnline(schedule.getId(),processDefinition.getVersion());
                 }
                 processDefinitionMapper.updateById(processDefinition);
                 logger.info("Set process definition online, projectCode:{}, processDefinitionCode:{}.", projectCode,

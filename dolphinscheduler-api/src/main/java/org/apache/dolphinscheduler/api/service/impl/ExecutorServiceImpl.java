@@ -843,6 +843,11 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
         if (startDate != null && endDate != null) {
             List<Schedule> schedules = processService.queryReleaseSchedulerListByProcessDefinitionCode(
                     command.getProcessDefinitionCode());
+            if(schedules.isEmpty())
+            {
+                logger.error("complement data with Schedule,but Schedule is not config ");
+                return 0;
+            }
             List<ZonedDateTime> listDate = CronUtils.getSelfFireDateList(
                     DateUtils.stringToZoneDateTime(startDate),
                     DateUtils.stringToZoneDateTime(endDate),

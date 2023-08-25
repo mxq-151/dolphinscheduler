@@ -792,10 +792,10 @@ public class ProcessServiceTest {
         command.setCommandParam("{\"ProcessInstanceId\":222}");
         command.setCommandType(CommandType.START_PROCESS);
         int mockResult = 1;
-        Mockito.when(commandMapper.insert(command)).thenReturn(mockResult);
+        Mockito.when(commandMapper.upsertCommand(command)).thenReturn(mockResult);
         int exeMethodResult = processService.createCommand(command);
         Assert.assertEquals(mockResult, exeMethodResult);
-        Mockito.verify(commandMapper, Mockito.times(1)).insert(command);
+        Mockito.verify(commandMapper, Mockito.times(1)).upsertCommand(command);
     }
 
     @Test

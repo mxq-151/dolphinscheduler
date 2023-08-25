@@ -282,7 +282,7 @@ public class CommandMapperTest extends BaseDaoTest {
         command.setWorkerGroup(Constants.DEFAULT_WORKER_GROUP);
         command.setProcessInstanceId(0);
         command.setProcessDefinitionVersion(0);
-        commandMapper.insert(command);
+        commandMapper.upsertCommand(command);
 
         return command;
     }

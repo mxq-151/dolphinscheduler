@@ -48,7 +48,7 @@ public class MasterCommandTest {
         cmd.setCommandParam("{\"ProcessInstanceId\":325}");
         cmd.setProcessDefinitionCode(63);
 
-        commandMapper.insert(cmd);
+        commandMapper.upsertCommand(cmd);
 
     }
 
@@ -60,7 +60,7 @@ public class MasterCommandTest {
         cmd.setCommandParam("{\"ProcessInstanceId\":290}");
         cmd.setCommandType(CommandType.RECOVER_SUSPENDED_PROCESS);
 
-        commandMapper.insert(cmd);
+        commandMapper.upsertCommand(cmd);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class MasterCommandTest {
         cmd.setWarningGroupId(4);
         cmd.setExecutorId(19);
 
-        commandMapper.insert(cmd);
+        commandMapper.upsertCommand(cmd);
     }
 
     @Test
@@ -83,7 +83,7 @@ public class MasterCommandTest {
         cmd.setCommandParam("{\"ProcessInstanceId\":816}");
         cmd.setProcessDefinitionCode(15);
 
-        commandMapper.insert(cmd);
+        commandMapper.upsertCommand(cmd);
     }
 
     @Test
@@ -94,7 +94,7 @@ public class MasterCommandTest {
         cmd.setWarningType(WarningType.ALL);
         cmd.setProcessDefinitionCode(72);
         cmd.setExecutorId(10);
-        commandMapper.insert(cmd);
+        commandMapper.upsertCommand(cmd);
     }
 
 }

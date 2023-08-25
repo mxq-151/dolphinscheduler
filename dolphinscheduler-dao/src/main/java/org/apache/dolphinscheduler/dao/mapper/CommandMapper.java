@@ -44,7 +44,7 @@ public interface CommandMapper extends BaseMapper<Command> {
             @Param("endTime") Date endTime,
             @Param("projectCodeArray") Long[] projectCodeArray);
 
-    int insert(@Param("command") Command command);
+    int upsertCommand(@Param("command") Command command);
 
     void deleteCommandByScheduleId(@Param("scheduleId")int scheduleId);
 
@@ -54,7 +54,7 @@ public interface CommandMapper extends BaseMapper<Command> {
 
     int makeCommandOffline(@Param("scheduleId")int scheduleId);
 
-    int makeCommandOnline(@Param("scheduleId")int scheduleId);
+    int makeCommandOnline(@Param("scheduleId")int scheduleId,@Param("processDefinitionVersion") int processDefinitionVersion);
 
     /**
      * query command page

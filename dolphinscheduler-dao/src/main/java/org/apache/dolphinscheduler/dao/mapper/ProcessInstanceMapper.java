@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.dao.mapper;
 
+import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.dao.entity.ExecuteStatusCount;
 import org.apache.dolphinscheduler.dao.entity.ProcessInstance;
@@ -134,6 +135,9 @@ public interface ProcessInstanceMapper extends BaseMapper<ProcessInstance> {
      * @return update result
      */
     int updateProcessInstanceByState(@Param("originState") WorkflowExecutionStatus originState,
+                                     @Param("destState") WorkflowExecutionStatus destState);
+
+    int updateProcessInstanceStateById(@Param("id") int id,
                                      @Param("destState") WorkflowExecutionStatus destState);
 
     /**

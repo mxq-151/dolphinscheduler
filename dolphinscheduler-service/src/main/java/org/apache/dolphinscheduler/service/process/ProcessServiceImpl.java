@@ -33,7 +33,6 @@ import org.apache.dolphinscheduler.common.graph.DAG;
 import org.apache.dolphinscheduler.common.model.TaskNodeRelation;
 import org.apache.dolphinscheduler.common.utils.CodeGenerateUtils;
 import org.apache.dolphinscheduler.common.utils.CodeGenerateUtils.CodeGenerateException;
-import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.Cluster;
 import org.apache.dolphinscheduler.dao.entity.Command;
@@ -112,7 +111,6 @@ import org.apache.dolphinscheduler.remote.command.TaskEventChangeCommand;
 import org.apache.dolphinscheduler.remote.command.WorkflowStateEventChangeCommand;
 import org.apache.dolphinscheduler.remote.processor.StateEventCallbackService;
 import org.apache.dolphinscheduler.remote.utils.Host;
-import org.apache.dolphinscheduler.service.cron.CronUtils;
 import org.apache.dolphinscheduler.service.exceptions.CronParseException;
 import org.apache.dolphinscheduler.service.exceptions.ResourceNotExistsException;
 import org.apache.dolphinscheduler.service.exceptions.ServiceException;
@@ -321,23 +319,30 @@ public class ProcessServiceImpl implements ProcessService {
                     this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
                     return pi;
                 }else {
-                    logger.info("serial process {} is running,instanceId:{}",command.getProcessDefinitionCode(),processId);
                     return null;
                 }
             }else {
                 ProcessInstance pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
                 if(pi!=null)
                 {
-                    if(command.getCommandType()==CommandType.SCHEDULER)
+                    if(command.getCommandType()==CommandType.RECOVER_TOLERANCE_FAULT_PROCESS)
                     {
-                        logger.warn("serial process must recover frist,recover instanceId:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
+                        this.processInstanceMapper.updateProcessInstanceStateById(pi.getId(), FAILURE);
+                        saveSerialProcess(processInstance, processDefinition);
+
+                        if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
+                            setSubProcessParam(processInstance);
+                            return null;
+                        }
+                        pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
+                        this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
+                        this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
+                        logger.warn("serial process {} recover,instanceId:{}",command.getProcessDefinitionCode(),pi.getId());
+                        return pi;
+                    }else {
+                        logger.info("serial process must recover frist,recover instanceId:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
                         return null;
                     }
-
-                    this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
-                    this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
-                    logger.info("serial process {} recover,instanceId:{}",command.getProcessDefinitionCode(),pi.getId());
-                    return pi;
                 }else {
                     saveSerialProcess(processInstance, processDefinition);
                     pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
@@ -448,6 +453,7 @@ public class ProcessServiceImpl implements ProcessService {
     @Counted("ds.workflow.create.command.count")
     public int createCommand(Command command) {
         int result = 0;
+
         if (command == null) {
             return result;
         }
@@ -476,7 +482,8 @@ public class ProcessServiceImpl implements ProcessService {
         }
         command.setId(null);
 
-        result = commandMapper.insert(command);
+
+        result = commandMapper.upsertCommand(command);
         return result;
     }
 
@@ -1691,7 +1698,7 @@ public class ProcessServiceImpl implements ProcessService {
         if (command.getId() != null) {
             return commandMapper.updateById(command);
         } else {
-            return commandMapper.insert(command);
+            return commandMapper.upsertCommand(command);
         }
     }
 
@@ -2097,7 +2104,6 @@ public class ProcessServiceImpl implements ProcessService {
         cmd.setScheduleTime(processInstance.getScheduleTime());
         cmd.setProcessDefinitionCode(processInstance.getProcessDefinitionCode());
         cmd.setProcessDefinitionVersion(processInstance.getProcessDefinitionVersion());
-        cmd.setProcessInstanceId(processInstance.getId());
         cmd.setExecutorId(processInstance.getExecutorId());
         cmd.setCommandType(CommandType.RECOVER_TOLERANCE_FAULT_PROCESS);
         cmd.setWarningType(processInstance.getWarningType());
