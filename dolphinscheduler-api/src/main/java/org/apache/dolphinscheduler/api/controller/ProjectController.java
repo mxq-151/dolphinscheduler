@@ -86,8 +86,9 @@ public class ProjectController extends BaseController {
     @AccessLogAnnotation(ignoreRequestArgs = "loginUser")
     public Result createProject(@ApiIgnore @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
                                 @RequestParam("projectName") String projectName,
+                                @RequestParam("cluster") String cluster,
                                 @RequestParam(value = "description", required = false) String description) {
-        return projectService.createProject(loginUser, projectName, description);
+        return projectService.createProject(loginUser, projectName, description,cluster);
     }
 
     /**
@@ -114,8 +115,8 @@ public class ProjectController extends BaseController {
                                 @PathVariable("code") Long code,
                                 @RequestParam("projectName") String projectName,
                                 @RequestParam(value = "description", required = false) String description,
-                                @RequestParam(value = "userName") String userName) {
-        return projectService.update(loginUser, code, projectName, description, userName);
+                                @RequestParam(value = "userName") String userName,@RequestParam(value = "cluster") String cluster) {
+        return projectService.update(loginUser, code, projectName, description, userName,cluster);
     }
 
     /**

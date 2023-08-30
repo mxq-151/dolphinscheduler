@@ -35,6 +35,8 @@ import { useI18n } from 'vue-i18n'
 import { useTable } from './use-table'
 import Card from '@/components/card'
 import ProjectModal from './components/project-modal'
+import { useUserStore } from '@/store/user/user'
+import type { UserInfoRes } from '@/service/modules/users/types'
 
 const list = defineComponent({
   name: 'list',
@@ -49,6 +51,7 @@ const list = defineComponent({
         searchVal: variables.searchVal
       })
     }
+    const userStore = useUserStore()
 
     const handleModalChange = () => {
       variables.showModalRef = true
@@ -103,7 +106,8 @@ const list = defineComponent({
       onConfirmModal,
       onClearSearch,
       handleChangePageSize,
-      trim
+      trim,
+      userStore
     }
   },
   render() {
@@ -117,6 +121,7 @@ const list = defineComponent({
               onClick={this.handleModalChange}
               type='primary'
               class='btn-create-project'
+              disabled = {(this.userStore.getUserInfo as UserInfoRes).userType !== 'ADMIN_USER'}
             >
               {t('project.list.create_project')}
             </NButton>

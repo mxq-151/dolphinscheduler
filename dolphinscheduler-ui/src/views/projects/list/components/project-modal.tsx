@@ -79,8 +79,10 @@ const ProjectModal = defineComponent({
             userStore.getUserInfo as UserInfoRes
           ).userName
           variables.model.description = ''
+          variables.model.cluster = ''
         } else {
           variables.model.projectName = props.row.name
+          variables.model.cluster = props.row.cluster
           variables.model.userName = props.row.userName
           variables.model.description = props.row.description
         }
@@ -92,6 +94,7 @@ const ProjectModal = defineComponent({
       () => {
         variables.model.projectName = props.row.name
         variables.model.userName = props.row.userName
+        variables.model.cluster = props.row.cluster
         variables.model.description = props.row.description
       }
     )
@@ -121,6 +124,14 @@ const ProjectModal = defineComponent({
               allowInput={this.trim}
               v-model={[this.model.projectName, 'value']}
               placeholder={t('project.list.project_tips')}
+              class='input-project-name'
+            />
+          </NFormItem>
+          <NFormItem label={t('project.list.project_cluster')} path='cluster'>
+            <NInput
+              allowInput={this.trim}
+              v-model={[this.model.cluster, 'value']}
+              placeholder={t('project.list.project_cluster')}
               class='input-project-name'
             />
           </NFormItem>

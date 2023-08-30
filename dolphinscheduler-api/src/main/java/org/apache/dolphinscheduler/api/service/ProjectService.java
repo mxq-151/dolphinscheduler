@@ -36,7 +36,7 @@ public interface ProjectService {
      * @param desc description
      * @return returns an error if it exists
      */
-    Result createProject(User loginUser, String name, String desc);
+    Result createProject(User loginUser, String name, String desc,String cluster);
 
     /**
      * query project details by code
@@ -53,7 +53,7 @@ public interface ProjectService {
      * @param projectName project name
      * @return project detail information
      */
-    Map<String, Object> queryByName(User loginUser, String projectName);
+    Map<String, Object> queryByName(User loginUser, String projectName,String cluster);
 
     /**
      * check project and authorization
@@ -111,7 +111,7 @@ public interface ProjectService {
      * @param userName project owner
      * @return update result code
      */
-    Result update(User loginUser, Long projectCode, String projectName, String desc, String userName);
+    Result update(User loginUser, Long projectCode, String projectName, String desc, String userName,String cluster);
 
     /**
      * query unauthorized project

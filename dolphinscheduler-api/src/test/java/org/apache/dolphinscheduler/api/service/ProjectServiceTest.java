@@ -100,19 +100,19 @@ public class ProjectServiceTest {
                 PROJECT_CREATE, baseServiceLogger)).thenReturn(true);
         Mockito.when(resourcePermissionCheckService.resourcePermissionCheck(AuthorizationType.PROJECTS, null, 1,
                 baseServiceLogger)).thenReturn(true);
-        Result result = projectService.createProject(loginUser, projectName, getDesc());
+        Result result = projectService.createProject(loginUser, projectName, getDesc(),"kk");
         logger.info(result.toString());
         Assert.assertEquals(Status.REQUEST_PARAMS_NOT_VALID_ERROR.getCode(), 10001);
 
         // project name exist
-        Mockito.when(projectMapper.queryByName(projectName)).thenReturn(getProject());
-        result = projectService.createProject(loginUser, projectName, projectName);
+        Mockito.when(projectMapper.queryByName(projectName,"default")).thenReturn(getProject());
+        result = projectService.createProject(loginUser, projectName, projectName,"default");
         logger.info(result.toString());
         Assert.assertEquals(Status.PROJECT_ALREADY_EXISTS.getCode(), result.getCode().intValue());
 
         // success
         Mockito.when(projectMapper.insert(Mockito.any(Project.class))).thenReturn(1);
-        result = projectService.createProject(loginUser, "test", "test");
+        result = projectService.createProject(loginUser, "test", "test","default");
         logger.info(result.toString());
         Assert.assertEquals(Status.SUCCESS.getCode(), result.getCode().intValue());
 
@@ -256,27 +256,27 @@ public class ProjectServiceTest {
         Mockito.when(resourcePermissionCheckService.resourcePermissionCheck(AuthorizationType.PROJECTS, new Object[]{1},
                 loginUser.getId(),
                 baseServiceLogger)).thenReturn(true);
-        Mockito.when(projectMapper.queryByName(projectName)).thenReturn(project);
+        Mockito.when(projectMapper.queryByName(projectName,"default")).thenReturn(project);
         Mockito.when(projectMapper.queryByCode(2L)).thenReturn(getProject());
         // PROJECT_NOT_FOUNT
-        Result result = projectService.update(loginUser, 1L, projectName, "desc", "testUser");
+        Result result = projectService.update(loginUser, 1L, projectName, "desc", "testUser","defalut");
         logger.info(result.toString());
         Assert.assertTrue(Status.PROJECT_NOT_FOUND.getCode() == result.getCode());
 
         // PROJECT_ALREADY_EXISTS
-        result = projectService.update(loginUser, 2L, projectName, "desc", userName);
+        result = projectService.update(loginUser, 2L, projectName, "desc", userName,"defalut");
         logger.info(result.toString());
         Assert.assertTrue(Status.PROJECT_ALREADY_EXISTS.getCode() == result.getCode());
 
         Mockito.when(userMapper.queryByUserNameAccurately(Mockito.any())).thenReturn(null);
-        result = projectService.update(loginUser, 2L, "test", "desc", "testuser");
+        result = projectService.update(loginUser, 2L, "test", "desc", "testuser","defalut");
         Assert.assertTrue(Status.USER_NOT_EXIST.getCode() == result.getCode());
 
         // success
         Mockito.when(userMapper.queryByUserNameAccurately(Mockito.any())).thenReturn(new User());
         project.setUserId(1);
         Mockito.when(projectMapper.updateById(Mockito.any(Project.class))).thenReturn(1);
-        result = projectService.update(loginUser, 2L, "test", "desc", "testUser");
+        result = projectService.update(loginUser, 2L, "test", "desc", "testUser","defalut");
         logger.info(result.toString());
         Assert.assertTrue(Status.SUCCESS.getCode() == result.getCode());
 

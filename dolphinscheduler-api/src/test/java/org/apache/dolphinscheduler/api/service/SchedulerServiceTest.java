@@ -127,7 +127,7 @@ public class SchedulerServiceTest {
         Mockito.when(scheduleMapper.selectById(1)).thenReturn(schedule);
         Mockito.when(processDefinitionMapper.queryByCode(1)).thenReturn(processDefinition);
         Mockito.when(projectMapper.queryByCode(projectCode)).thenReturn(project);
-        Mockito.when(projectMapper.queryByName(projectName)).thenReturn(project);
+        Mockito.when(projectMapper.queryByName(projectName,"default")).thenReturn(project);
 
         // schedule not exists
         exception = Assertions.assertThrows(ServiceException.class, () -> {

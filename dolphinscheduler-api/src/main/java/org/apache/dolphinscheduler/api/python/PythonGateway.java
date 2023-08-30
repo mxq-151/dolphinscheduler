@@ -173,7 +173,7 @@ public class PythonGateway {
     }
 
     public Map<String, Long> getCodeAndVersion(String projectName, String processDefinitionName, String taskName) throws CodeGenerateUtils.CodeGenerateException {
-        Project project = projectMapper.queryByName(projectName);
+        Project project = projectMapper.queryByName(projectName,"default");
         Map<String, Long> result = new HashMap<>();
         // project do not exists, mean task not exists too, so we should directly return init value
         if (project == null) {
@@ -243,7 +243,7 @@ public class PythonGateway {
                                        String otherParamsJson,
                                        String executionType) {
         User user = usersService.queryUser(userName);
-        Project project = projectMapper.queryByName(projectName);
+        Project project = projectMapper.queryByName(projectName,"default");
         long projectCode = project.getCode();
 
         ProcessDefinition processDefinition = getWorkflow(user, projectCode, name);
@@ -352,7 +352,7 @@ public class PythonGateway {
                                      Integer warningGroupId,
                                      Integer timeout) {
         User user = usersService.queryUser(userName);
-        Project project = projectMapper.queryByName(projectName);
+        Project project = projectMapper.queryByName(projectName,"default");
         ProcessDefinition processDefinition =
                 processDefinitionMapper.queryByDefineName(project.getCode(), workflowName);
 
@@ -406,9 +406,9 @@ public class PythonGateway {
         User user = usersService.queryUser(userName);
 
         Project project;
-        project = projectMapper.queryByName(name);
+        project = projectMapper.queryByName(name,"default");
         if (project == null) {
-            projectService.createProject(user, name, desc);
+            projectService.createProject(user, name, desc,"default");
         } else if (project.getUserId() != user.getId()) {
             ProjectUser projectUser = projectUserMapper.queryProjectRelation(project.getId(), user.getId());
             if (projectUser == null) {
@@ -419,12 +419,12 @@ public class PythonGateway {
 
     public Project queryProjectByName(String userName, String projectName) {
         User user = usersService.queryUser(userName);
-        return (Project) projectService.queryByName(user, projectName).get(Constants.DATA_LIST);
+        return (Project) projectService.queryByName(user, projectName,"default").get(Constants.DATA_LIST);
     }
 
     public void updateProject(String userName, Long projectCode, String projectName, String desc) {
         User user = usersService.queryUser(userName);
-        projectService.update(user, projectCode, projectName, desc, userName);
+        projectService.update(user, projectCode, projectName, desc, userName,"default");
     }
 
     public void deleteProject(String userName, Long projectCode) {
@@ -517,7 +517,7 @@ public class PythonGateway {
         Map<String, Object> result = new HashMap<>();
 
         User user = usersService.queryUser(userName);
-        Project project = (Project) projectService.queryByName(user, projectName).get(Constants.DATA_LIST);
+        Project project = (Project) projectService.queryByName(user, projectName,"default").get(Constants.DATA_LIST);
         long projectCode = project.getCode();
         ProcessDefinition processDefinition = getWorkflow(user, projectCode, workflowName);
         // get workflow info
@@ -548,7 +548,7 @@ public class PythonGateway {
     public Map<String, Object> getDependentInfo(String projectName, String workflowName, String taskName) {
         Map<String, Object> result = new HashMap<>();
 
-        Project project = projectMapper.queryByName(projectName);
+        Project project = projectMapper.queryByName(projectName,"default");
         if (project == null) {
             String msg = String.format("Can not find valid project by name %s", projectName);
             logger.error(msg);

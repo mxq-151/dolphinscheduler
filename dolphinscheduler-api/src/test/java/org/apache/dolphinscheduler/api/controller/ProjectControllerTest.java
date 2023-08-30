@@ -73,8 +73,8 @@ public class ProjectControllerTest {
         String projectName = "test";
         String desc = "";
         String userName = "jack";
-        Mockito.when(projectService.update(user, projectCode, projectName, desc, userName)).thenReturn(result);
-        Result response = projectController.updateProject(user, projectCode, projectName, desc, userName);
+        Mockito.when(projectService.update(user, projectCode, projectName, desc, userName,"default")).thenReturn(result);
+        Result response = projectController.updateProject(user, projectCode, projectName, desc, userName,"default");
         Assert.assertEquals(Status.SUCCESS.getCode(), response.getCode().intValue());
     }
 

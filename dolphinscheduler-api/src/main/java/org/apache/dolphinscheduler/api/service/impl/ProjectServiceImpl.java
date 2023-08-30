@@ -97,7 +97,7 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
      */
     @Override
     @Transactional
-    public Result createProject(User loginUser, String name, String desc) {
+    public Result createProject(User loginUser, String name, String desc,String cluster) {
         Result result = new Result();
 
         checkDesc(result, desc);
@@ -109,7 +109,7 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
             return result;
         }
 
-        Project project = projectMapper.queryByName(name);
+        Project project = projectMapper.queryByName(name,cluster);
         if (project != null) {
             putMsg(result, Status.PROJECT_ALREADY_EXISTS, name);
             return result;
@@ -182,9 +182,9 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
     }
 
     @Override
-    public Map<String, Object> queryByName(User loginUser, String projectName) {
+    public Map<String, Object> queryByName(User loginUser, String projectName,String cluster) {
         Map<String, Object> result = new HashMap<>();
-        Project project = projectMapper.queryByName(projectName);
+        Project project = projectMapper.queryByName(projectName,cluster);
         boolean hasProjectAndPerm = hasProjectAndPerm(loginUser, project, result, PROJECT);
         if (!hasProjectAndPerm) {
             return result;
@@ -361,7 +361,7 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
      * @return update result code
      */
     @Override
-    public Result update(User loginUser, Long projectCode, String projectName, String desc, String userName) {
+    public Result update(User loginUser, Long projectCode, String projectName, String desc, String userName,String cluster) {
         Result result = new Result();
 
         checkDesc(result, desc);
@@ -374,7 +374,7 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
         if (!hasProjectAndPerm) {
             return result;
         }
-        Project tempProject = projectMapper.queryByName(projectName);
+        Project tempProject = projectMapper.queryByName(projectName,cluster);
         if (tempProject != null && tempProject.getCode() != project.getCode()) {
             putMsg(result, Status.PROJECT_ALREADY_EXISTS, projectName);
             return result;
@@ -386,6 +386,7 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
         }
         project.setName(projectName);
         project.setDescription(desc);
+        project.setCluster(cluster);
         project.setUpdateTime(new Date());
         project.setUserId(user.getId());
         int update = projectMapper.updateById(project);

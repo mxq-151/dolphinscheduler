@@ -31,4 +31,7 @@ public class ProjectCreateRequest {
 
     @ApiModelProperty(example = "this is a project")
     private String description;
+
+    @ApiModelProperty(example = "nmcloud")
+    private String cluster;
 }

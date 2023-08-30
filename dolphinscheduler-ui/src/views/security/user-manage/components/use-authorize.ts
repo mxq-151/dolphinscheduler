@@ -74,8 +74,8 @@ export function useAuthorize() {
       (item: { name: string; id: number }) => item.id
     )
     state.unauthorizedProjects = [...projects[0], ...projects[1]].map(
-      (item: { name: string; id: number }) => ({
-        label: item.name,
+      (item: { name: string;cluster: string; id: number }) => ({
+        label: item.name+"("+item.cluster+")",
         value: item.id
       })
     )
