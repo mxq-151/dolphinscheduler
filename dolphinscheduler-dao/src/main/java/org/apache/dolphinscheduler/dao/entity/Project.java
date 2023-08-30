@@ -113,14 +113,15 @@ public class Project {
         if (id != project.id) {
             return false;
         }
-        return name.equals(project.name);
+        return name.equals(project.name) && cluster.equals(project.cluster);
 
     }
 
     @Override
     public int hashCode() {
         int result = id;
-        result = 31 * result + name.hashCode();
+        int tmp=cluster.hashCode();
+        result = 31 * result + name.hashCode()+tmp;
         return result;
     }
 }

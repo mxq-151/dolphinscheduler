@@ -125,6 +125,7 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
                     .description(desc)
                     .userId(loginUser.getId())
                     .userName(loginUser.getUserName())
+                    .cluster(cluster)
                     .createTime(now)
                     .updateTime(now)
                     .build();
