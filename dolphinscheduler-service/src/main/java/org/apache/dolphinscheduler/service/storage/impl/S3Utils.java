@@ -45,6 +45,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -383,5 +384,10 @@ public class S3Utils implements Closeable, StorageOperate {
     @Override
     public ResUploadType returnStorageType() {
         return ResUploadType.S3;
+    }
+
+    @Override
+    public Date getLastModifiedTime(String objectKey) {
+        return s3Client.getObjectMetadata(BUCKET_NAME, objectKey).getLastModified();
     }
 }

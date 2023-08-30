@@ -44,6 +44,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -330,6 +331,11 @@ public class OssOperator implements Closeable, StorageOperate {
 
     protected OSS buildOssClient() {
         return OssClientFactory.buildOssClient(ossConnection);
+    }
+
+    @Override
+    public Date getLastModifiedTime(String objectKey) {
+        return ossClient.getObjectMetadata(bucketName,objectKey).getLastModified();
     }
 
 }

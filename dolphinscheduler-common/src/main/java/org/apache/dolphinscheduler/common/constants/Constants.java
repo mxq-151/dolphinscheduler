@@ -34,6 +34,9 @@ public final class Constants {
      */
     public static final String COMMON_PROPERTIES_PATH = "/common.properties";
 
+    public static final String RESOURCE_CACHE_PATH = "resource.cache.path";
+
+    public static final String RESOURCE_CACHE_ENABLE = "resource.cache.enable";
     /**
      * registry properties
      */

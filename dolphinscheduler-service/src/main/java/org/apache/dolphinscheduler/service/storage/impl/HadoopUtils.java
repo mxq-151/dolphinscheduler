@@ -54,6 +54,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.PrivilegedExceptionAction;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -748,5 +749,20 @@ public class HadoopUtils implements Closeable, StorageOperate {
     @Override
     public ResUploadType returnStorageType() {
         return ResUploadType.HDFS;
+    }
+
+
+    /**
+     * get LastModifiedTime
+     * @param filename
+     * @return LastModifiedTime
+     * @throws IOException
+     */
+    @Override
+    public Date getLastModifiedTime(String filename) throws IOException {
+        // 构造 HDFS 文件路径,获取文件的状态信息
+        Path hdfsDir = new Path(filename);
+        FileStatus status = fs.getFileStatus(hdfsDir);
+        return new Date(status.getModificationTime());
     }
 }
