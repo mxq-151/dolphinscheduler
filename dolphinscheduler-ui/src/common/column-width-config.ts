@@ -74,6 +74,10 @@ export const COLUMN_WIDTH_CONFIG = {
       tooltip: true
     }
   },
+
+  cluster: {
+    width: 150,
+  },
   dryRun: {
     width: 140
   },

@@ -92,7 +92,7 @@ public class ProjectV2Controller extends BaseController {
     public ProjectCreateResponse createProject(@ApiIgnore @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
                                                @RequestBody ProjectCreateRequest projectCreateRequest) {
         Result result = projectService.createProject(loginUser, projectCreateRequest.getProjectName(),
-                projectCreateRequest.getDescription());
+                projectCreateRequest.getDescription(),projectCreateRequest.getCluster());
         return new ProjectCreateResponse(result);
     }
 
@@ -113,7 +113,7 @@ public class ProjectV2Controller extends BaseController {
                                                @PathVariable("code") Long code,
                                                @RequestBody ProjectUpdateRequest projectUpdateReq) {
         Result result = projectService.update(loginUser, code, projectUpdateReq.getProjectName(),
-                projectUpdateReq.getDescription(), projectUpdateReq.getUserName());
+                projectUpdateReq.getDescription(), projectUpdateReq.getUserName(),projectUpdateReq.getCluster());
         return new ProjectUpdateResponse(result);
     }
 

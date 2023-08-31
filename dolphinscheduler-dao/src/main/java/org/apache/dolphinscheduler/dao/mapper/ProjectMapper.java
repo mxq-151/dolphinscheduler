@@ -67,7 +67,7 @@ public interface ProjectMapper extends BaseMapper<Project> {
      * @param projectName projectName
      * @return project
      */
-    Project queryByName(@Param("projectName") String projectName);
+    Project queryByName(@Param("projectName") String projectName,@Param("cluster") String cluster);
 
     /**
      * project page

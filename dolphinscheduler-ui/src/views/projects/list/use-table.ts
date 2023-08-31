@@ -96,6 +96,11 @@ export function useTable() {
           )
       },
       {
+        title: t('project.list.project_cluster'),
+        key: 'cluster',
+        ...COLUMN_WIDTH_CONFIG['cluster']
+      },
+      {
         title: t('project.list.owned_users'),
         key: 'userName',
         ...COLUMN_WIDTH_CONFIG['userName']
@@ -209,6 +214,7 @@ export function useTable() {
 
   const variables = reactive({
     columns: [],
+    createProject: ref(false),
     tableWidth: DefaultTableWidth,
     tableData: [],
     page: ref(1),

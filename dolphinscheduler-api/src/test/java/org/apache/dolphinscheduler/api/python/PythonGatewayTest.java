@@ -64,7 +64,7 @@ public class PythonGatewayTest {
     @Test
     public void testGetCodeAndVersion() throws CodeGenerateUtils.CodeGenerateException {
         Project project = getTestProject();
-        Mockito.when(projectMapper.queryByName(project.getName())).thenReturn(project);
+        Mockito.when(projectMapper.queryByName(project.getName(),"default")).thenReturn(project);
 
         ProcessDefinition processDefinition = getTestProcessDefinition();
         Mockito.when(processDefinitionMapper.queryByDefineName(project.getCode(), processDefinition.getName())).thenReturn(processDefinition);
@@ -79,7 +79,7 @@ public class PythonGatewayTest {
     @Test
     public void testGetDependentInfo() {
         Project project = getTestProject();
-        Mockito.when(projectMapper.queryByName(project.getName())).thenReturn(project);
+        Mockito.when(projectMapper.queryByName(project.getName(),"default")).thenReturn(project);
 
         ProcessDefinition processDefinition = getTestProcessDefinition();
         Mockito.when(processDefinitionMapper.queryByDefineName(project.getCode(), processDefinition.getName())).thenReturn(processDefinition);

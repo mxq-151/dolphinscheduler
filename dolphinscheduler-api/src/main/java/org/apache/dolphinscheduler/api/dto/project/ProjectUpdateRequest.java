@@ -39,4 +39,7 @@ public class ProjectUpdateRequest {
 
     @ApiModelProperty(example = "this is a project")
     private String description;
+
+    @ApiModelProperty(example = "nm")
+    private String cluster;
 }

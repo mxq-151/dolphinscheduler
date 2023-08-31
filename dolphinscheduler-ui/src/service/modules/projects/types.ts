@@ -24,6 +24,7 @@ interface ListReq {
 interface ProjectsReq {
   description?: string
   projectName: string
+  cluster: string
 }
 
 interface UserIdReq {

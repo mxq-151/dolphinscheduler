@@ -33,6 +33,7 @@ export function useForm(
     variables.model = {
       projectName: '',
       description: '',
+      cluster:'',
       userName: (userStore.getUserInfo as UserInfoRes).userName
     }
   }
@@ -41,6 +42,7 @@ export function useForm(
     projectFormRef: ref(),
     model: {
       projectName: '',
+      cluster: '',
       description: '',
       userName: (userStore.getUserInfo as UserInfoRes).userName
     },
@@ -52,6 +54,15 @@ export function useForm(
         validator() {
           if (variables.model.projectName === '') {
             return new Error(t('project.list.project_tips'))
+          }
+        }
+      },
+      cluster: {
+        required: true,
+        trigger: ['input', 'blur'],
+        validator() {
+          if (variables.model.cluster === '') {
+            return new Error(t('project.list.cluster'))
           }
         }
       },

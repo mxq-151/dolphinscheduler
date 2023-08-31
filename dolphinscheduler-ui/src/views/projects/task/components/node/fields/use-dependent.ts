@@ -180,9 +180,9 @@ export function useDependent(model: { [field: string]: any }): IJsonItem[] {
 
   const getProjectList = async () => {
     const result = await queryAllProjectListForDependent()
-    projectList.value = result.map((item: { code: number; name: string }) => ({
+    projectList.value = result.map((item: { code: number; name: string; cluster: string }) => ({
       value: item.code,
-      label: () => h(NEllipsis, null, item.name)
+      label: () => h(NEllipsis, null, item.name+"("+item.cluster+")")
     }))
     return projectList
   }
