@@ -72,6 +72,8 @@ public interface ProcessService {
 
     int createCommand(Command command);
 
+    int preCreateCommand(ProcessDefinition processDefinition,Schedule schedule) throws CronParseException;
+
     List<Command> queryCommands(long processDefinitionCode,Date scheduleTime);
 
     List<Command> findCommandPage(int pageSize, int pageNumber);

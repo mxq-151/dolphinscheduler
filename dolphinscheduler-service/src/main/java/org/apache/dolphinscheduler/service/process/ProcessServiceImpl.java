@@ -111,6 +111,7 @@ import org.apache.dolphinscheduler.remote.command.TaskEventChangeCommand;
 import org.apache.dolphinscheduler.remote.command.WorkflowStateEventChangeCommand;
 import org.apache.dolphinscheduler.remote.processor.StateEventCallbackService;
 import org.apache.dolphinscheduler.remote.utils.Host;
+import org.apache.dolphinscheduler.service.cron.CronUtils;
 import org.apache.dolphinscheduler.service.exceptions.CronParseException;
 import org.apache.dolphinscheduler.service.exceptions.ResourceNotExistsException;
 import org.apache.dolphinscheduler.service.exceptions.ServiceException;
@@ -482,9 +483,90 @@ public class ProcessServiceImpl implements ProcessService {
         }
         command.setId(null);
 
-
         result = commandMapper.upsertCommand(command);
         return result;
+    }
+
+    @Override
+    public int preCreateCommand(ProcessDefinition processDefinition, Schedule schedule) throws CronParseException {
+
+        //预先创建50个实例
+
+
+        Date now=new Date();
+
+        List<Command> commandList=
+                this.queryCommands(schedule.getProcessDefinitionCode(),now);
+
+        if(commandList.size()>=50)
+        {
+            return commandList.size();
+        }
+        Date end=new Date(System.currentTimeMillis()+24*60*60*1000);
+        int count=0;
+        List<Date> dates=CronUtils.getSelfFireDateList(now,end,Arrays.asList(schedule));
+        for (int i = 0; i < dates.size(); i++) {
+            Date scheduledFireTime=dates.get(i);
+            Command command = new Command();
+            command.setScheduleId(schedule.getId());
+            command.setCommandType(CommandType.SCHEDULER);
+            command.setExecutorId(schedule.getUserId());
+            command.setFailureStrategy(schedule.getFailureStrategy());
+            command.setProcessDefinitionCode(schedule.getProcessDefinitionCode());
+            command.setScheduleTime(scheduledFireTime);
+            command.setStartTime(now);
+            command.setWarningGroupId(schedule.getWarningGroupId());
+            String workerGroup = StringUtils.isEmpty(schedule.getWorkerGroup()) ? Constants.DEFAULT_WORKER_GROUP : schedule.getWorkerGroup();
+            command.setWorkerGroup(workerGroup);
+            command.setEnvironmentCode(schedule.getEnvironmentCode());
+            command.setWarningType(schedule.getWarningType());
+            command.setProcessInstancePriority(schedule.getProcessInstancePriority());
+            command.setProcessDefinitionVersion(processDefinition.getVersion());
+
+            boolean find=false;
+            for (int j = 0; j < commandList.size(); j++) {
+                Command tmp=commandList.get(j);
+                if(tmp.getScheduleTime().compareTo(scheduledFireTime)==0)
+                {
+                    find=true;
+                    break;
+                }
+            }
+            if(find)
+            {
+                continue;
+            }
+
+            count++;
+
+
+            CommandType ct=command.getCommandType();
+            switch (ct){
+                case REPEAT_RUNNING:
+                case START_FAILURE_TASK_PROCESS:
+                case START_PROCESS:
+                case START_CURRENT_TASK_PROCESS:
+                    command.setManualRun(true);
+                    break;
+                default:
+                    command.setManualRun(false);
+                    break;
+            }
+
+            Map<String, String> commandParams =
+                    StringUtils.isNotBlank(command.getCommandParam()) ? JSONUtils.toMap(command.getCommandParam())
+                            : new HashMap<>();
+            commandParams.put(Constants.SCHEDULE_TIMEZONE, schedule.getTimezoneId());
+            command.setCommandParam(JSONUtils.toJsonString(commandParams));
+
+            commandMapper.upsertCommand(command);
+            //不会预先创建超过12小时的实例
+            if(scheduledFireTime.getTime()-now.getTime()>12*60*60*1000 || count>=50)
+            {
+                break;
+            }
+        }
+        return count;
     }
 
     @Override

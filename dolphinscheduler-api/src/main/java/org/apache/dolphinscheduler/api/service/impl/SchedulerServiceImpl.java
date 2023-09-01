@@ -38,11 +38,7 @@ import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.common.model.Server;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
-import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
-import org.apache.dolphinscheduler.dao.entity.ProcessTaskRelation;
-import org.apache.dolphinscheduler.dao.entity.Project;
-import org.apache.dolphinscheduler.dao.entity.Schedule;
-import org.apache.dolphinscheduler.dao.entity.User;
+import org.apache.dolphinscheduler.dao.entity.*;
 import org.apache.dolphinscheduler.dao.mapper.*;
 import org.apache.dolphinscheduler.scheduler.api.SchedulerApi;
 import org.apache.dolphinscheduler.service.cron.CronUtils;
@@ -365,7 +361,11 @@ public class SchedulerServiceImpl extends BaseServiceImpl implements SchedulerSe
                     logger.info("Call master client set schedule online, project id: {}, flow id: {},host: {}",
                             project.getId(), processDefinition.getId(), masterServers);
                     setSchedule(project.getId(), scheduleObj);
-                    this.commandMapper.makeCommandOnline(scheduleObj.getId(),processDefinition.getVersion());
+                    int count=this.commandMapper.makeCommandOnline(scheduleObj.getId(),processDefinition.getVersion());
+                    if(count<=0)
+                    {
+                        this.processService.preCreateCommand(processDefinition,scheduleObj);
+                    }
                     break;
                 case OFFLINE:
                     logger.info("Call master client set schedule offline, project id: {}, flow id: {},host: {}",
