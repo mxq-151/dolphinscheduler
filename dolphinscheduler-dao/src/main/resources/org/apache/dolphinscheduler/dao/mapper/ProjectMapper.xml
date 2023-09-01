@@ -85,6 +85,7 @@
         SELECT p.id,
         p.name,
         p.code,
+        p.cluster,
         p.description,
         p.user_id,
         p.flag,

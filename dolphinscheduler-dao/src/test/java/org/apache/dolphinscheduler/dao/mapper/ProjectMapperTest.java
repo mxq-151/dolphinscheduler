@@ -127,7 +127,7 @@ public class ProjectMapperTest extends BaseDaoTest {
         Project project = insertOne();
         project.setUserId(user.getId());
         projectMapper.updateById(project);
-        Project project1 = projectMapper.queryByName(project.getName());
+        Project project1 = projectMapper.queryByName(project.getName(),"default");
 
         Assert.assertNotEquals(project1, null);
     }
