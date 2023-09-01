@@ -83,6 +83,6 @@
     </update>
 
     <update id="makeCommandOnline">
-        update t_ds_command set cstate=0,process_definition_code=#{processDefinitionVersion} where cstate=3 and schedule_id=#{scheduleId}
+        update t_ds_command set cstate=0,process_definition_version=#{processDefinitionVersion} where cstate=3 and schedule_id=#{scheduleId}
     </update>
 </mapper>
