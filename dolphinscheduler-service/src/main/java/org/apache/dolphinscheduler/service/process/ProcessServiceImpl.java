@@ -490,11 +490,8 @@ public class ProcessServiceImpl implements ProcessService {
     @Override
     public int preCreateCommand(ProcessDefinition processDefinition, Schedule schedule) throws CronParseException {
 
+        Date now=schedule.getStartTime();
         //预先创建50个实例
-
-
-        Date now=new Date();
-
         List<Command> commandList=
                 this.queryCommands(schedule.getProcessDefinitionCode(),now);
 
@@ -502,7 +499,8 @@ public class ProcessServiceImpl implements ProcessService {
         {
             return commandList.size();
         }
-        Date end=new Date(System.currentTimeMillis()+24*60*60*1000);
+
+        Date end=new Date(now.getTime()+24*60*60*1000);
         int count=0;
         List<Date> dates=CronUtils.getSelfFireDateList(now,end,Arrays.asList(schedule));
         for (int i = 0; i < dates.size(); i++) {
