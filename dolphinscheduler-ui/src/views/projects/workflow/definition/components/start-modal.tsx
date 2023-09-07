@@ -316,9 +316,8 @@ export default defineComponent({
             path='environmentCode'
           >
             <NSelect
-              options={this.environmentList.filter((item: any) =>
-                item.workerGroups?.includes(this.startForm.workerGroup)
-              )}
+              options={this.environmentList
+              }
               v-model:value={this.startForm.environmentCode}
               clearable
             />
