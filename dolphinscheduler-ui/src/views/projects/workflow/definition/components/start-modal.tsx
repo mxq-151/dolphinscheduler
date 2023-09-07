@@ -54,6 +54,7 @@ import {
 } from '@vicons/antd'
 import { IDefinitionData } from '../types'
 import styles from '../index.module.scss'
+import { IOption } from '@/components/form/types'
 
 const props = {
   row: {
@@ -94,6 +95,8 @@ export default defineComponent({
     const handleStart = () => {
       handleStartDefinition(props.row.code)
     }
+
+
 
     const generalWarningTypeListOptions = () => [
       {
@@ -151,6 +154,10 @@ export default defineComponent({
       () => route.name === 'workflow-definition-detail'
     )
 
+    const workerGroupOptions = computed(
+      ()=>variables.environmentList.filter((item)=> item.value==startState.startForm.environmentCode).map((item)=>item.workerGroups).flat().map((wg)=>({value:wg,label:wg}))
+    )
+
     const renderLabel = (option: any) => {
       return [
         h(
@@ -169,10 +176,6 @@ export default defineComponent({
         ),
         option.label
       ]
-    }
-
-    const updateWorkerGroup = () => {
-      startState.startForm.environmentCode = null
     }
 
     const addStartParams = () => {
@@ -219,7 +222,7 @@ export default defineComponent({
       generalWarningTypeListOptions,
       generalPriorityList,
       renderLabel,
-      updateWorkerGroup,
+      workerGroupOptions,
       removeStartParams,
       addStartParams,
       updateParamsList,
@@ -301,16 +304,7 @@ export default defineComponent({
               v-model:value={this.startForm.processInstancePriority}
             />
           </NFormItem>
-          <NFormItem
-            label={t('project.workflow.worker_group')}
-            path='workerGroup'
-          >
-            <NSelect
-              options={this.workerGroups}
-              onUpdateValue={this.updateWorkerGroup}
-              v-model:value={this.startForm.workerGroup}
-            />
-          </NFormItem>
+
           <NFormItem
             label={t('project.workflow.environment_name')}
             path='environmentCode'
@@ -318,8 +312,19 @@ export default defineComponent({
             <NSelect
               options={this.environmentList
               }
+
               v-model:value={this.startForm.environmentCode}
               clearable
+            />
+          </NFormItem>
+
+          <NFormItem
+            label={t('project.workflow.worker_group')}
+            path='workerGroup'
+          >
+            <NSelect
+              options={this.workerGroupOptions}
+              v-model:value={this.startForm.workerGroup}
             />
           </NFormItem>
           <NFormItem
