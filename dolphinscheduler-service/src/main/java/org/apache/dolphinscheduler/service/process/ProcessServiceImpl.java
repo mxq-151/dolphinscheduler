@@ -310,6 +310,7 @@ public class ProcessServiceImpl implements ProcessService {
                     saveSerialProcess(processInstance, processDefinition);
                     if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
                         setSubProcessParam(processInstance);
+                        logger.info("running sub2 process {}",processInstance.getProcessDefinitionCode());
                         return null;
                     }
 
@@ -320,6 +321,7 @@ public class ProcessServiceImpl implements ProcessService {
                     this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
                     return pi;
                 }else {
+                    logger.info("running sub5 process {}",processInstance.getProcessDefinitionCode());
                     return null;
                 }
             }else {
@@ -333,6 +335,7 @@ public class ProcessServiceImpl implements ProcessService {
 
                         if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
                             setSubProcessParam(processInstance);
+                            logger.info("running sub1 process {}",processInstance.getProcessDefinitionCode());
                             return null;
                         }
                         pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
@@ -349,6 +352,7 @@ public class ProcessServiceImpl implements ProcessService {
                     pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
                     if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
                         setSubProcessParam(processInstance);
+                        logger.info("running sub2 process {}",processInstance.getProcessDefinitionCode());
                         return null;
                     }
                     logger.info("create new serial process {},time:{}",command.getProcessDefinitionCode(),pi.getScheduleTime());
@@ -512,7 +516,7 @@ public class ProcessServiceImpl implements ProcessService {
             command.setFailureStrategy(schedule.getFailureStrategy());
             command.setProcessDefinitionCode(schedule.getProcessDefinitionCode());
             command.setScheduleTime(scheduledFireTime);
-            command.setStartTime(now);
+            command.setStartTime(new Date());
             command.setWarningGroupId(schedule.getWarningGroupId());
             String workerGroup = StringUtils.isEmpty(schedule.getWorkerGroup()) ? Constants.DEFAULT_WORKER_GROUP : schedule.getWorkerGroup();
             command.setWorkerGroup(workerGroup);
