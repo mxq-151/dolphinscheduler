@@ -23,6 +23,7 @@ import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
+import org.apache.dolphinscheduler.common.utils.PropertyUtils;
 import org.apache.dolphinscheduler.plugin.task.api.AbstractTask;
 import org.apache.dolphinscheduler.plugin.task.api.TaskCallBack;
 import org.apache.dolphinscheduler.plugin.task.api.TaskChannel;
@@ -156,6 +157,7 @@ public abstract class WorkerTaskExecuteRunnable implements Runnable {
 
             initializeTask();
 
+
             if (Constants.DRY_RUN_FLAG_YES == taskExecutionContext.getDryRun()) {
                 taskExecutionContext.setCurrentExecutionStatus(TaskExecutionStatus.SUCCESS);
                 taskExecutionContext.setEndTime(new Date());
@@ -166,6 +168,19 @@ public abstract class WorkerTaskExecuteRunnable implements Runnable {
                         "The current execute mode is dry run, will stop the subsequent process and set the taskInstance status to success");
                 return;
             }
+
+            if (PropertyUtils.getBoolean("task.dryRun.enable",false)) {
+                Thread.sleep(10000);
+                taskExecutionContext.setCurrentExecutionStatus(TaskExecutionStatus.SUCCESS);
+                taskExecutionContext.setEndTime(new Date());
+                TaskExecutionContextCacheManager.removeByTaskInstanceId(taskExecutionContext.getTaskInstanceId());
+                workerMessageSender.sendMessageWithRetry(taskExecutionContext, masterAddress,
+                        CommandType.TASK_EXECUTE_RESULT);
+                logger.info(
+                        "The current execute mode is manually dry run, will stop the subsequent process and set the taskInstance status to success");
+                return;
+            }
+
 
             beforeExecute();
 
