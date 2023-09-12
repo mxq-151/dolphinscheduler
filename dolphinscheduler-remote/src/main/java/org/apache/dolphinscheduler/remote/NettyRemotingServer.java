@@ -130,10 +130,10 @@ public class NettyRemotingServer {
             final boolean enableSSL = PropertyUtils.getBoolean("communicate.ssl", false);
             SslContext sslContext = null;
             if (enableSSL) {
-                String basePath = PropertyUtils.getString("ssl.basePath", "/opt/soft/dolphinscheduler/tls/");
-                File certChainFile = new File(basePath + "server.crt");
-                File keyFile = new File(basePath + "pkcs8_server.key");
-                File rootFile = new File(basePath + "ca.crt");
+                String basePath = PropertyUtils.getString("ssl.basePath", "/opt/soft/dolphinscheduler/tls");
+                File certChainFile = new File(basePath + File.separator + "server.crt");
+                File keyFile = new File(basePath + File.separator + "pkcs8_server.key");
+                File rootFile = new File(basePath + File.separator + "ca.crt");
                 //生成sslContext对象
                 sslContext = SslContextBuilder.forServer(certChainFile, keyFile)
                         .trustManager(rootFile)

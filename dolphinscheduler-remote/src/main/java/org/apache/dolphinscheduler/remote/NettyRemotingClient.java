@@ -118,10 +118,10 @@ public class NettyRemotingClient implements AutoCloseable {
         SslContext sslContext = null;
         final boolean enableSSL = PropertyUtils.getBoolean("communicate.ssl", false);
         if (enableSSL) {
-            String basePath = PropertyUtils.getString("ssl.basePath", "/opt/soft/dolphinscheduler/tls/");
-            File certChainFile = new File(basePath + "client.crt");
-            File keyFile = new File(basePath + "pkcs8_client.key");
-            File rootFile = new File(basePath + "ca.crt");
+            String basePath = PropertyUtils.getString("ssl.basePath", "/opt/soft/dolphinscheduler/tls");
+            File certChainFile = new File(basePath + File.separator + "client.crt");
+            File keyFile = new File(basePath + File.separator + "pkcs8_client.key");
+            File rootFile = new File(basePath + File.separator + "ca.crt");
             //生成SslContext对象
             sslContext = SslContextBuilder.forClient()
                     //客户端crt+key.pk8
