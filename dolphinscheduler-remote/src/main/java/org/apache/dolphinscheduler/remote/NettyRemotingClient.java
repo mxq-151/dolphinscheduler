@@ -116,13 +116,12 @@ public class NettyRemotingClient implements AutoCloseable {
     private void start() throws SSLException {
 
         SslContext sslContext = null;
-        final boolean enableSSL=PropertyUtils.getBoolean("communicate.ssl",false);
-        if(enableSSL)
-        {
-            String basePath = "/opt/soft/dolphinscheduler/tls/";
-            File certChainFile = new File(basePath+"client.crt");
-            File keyFile = new File(basePath+"pkcs8_client.key");
-            File rootFile = new File(basePath+"ca.crt");
+        final boolean enableSSL = PropertyUtils.getBoolean("communicate.ssl", false);
+        if (enableSSL) {
+            String basePath = PropertyUtils.getString("ssl.basePath", "/opt/soft/dolphinscheduler/tls/");
+            File certChainFile = new File(basePath + "client.crt");
+            File keyFile = new File(basePath + "pkcs8_client.key");
+            File rootFile = new File(basePath + "ca.crt");
             //生成SslContext对象
             sslContext = SslContextBuilder.forClient()
                     //客户端crt+key.pk8
@@ -145,16 +144,15 @@ public class NettyRemotingClient implements AutoCloseable {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, clientConfig.getConnectTimeoutMillis())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    public void initChannel(SocketChannel ch){
-                        if(enableSSL)
-                        {
+                    public void initChannel(SocketChannel ch) {
+                        if (enableSSL) {
                             ch.pipeline()
                                     //添加ssl安全验证
                                     .addFirst(finalSslContext.newHandler(ch.alloc()))
                                     .addLast("client-idle-handler", new IdleStateHandler(Constants.NETTY_CLIENT_HEART_BEAT_TIME, 0, 0, TimeUnit.MILLISECONDS))
                                     .addLast(new NettyDecoder(), clientHandler, encoder);
 
-                        }else {
+                        } else {
                             ch.pipeline()
                                     //添加ssl安全验证
                                     .addLast("client-idle-handler", new IdleStateHandler(Constants.NETTY_CLIENT_HEART_BEAT_TIME, 0, 0, TimeUnit.MILLISECONDS))
