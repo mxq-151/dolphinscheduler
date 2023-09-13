@@ -633,14 +633,6 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
         command.setExecutorId(loginUser.getId());
         command.setProcessDefinitionVersion(processVersion);
 
-        if (!processService.verifyIsNeedCreateCommand(command)) {
-            logger.warn(
-                    "Process instance is executing the command, processDefinitionCode:{}, processDefinitionVersion:{}, processInstanceId:{}.",
-                    processDefinitionCode, processVersion, instanceId);
-            putMsg(result, Status.PROCESS_INSTANCE_EXECUTING_COMMAND, String.valueOf(processDefinitionCode));
-            return result;
-        }
-
         int create = processService.createCommand(command);
 
         if (create > 0) {
