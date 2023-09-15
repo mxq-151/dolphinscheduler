@@ -351,7 +351,7 @@ public class SchedulerServiceImpl extends BaseServiceImpl implements SchedulerSe
 
         // set status
         scheduleObj.setReleaseState(scheduleStatus);
-
+        scheduleObj.setEndTime(new Date());
         scheduleMapper.updateById(scheduleObj);
 
 

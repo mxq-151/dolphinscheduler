@@ -45,6 +45,7 @@ import {
   NList,
   NListItem,
   NThing,
+  NCheckbox,
   NPopover
 } from 'naive-ui'
 import { ArrowDownOutlined, ArrowUpOutlined } from '@vicons/antd'
@@ -200,7 +201,7 @@ export default defineComponent({
         if (!props.row.crontab) return
 
         timingState.timingForm.startEndTime = [
-          new Date(props.row.startTime),
+          new Date(),
           new Date(props.row.endTime)
         ]
         timingState.timingForm.crontab = props.row.crontab
@@ -251,7 +252,7 @@ export default defineComponent({
             path='startEndTime'
           >
             <NDatePicker
-              type='datetimerange'
+              type='datetime'
               clearable
               v-model:value={this.timingForm.startEndTime}
             />
