@@ -1087,6 +1087,7 @@ public class ProcessServiceImpl implements ProcessService {
             logger.warn("kkkwwww:{}",cmdParam);
         } else {
             processInstance = this.findProcessInstanceDetailById(processInstanceId).orElse(null);
+            logger.info("wwwwwwwwwwwwww instance:",processInstance);
             if (processInstance == null) {
                 return null;
             }
