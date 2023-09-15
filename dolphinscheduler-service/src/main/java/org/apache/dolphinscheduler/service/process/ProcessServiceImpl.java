@@ -1087,6 +1087,7 @@ public class ProcessServiceImpl implements ProcessService {
             logger.warn("kkkwwww:{}",cmdParam);
             if (cmdParam.containsKey(CommandKeyConstants.CMD_PARAM_SUB_PROCESS)) {
                 processInstanceId = Integer.parseInt(cmdParam.get(CommandKeyConstants.CMD_PARAM_SUB_PROCESS));
+                logger.info("------------------:{}",processInstanceId);
                 processInstance.setId(processInstanceId);
             }
 
