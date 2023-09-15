@@ -240,6 +240,7 @@ public class MasterSchedulerBootstrap extends BaseDaemonThread implements AutoCl
                                 processInstance.getId());
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     logger.error("Master handle command {} error ", command.getId(), e);
                     processService.moveToErrorCommand(command, e.toString());
                 }
