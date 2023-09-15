@@ -88,7 +88,7 @@ export default {
     success: 'Success',
     set_parameters_before_starting: 'Please set the parameters before starting',
     set_parameters_before_timing: 'Set parameters before timing',
-    start_and_stop_time: 'Start and stop time',
+    start_and_stop_time: 'stop time',
     next_five_execution_times: 'Next five execution times',
     execute_time: 'Execute time',
     failure_strategy: 'Failure Strategy',

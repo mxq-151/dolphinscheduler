@@ -91,7 +91,7 @@ export default {
     set_parameters_before_starting: '启动前请先设置参数',
     set_parameters_before_timing: '定时前请先设置参数',
     set_from_now: '从当前开始',
-    start_and_stop_time: '起止时间',
+    start_and_stop_time: '结束时间',
     next_five_execution_times: '接下来五次执行时间',
     execute_time: '执行时间',
     failure_strategy: '失败策略',
