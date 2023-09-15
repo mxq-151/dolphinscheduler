@@ -1081,6 +1081,10 @@ public class ProcessServiceImpl implements ProcessService {
         int processInstanceId = command.getProcessInstanceId();
         if (processInstanceId == 0) {
             processInstance = generateNewProcessInstance(processDefinition, command, cmdParam);
+            logger.warn("lllll:{}",processInstance);
+            logger.warn("kkkkkk:{}",processDefinition);
+            logger.warn("iiiiii:{}",command);
+            logger.warn("kkkwwww:{}",cmdParam);
         } else {
             processInstance = this.findProcessInstanceDetailById(processInstanceId).orElse(null);
             if (processInstance == null) {
