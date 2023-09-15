@@ -1081,24 +1081,17 @@ public class ProcessServiceImpl implements ProcessService {
         int processInstanceId = command.getProcessInstanceId();
         if (processInstanceId == 0) {
             processInstance = generateNewProcessInstance(processDefinition, command, cmdParam);
-            logger.warn("lllll:{}",processInstance);
-            logger.warn("kkkkkk:{}",processDefinition);
-            logger.warn("iiiiii:{}",command);
-            logger.warn("kkkwwww:{}",cmdParam);
             if (cmdParam.containsKey(CommandKeyConstants.CMD_PARAM_RECOVER_PROCESS_ID_STRING)) {
                 processInstanceId = Integer.parseInt(cmdParam.get(CommandKeyConstants.CMD_PARAM_RECOVER_PROCESS_ID_STRING));
-                logger.info("------------------:{}",processInstanceId);
                 processInstance.setId(processInstanceId);
             }
 
         } else {
             processInstance = this.findProcessInstanceDetailById(processInstanceId).orElse(null);
-            logger.info("wwwwwwwwwwwwww instance:{}",processInstance);
             if (processInstance == null) {
                 return null;
             }
         }
-        logger.info("ooooooooo instance:{}",processInstance);
         if (cmdParam != null) {
             CommandType commandTypeIfComplement = getCommandTypeIfComplement(processInstance, command);
             // reset global params while repeat running is needed by cmdParam
@@ -1172,7 +1165,6 @@ public class ProcessServiceImpl implements ProcessService {
             case RECOVER_SUSPENDED_PROCESS:
                 // find pause tasks and init task's state
                 cmdParam.remove(CommandKeyConstants.CMD_PARAM_RECOVERY_START_NODE_STRING);
-                logger.info("process instance:{}",processInstance);
                 List<Integer> stopNodeList = findTaskIdByInstanceState(processInstance.getId(),
                         TaskExecutionStatus.KILL);
                 for (Integer taskId : stopNodeList) {
