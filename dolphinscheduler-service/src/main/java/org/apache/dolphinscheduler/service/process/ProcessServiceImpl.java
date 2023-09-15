@@ -1091,6 +1091,7 @@ public class ProcessServiceImpl implements ProcessService {
                 return null;
             }
         }
+        logger.info("ooooooooo instance:",processInstance);
         if (cmdParam != null) {
             CommandType commandTypeIfComplement = getCommandTypeIfComplement(processInstance, command);
             // reset global params while repeat running is needed by cmdParam
