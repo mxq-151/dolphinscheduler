@@ -1087,12 +1087,12 @@ public class ProcessServiceImpl implements ProcessService {
             logger.warn("kkkwwww:{}",cmdParam);
         } else {
             processInstance = this.findProcessInstanceDetailById(processInstanceId).orElse(null);
-            logger.info("wwwwwwwwwwwwww instance:",processInstance);
+            logger.info("wwwwwwwwwwwwww instance:{}",processInstance);
             if (processInstance == null) {
                 return null;
             }
         }
-        logger.info("ooooooooo instance:",processInstance);
+        logger.info("ooooooooo instance:{}",processInstance);
         if (cmdParam != null) {
             CommandType commandTypeIfComplement = getCommandTypeIfComplement(processInstance, command);
             // reset global params while repeat running is needed by cmdParam
@@ -1166,7 +1166,7 @@ public class ProcessServiceImpl implements ProcessService {
             case RECOVER_SUSPENDED_PROCESS:
                 // find pause tasks and init task's state
                 cmdParam.remove(CommandKeyConstants.CMD_PARAM_RECOVERY_START_NODE_STRING);
-                logger.info("process instance:",processInstance);
+                logger.info("process instance:{}",processInstance);
                 List<Integer> stopNodeList = findTaskIdByInstanceState(processInstance.getId(),
                         TaskExecutionStatus.KILL);
                 for (Integer taskId : stopNodeList) {
