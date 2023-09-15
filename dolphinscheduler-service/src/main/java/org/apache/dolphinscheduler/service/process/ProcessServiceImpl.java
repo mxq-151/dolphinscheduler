@@ -310,7 +310,7 @@ public class ProcessServiceImpl implements ProcessService {
                     saveSerialProcess(processInstance, processDefinition);
                     if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
                         setSubProcessParam(processInstance);
-                        logger.info("running sub2 process {}",processInstance.getProcessDefinitionCode());
+                        logger.info("subProcess processDefinitionCode:{},instance:{},time:{}",command.getProcessDefinitionCode(),runningInstance.getId(),runningInstance.getScheduleTime());
                         return null;
                     }
 
@@ -321,7 +321,7 @@ public class ProcessServiceImpl implements ProcessService {
                     this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
                     return pi;
                 }else {
-                    logger.info("running sub5 process {}",processInstance.getProcessDefinitionCode());
+                    logger.info("running  processDefinitionCode:{},instance:{},time:{}",processInstance.getProcessDefinitionCode(),processInstance.getId(),processInstance.getScheduleTime());
                     return null;
                 }
             }else {
@@ -335,7 +335,7 @@ public class ProcessServiceImpl implements ProcessService {
 
                         if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
                             setSubProcessParam(processInstance);
-                            logger.info("running sub1 process {}",processInstance.getProcessDefinitionCode());
+                            logger.info("subProcess processDefinitionCode:{},instance:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
                             return null;
                         }
                         pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
@@ -344,7 +344,7 @@ public class ProcessServiceImpl implements ProcessService {
                         logger.warn("serial process {} recover,instanceId:{}",command.getProcessDefinitionCode(),pi.getId());
                         return pi;
                     }else {
-                        logger.info("serial process must recover frist,recover instanceId:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
+                        logger.info("serial process must recover frist,recover processDefinitionCode:{},instance:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
                         return null;
                     }
                 }else {
@@ -352,10 +352,10 @@ public class ProcessServiceImpl implements ProcessService {
                     pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
                     if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
                         setSubProcessParam(processInstance);
-                        logger.info("running sub2 process {}",processInstance.getProcessDefinitionCode());
+                        logger.info("subProcess processDefinitionCode:{},instance:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
                         return null;
                     }
-                    logger.info("create new serial process {},time:{}",command.getProcessDefinitionCode(),pi.getScheduleTime());
+                    logger.info("create new serial processDefinitionCode:{},instance:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
                     this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
                     this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
                     return pi;
