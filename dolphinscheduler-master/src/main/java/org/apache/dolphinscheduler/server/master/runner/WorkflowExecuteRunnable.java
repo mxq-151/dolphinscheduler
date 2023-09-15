@@ -1593,6 +1593,7 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             readyToSubmitTaskQueue.clear();
         }
 
+
         for (long taskCode : activeTaskProcessorMaps.keySet()) {
             ITaskProcessor taskProcessor = activeTaskProcessorMaps.get(taskCode);
             Integer taskInstanceId = validTaskMap.get(taskCode);
@@ -1618,6 +1619,19 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             } finally {
                 LogUtils.removeWorkflowAndTaskInstanceIdMDC();
             }
+        }
+        if(activeTaskProcessorMaps.isEmpty())
+        {
+            WorkflowStateEvent event=new WorkflowStateEvent();
+            event.setProcessInstanceId(this.processInstance.getId());
+            event.setStatus(WorkflowExecutionStatus.STOP);
+            try{
+                this.updateProcessInstanceState(event);
+            }catch (StateEventHandleException e)
+            {
+                logger.error("update processinstance:{} error:{}",processInstance.getId(),e);
+            }
+
         }
     }
 
