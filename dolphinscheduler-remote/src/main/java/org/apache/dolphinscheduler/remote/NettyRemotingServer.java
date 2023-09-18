@@ -127,14 +127,13 @@ public class NettyRemotingServer {
      */
     public void start() throws SSLException {
         if (isStarted.compareAndSet(false, true)) {
-            final boolean enableSSL= PropertyUtils.getBoolean("communicate.ssl",false);
-            SslContext sslContext=null;
-            if(enableSSL)
-            {
-                String basePath = "/opt/soft/dolphinscheduler/tls/";
-                File certChainFile = new File(basePath + "server.crt");
-                File keyFile = new File(basePath + "pkcs8_server.key");
-                File rootFile = new File(basePath + "ca.crt");
+            final boolean enableSSL = PropertyUtils.getBoolean("communicate.ssl", false);
+            SslContext sslContext = null;
+            if (enableSSL) {
+                String basePath = PropertyUtils.getString("ssl.basePath", "/opt/soft/dolphinscheduler/tls");
+                File certChainFile = new File(basePath + File.separator + "server.crt");
+                File keyFile = new File(basePath + File.separator + "pkcs8_server.key");
+                File rootFile = new File(basePath + File.separator + "ca.crt");
                 //生成sslContext对象
                 sslContext = SslContextBuilder.forServer(certChainFile, keyFile)
                         .trustManager(rootFile)
@@ -157,7 +156,7 @@ public class NettyRemotingServer {
 
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            initNettyChannel(ch, finalSslContext,enableSSL);
+                            initNettyChannel(ch, finalSslContext, enableSSL);
                         }
                     });
 
@@ -184,9 +183,8 @@ public class NettyRemotingServer {
      * @param ch         socket channel
      * @param sslContext
      */
-    private void initNettyChannel(SocketChannel ch, SslContext sslContext,boolean enableSSL) {
-        if(enableSSL)
-        {
+    private void initNettyChannel(SocketChannel ch, SslContext sslContext, boolean enableSSL) {
+        if (enableSSL) {
             ch.pipeline()
                     //添加ssl安全验证
                     .addFirst(sslContext.newHandler(ch.alloc()))
@@ -194,7 +192,7 @@ public class NettyRemotingServer {
                     .addLast("decoder", new NettyDecoder())
                     .addLast("server-idle-handle", new IdleStateHandler(0, 0, Constants.NETTY_SERVER_HEART_BEAT_TIME, TimeUnit.MILLISECONDS))
                     .addLast("handler", serverHandler);
-        }else {
+        } else {
             ch.pipeline()
                     .addLast("encoder", new NettyEncoder())
                     .addLast("decoder", new NettyDecoder())
