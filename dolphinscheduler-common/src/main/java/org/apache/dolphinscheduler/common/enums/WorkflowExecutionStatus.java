@@ -46,6 +46,7 @@ public enum WorkflowExecutionStatus {
             RUNNING_EXECUTION.getCode(),
             DELAY_EXECUTION.getCode(),
             READY_PAUSE.getCode(),
+            SERIAL_WAIT.getCode(),
             READY_STOP.getCode()
     };
 

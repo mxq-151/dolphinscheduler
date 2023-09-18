@@ -314,13 +314,20 @@ public class ProcessServiceImpl implements ProcessService {
                         return null;
                     }
 
-
                     ProcessInstance pi=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),null,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
                     logger.info("create next serial process {},instanceId:{},time:{}",command.getProcessDefinitionCode(),pi.getId(),pi.getScheduleTime());
                     this.runningProcessCache.put(command.getProcessDefinitionCode(),pi.getId());
                     this.updateCommandById(command.getId(),CommandState.RUNNING.getCode());
                     return pi;
                 }else {
+
+                    if(processInstance.getCommandType()==CommandType.SCHEDULER && System.currentTimeMillis()-processInstance.getStartTime().getTime()>3*60*60*1000)
+                    {
+                        logger.info("remove cache: processDefinitionCode:{},instance:{},time:{}",processInstance.getProcessDefinitionCode(),processInstance.getId(),processInstance.getScheduleTime());
+                        processInstance.setState(FAILURE);
+                        processInstanceDao.upsertProcessInstance(processInstance);
+                        this.runningProcessCache.remove(command.getProcessDefinitionCode());
+                    }
                     logger.info("running  processDefinitionCode:{},instance:{},time:{}",processInstance.getProcessDefinitionCode(),processInstance.getId(),processInstance.getScheduleTime());
                     return null;
                 }
