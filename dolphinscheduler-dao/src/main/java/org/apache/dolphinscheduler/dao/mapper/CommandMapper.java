@@ -70,7 +70,7 @@ public interface CommandMapper extends BaseMapper<Command> {
      * query command page by slot
      * @return command list
      */
-    List<Command> queryCommandPageBySlot(@Param("limit") int limit, @Param("offset") int offset,@Param("processDefinitionCode")long processDefinitionCode);
+    List<Command> queryCommandPageBySlot(@Param("limit") int limit, @Param("offset") int offset,@Param("processDefinitionCode")long processDefinitionCode,@Param("commandType")int commandType);
 
     List<Command> queryProcess( @Param("masterCount") int masterCount, @Param("thisMasterSlot") int thisMasterSlot);
 

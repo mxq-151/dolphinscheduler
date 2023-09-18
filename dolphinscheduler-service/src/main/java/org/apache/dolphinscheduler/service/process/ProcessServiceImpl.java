@@ -321,14 +321,14 @@ public class ProcessServiceImpl implements ProcessService {
                     return pi;
                 }else {
 
-                    if(processInstance.getCommandType()==CommandType.SCHEDULER && System.currentTimeMillis()-processInstance.getStartTime().getTime()>3*60*60*1000)
+                    if(runningInstance.getCommandType()==CommandType.SCHEDULER && System.currentTimeMillis()-processInstance.getStartTime().getTime()>3*60*60*1000)
                     {
-                        logger.info("remove cache: processDefinitionCode:{},instance:{},time:{}",processInstance.getProcessDefinitionCode(),processInstance.getId(),processInstance.getScheduleTime());
-                        processInstance.setState(FAILURE);
-                        processInstanceDao.upsertProcessInstance(processInstance);
-                        this.runningProcessCache.remove(command.getProcessDefinitionCode());
+                        logger.info("remove cache: processDefinitionCode:{},instance:{},time:{}",runningInstance.getProcessDefinitionCode(),runningInstance.getId(),runningInstance.getScheduleTime());
+                        runningInstance.setState(FAILURE);
+                        processInstanceDao.upsertProcessInstance(runningInstance);
+                        this.runningProcessCache.remove(runningInstance.getProcessDefinitionCode());
                     }
-                    logger.info("running  processDefinitionCode:{},instance:{},time:{}",processInstance.getProcessDefinitionCode(),processInstance.getId(),processInstance.getScheduleTime());
+                    logger.info("running  processDefinitionCode:{},instance:{},time:{}",runningInstance.getProcessDefinitionCode(),runningInstance.getId(),processInstance.getScheduleTime());
                     return null;
                 }
             }else {
@@ -604,7 +604,7 @@ public class ProcessServiceImpl implements ProcessService {
         List<Command> commands=commandMapper.queryProcess(masterCount,thisMasterSlot);
         for (int i = 0; i < commands.size(); i++) {
             Command command=commands.get(i);
-            List<Command> tmp=commandMapper.queryCommandPageBySlot(pageSize, pageNumber * pageSize,command.getProcessDefinitionCode());
+            List<Command> tmp=commandMapper.queryCommandPageBySlot(pageSize, pageNumber * pageSize,command.getProcessDefinitionCode(),command.getCommandType().getCode());
             result.addAll(tmp);
         }
         return result;

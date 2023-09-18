@@ -63,13 +63,13 @@
     <select id="queryCommandPageBySlot" resultType="org.apache.dolphinscheduler.dao.entity.Command">
         select *
         from t_ds_command
-        where  (now() >= schedule_time) and cstate=0 and process_definition_code=#{processDefinitionCode}
+        where  (now() >= schedule_time) and cstate=0 and process_definition_code=#{processDefinitionCode} and command_type=#{commandType}
         order by schedule_time,process_instance_priority asc
             limit #{limit} offset #{offset}
     </select>
 
     <select id="queryProcess" resultType="org.apache.dolphinscheduler.dao.entity.Command">
-        select distinct process_definition_code
+        select distinct process_definition_code,command_type
         from t_ds_command
         where  (now() >= schedule_time) and cstate=0 and process_definition_code % #{masterCount} = #{thisMasterSlot}
     </select>
