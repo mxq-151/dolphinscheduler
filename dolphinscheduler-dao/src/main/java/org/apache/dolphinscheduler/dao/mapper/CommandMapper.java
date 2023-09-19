@@ -46,15 +46,14 @@ public interface CommandMapper extends BaseMapper<Command> {
 
     int upsertCommand(@Param("command") Command command);
 
-    void deleteCommandByScheduleId(@Param("scheduleId")int scheduleId);
 
     int updateCommandState(@Param("commandId")int commandId,@Param("cstate")int cstate);
 
+    int updateCommandByType(@Param("commandType")int commandType,@Param("processDefinitionCode")long processDefinitionCode,@Param("scheduleTime")Date scheduleTime,@Param("cstate")int cstate);
+
     List<Command> queryCommandByCommandType();
 
-    int makeCommandOffline(@Param("scheduleId")int scheduleId);
-
-    int makeCommandOnline(@Param("scheduleId")int scheduleId,@Param("processDefinitionVersion") int processDefinitionVersion);
+    int deleteCommandByScheduleId(@Param("scheduleId")int scheduleId);
 
     /**
      * query command page

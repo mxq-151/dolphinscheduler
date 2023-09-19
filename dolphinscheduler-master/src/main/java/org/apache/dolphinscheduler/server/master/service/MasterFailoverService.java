@@ -183,7 +183,6 @@ public class MasterFailoverService {
                 ProcessInstanceMetrics.incProcessInstanceByState("failover");
                 // updateProcessInstance host is null to mark this processInstance has been failover
                 // and insert a failover command
-                processInstance.setHost(Constants.NULL);
                 processService.processNeedFailoverProcessInstances(processInstance);
                 LOGGER.info("WorkflowInstance failover finished");
             } finally {

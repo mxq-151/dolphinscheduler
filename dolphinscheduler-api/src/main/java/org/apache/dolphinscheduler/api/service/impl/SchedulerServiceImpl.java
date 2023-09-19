@@ -361,17 +361,14 @@ public class SchedulerServiceImpl extends BaseServiceImpl implements SchedulerSe
                     logger.info("Call master client set schedule online, project id: {}, flow id: {},host: {}",
                             project.getId(), processDefinition.getId(), masterServers);
                     setSchedule(project.getId(), scheduleObj);
-                    int count=this.commandMapper.makeCommandOnline(scheduleObj.getId(),processDefinition.getVersion());
-                    if(count<=0)
-                    {
-                        this.processService.preCreateCommand(processDefinition,scheduleObj);
-                    }
+                    this.processService.preCreateCommand(processDefinition,scheduleObj);
                     break;
                 case OFFLINE:
                     logger.info("Call master client set schedule offline, project id: {}, flow id: {},host: {}",
                             project.getId(), processDefinition.getId(), masterServers);
                     deleteSchedule(project.getId(), id);
-                    this.commandMapper.makeCommandOffline(scheduleObj.getId());
+                    int count=this.commandMapper.deleteCommandByScheduleId(scheduleObj.getId());
+                    logger.info("delete {} command by schedule id:{}",count,scheduleObj.getId());
                     break;
                 default:
                     throw new ServiceException(Status.SCHEDULE_STATUS_UNKNOWN, scheduleStatus.toString());

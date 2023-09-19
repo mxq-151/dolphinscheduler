@@ -41,7 +41,7 @@
     </insert>
 
     <delete id="deleteCommandByScheduleId">
-        delete from t_ds_command where schedule_id=#{scheduleId}
+        delete from t_ds_command where schedule_id=#{scheduleId} and cstate=0
     </delete>
     <select id="queryCommandPage" resultType="org.apache.dolphinscheduler.dao.entity.Command">
         select *
@@ -78,11 +78,11 @@
         update t_ds_command set cstate=#{cstate} where id = #{commandId}
     </update>
 
-    <update id="makeCommandOffline">
-        update t_ds_command set cstate=3 where cstate=0 and schedule_id=#{scheduleId}
+    <update id="updateCommandByType">
+        update t_ds_command set cstate=#{cstate} where schedule_time={scheduleTime} and process_definition_code=#{processDefinitionCode} and command_type=#{commandType}
     </update>
 
-    <update id="makeCommandOnline">
-        update t_ds_command set cstate=0,process_definition_version=#{processDefinitionVersion} where cstate=3 and schedule_id=#{scheduleId}
-    </update>
+    <delete id="makeCommandOffline">
+        delete from  t_ds_command  where cstate=0 and schedule_id=#{scheduleId}
+    </delete>
 </mapper>

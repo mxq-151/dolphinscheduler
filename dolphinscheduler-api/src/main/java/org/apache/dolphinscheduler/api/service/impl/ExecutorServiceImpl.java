@@ -38,18 +38,7 @@ import org.apache.dolphinscheduler.api.service.MonitorService;
 import org.apache.dolphinscheduler.api.service.ProjectService;
 import org.apache.dolphinscheduler.common.constants.CommandKeyConstants;
 import org.apache.dolphinscheduler.common.constants.Constants;
-import org.apache.dolphinscheduler.common.enums.CommandType;
-import org.apache.dolphinscheduler.common.enums.ComplementDependentMode;
-import org.apache.dolphinscheduler.common.enums.CycleEnum;
-import org.apache.dolphinscheduler.common.enums.FailureStrategy;
-import org.apache.dolphinscheduler.common.enums.Flag;
-import org.apache.dolphinscheduler.common.enums.Priority;
-import org.apache.dolphinscheduler.common.enums.ReleaseState;
-import org.apache.dolphinscheduler.common.enums.RunMode;
-import org.apache.dolphinscheduler.common.enums.TaskDependType;
-import org.apache.dolphinscheduler.common.enums.TaskGroupQueueStatus;
-import org.apache.dolphinscheduler.common.enums.WarningType;
-import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
+import org.apache.dolphinscheduler.common.enums.*;
 import org.apache.dolphinscheduler.common.model.Server;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
@@ -634,7 +623,8 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
         command.setProcessDefinitionVersion(processVersion);
 
         int create = processService.createCommand(command);
-
+        int count=this.processService.updateCommandByType(commandType.getCode(),processDefinitionCode,command.getScheduleTime(), CommandState.NOT_RUNNING.getCode());
+        logger.info("update process {} schedule {} command type {},num:{}",processDefinitionCode,command.getScheduleTime(),commandType,count);
         if (create > 0) {
             putMsg(result, Status.SUCCESS);
         } else {

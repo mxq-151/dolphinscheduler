@@ -98,6 +98,7 @@ public interface ProcessService {
 
     int updateCommandById(int commandId,int cstate);
 
+    int updateCommandByType(int commandType,Long processDefinitionCode,Date scheduleTime,int cstate);
 
     int deleteAllSubWorkProcessByParentId(int processInstanceId);
 

@@ -949,10 +949,6 @@ public class ProcessDefinitionServiceImpl extends BaseServiceImpl implements Pro
                     return result;
                 }
                 processDefinition.setReleaseState(releaseState);
-                if(schedule!=null)
-                {
-                    this.commandMapper.makeCommandOnline(schedule.getId(),processDefinition.getVersion());
-                }
                 processDefinitionMapper.updateById(processDefinition);
                 logger.info("Set process definition online, projectCode:{}, processDefinitionCode:{}.", projectCode,
                         code);
@@ -962,7 +958,8 @@ public class ProcessDefinitionServiceImpl extends BaseServiceImpl implements Pro
                 int updateProcess = processDefinitionMapper.updateById(processDefinition);
                 if(schedule!=null)
                 {
-                    this.commandMapper.makeCommandOffline(schedule.getId());
+                   int count= this.commandMapper.deleteCommandByScheduleId(schedule.getId());
+                   logger.info("delete {} command by schedule id:{}",count,schedule.getId());
                 }
                 if (updateProcess > 0) {
                     logger.info("Set process definition offline, projectCode:{}, processDefinitionCode:{}.",
