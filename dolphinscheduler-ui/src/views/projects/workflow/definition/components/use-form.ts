@@ -50,7 +50,7 @@ export const useForm = () => {
     startFormRef: ref(),
     startForm: {
       processDefinitionCode: -1,
-      startEndTime: new Date(year, month, day),
+      startEndTime: [new Date(year, month, day), new Date(year, month, day)],
       scheduleTime: '',
       dataDateType: 1,
       failureStrategy: 'CONTINUE',
@@ -95,9 +95,8 @@ export const useForm = () => {
     timingForm: {
       startEndTime: [
         new Date(year, month, day),
-        new Date(year + 1000, month, day)
+        new Date(year + 100, month, day)
       ],
-      fromNow: true,
       crontab: '0 0 * * * ? *',
       timezoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
       failureStrategy: 'CONTINUE',

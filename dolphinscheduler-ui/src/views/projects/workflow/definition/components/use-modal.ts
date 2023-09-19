@@ -91,15 +91,12 @@ export function useModal(
   const handleStartDefinition = async (code: number) => {
     await state.startFormRef.validate()
 
-    
     if( state.startForm.workerGroup=='default' || state.startForm.workerGroup.length<=0)
     {
       message.error("worker分组为空或default,请选择worker分组");
       state.saving = false
       return;
     }
-
-  
 
     if (state.saving) return
     state.saving = true
@@ -180,7 +177,6 @@ export function useModal(
   const handleUpdateTiming = async (id: number) => {
     await state.timingFormRef.validate()
 
-    debugger
     if (state.saving) return
     state.saving = true
     try {
@@ -225,12 +221,12 @@ export function useModal(
   }
 
   const getTimingData = () => {
-    
-    const start = format(new Date(),
+    const start = format(
+      parseTime(state.timingForm.startEndTime[0]),
       'yyyy-MM-dd HH:mm:ss'
     )
     const end = format(
-      parseTime(state.timingForm.startEndTime),
+      parseTime(state.timingForm.startEndTime[1]),
       'yyyy-MM-dd HH:mm:ss'
     )
 
@@ -241,7 +237,6 @@ export function useModal(
         crontab: state.timingForm.crontab,
         timezoneId: state.timingForm.timezoneId
       }),
-      fromNow:state.timingForm.fromNow,
       failureStrategy: state.timingForm.failureStrategy,
       warningType: state.timingForm.warningType,
       processInstancePriority: state.timingForm.processInstancePriority,
