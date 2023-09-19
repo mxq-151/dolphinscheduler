@@ -79,7 +79,7 @@
     </update>
 
     <update id="updateCommandByType">
-        update t_ds_command set cstate=#{cstate} where schedule_time={scheduleTime} and process_definition_code=#{processDefinitionCode} and command_type=#{commandType}
+        update t_ds_command set cstate=#{cstate},start_time=now() where schedule_time=#{scheduleTime} and process_definition_code=#{processDefinitionCode} and command_type=#{commandType}
     </update>
 
     <delete id="makeCommandOffline">

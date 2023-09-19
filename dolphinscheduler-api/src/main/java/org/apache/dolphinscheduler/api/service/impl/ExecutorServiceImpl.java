@@ -596,6 +596,7 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
                                               int processVersion, CommandType commandType, String startParams) {
         Map<String, Object> result = new HashMap<>();
 
+        logger.info("-----------ppppppppp------------------------");
         // To add startParams only when repeat running is needed
         Map<String, Object> cmdParam = new HashMap<>();
         cmdParam.put(CMD_PARAM_RECOVER_PROCESS_ID_STRING, instanceId);
@@ -839,6 +840,7 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
                     ZonedDateTime dateTime=listDate.get(i);
                     command.setScheduleTime(Date.from(dateTime.toInstant()));
                     if (processService.createCommand(command) > 0) {
+                        this.processService.updateCommandByType(commandType.getCode(),command.getProcessDefinitionCode(),command.getScheduleTime(),CommandState.NOT_RUNNING.getCode());
                         createCount++;
                         logger.info("Create {} command complete, processDefinitionCode:{}",
                                 command.getCommandType().getDescp(), command.getProcessDefinitionCode());
@@ -857,6 +859,7 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
                     command.setScheduleTime(date);
                     if (processService.createCommand(command) > 0) {
                         createCount++;
+                        this.processService.updateCommandByType(commandType.getCode(),command.getProcessDefinitionCode(),command.getScheduleTime(),CommandState.NOT_RUNNING.getCode());
                         logger.info("Create {} command complete, processDefinitionCode:{}",
                                 command.getCommandType().getDescp(), command.getProcessDefinitionCode());
                     }else
