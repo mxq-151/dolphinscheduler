@@ -325,13 +325,22 @@ public class ProcessServiceImpl implements ProcessService {
 
         if(createNew)
         {
-            saveSerialProcess(processInstance, processDefinition);
-            this.commandMapper.updateCommandState(command.getId(),CommandState.RUNNING.getCode());
-            if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
+            if(processDefinition.getExecutionType().typeIsSerial())
+            {
+                saveSerialProcess(processInstance, processDefinition);
+                this.commandMapper.updateCommandState(command.getId(),CommandState.RUNNING.getCode());
+                if (processInstance.getState() != WorkflowExecutionStatus.RUNNING_EXECUTION) {
+                    setSubProcessParam(processInstance);
+                    logger.info("create new process instance but it is not in running state, processDefinitionCode:{},time:{}",command.getProcessDefinitionCode(),command.getScheduleTime());
+                    return null;
+                }
+            }else {
+                logger.info("create new paral process instance, processDefinitionCode:{},time:{}",command.getProcessDefinitionCode(),command.getScheduleTime());
+                processInstanceDao.upsertProcessInstance(processInstance);
                 setSubProcessParam(processInstance);
-                logger.info("create new process instance but it is not in running state, processDefinitionCode:{},instance:{},time:{}",command.getProcessDefinitionCode(),runningInstance.getId(),runningInstance.getScheduleTime());
-                return null;
             }
+
+            this.commandMapper.updateCommandState(command.getId(),CommandState.RUNNING.getCode());
             return processInstance;
         }
 
