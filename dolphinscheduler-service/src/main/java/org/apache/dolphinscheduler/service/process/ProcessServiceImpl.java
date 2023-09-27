@@ -337,9 +337,9 @@ public class ProcessServiceImpl implements ProcessService {
             }else {
                 logger.info("create new paral process instance, processDefinitionCode:{},time:{}",command.getProcessDefinitionCode(),command.getScheduleTime());
                 processInstanceDao.upsertProcessInstance(processInstance);
-                setSubProcessParam(processInstance);
-            }
 
+            }
+            setSubProcessParam(processInstance);
             this.commandMapper.updateCommandState(command.getId(),CommandState.RUNNING.getCode());
             return processInstance;
         }
