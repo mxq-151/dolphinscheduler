@@ -83,7 +83,7 @@ export function useTable() {
         title: t('project.workflow.workflow_name'),
         key: 'name',
         className: 'workflow-name',
-        ...COLUMN_WIDTH_CONFIG['name'],
+        ...COLUMN_WIDTH_CONFIG['longName'],
         titleColSpan: 2,
         render: (row) =>
           h(
@@ -108,7 +108,7 @@ export function useTable() {
                     default: () =>
                       h(
                         NEllipsis,
-                        COLUMN_WIDTH_CONFIG['linkEllipsis'],
+                        COLUMN_WIDTH_CONFIG['longNameEllipsis'],
                         () => row.name
                       )
                   }
@@ -143,31 +143,6 @@ export function useTable() {
             : t('project.workflow.down_line')
       },
       {
-        title: t('project.workflow.create_time'),
-        key: 'createTime',
-        ...COLUMN_WIDTH_CONFIG['time']
-      },
-      {
-        title: t('project.workflow.update_time'),
-        key: 'updateTime',
-        ...COLUMN_WIDTH_CONFIG['time']
-      },
-      {
-        title: t('project.workflow.description'),
-        key: 'description',
-        ...COLUMN_WIDTH_CONFIG['note']
-      },
-      {
-        title: t('project.workflow.create_user'),
-        key: 'userName',
-        ...COLUMN_WIDTH_CONFIG['userName']
-      },
-      {
-        title: t('project.workflow.modify_user'),
-        key: 'modifyBy',
-        ...COLUMN_WIDTH_CONFIG['userName']
-      },
-      {
         title: t('project.workflow.schedule_publish_status'),
         key: 'scheduleReleaseState',
         ...COLUMN_WIDTH_CONFIG['state'],
@@ -193,6 +168,32 @@ export function useTable() {
           }
         }
       },
+      {
+        title: t('project.workflow.description'),
+        key: 'description',
+        ...COLUMN_WIDTH_CONFIG['note']
+      },
+      {
+        title: t('project.workflow.create_time'),
+        key: 'createTime',
+        ...COLUMN_WIDTH_CONFIG['time']
+      },
+      {
+        title: t('project.workflow.update_time'),
+        key: 'updateTime',
+        ...COLUMN_WIDTH_CONFIG['time']
+      },
+      {
+        title: t('project.workflow.create_user'),
+        key: 'userName',
+        ...COLUMN_WIDTH_CONFIG['userName']
+      },
+      {
+        title: t('project.workflow.modify_user'),
+        key: 'modifyBy',
+        ...COLUMN_WIDTH_CONFIG['userName']
+      },
+
       {
         title: t('project.workflow.operation'),
         key: 'operation',

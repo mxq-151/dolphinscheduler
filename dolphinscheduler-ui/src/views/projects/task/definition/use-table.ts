@@ -65,7 +65,7 @@ export function useTable(onEdit: Function) {
       {
         title: t('project.task.task_name'),
         key: 'taskName',
-        ...COLUMN_WIDTH_CONFIG['linkName'],
+        ...COLUMN_WIDTH_CONFIG['longName'],
         render: (row: IRecord) =>
           h(
             ButtonLink,
@@ -76,7 +76,7 @@ export function useTable(onEdit: Function) {
               default: () =>
                 h(
                   NEllipsis,
-                  COLUMN_WIDTH_CONFIG['linkEllipsis'],
+                  COLUMN_WIDTH_CONFIG['longNameEllipsis'],
                   () => row.taskName
                 )
             }
@@ -85,7 +85,7 @@ export function useTable(onEdit: Function) {
       {
         title: t('project.task.workflow_name'),
         key: 'processDefinitionName',
-        ...COLUMN_WIDTH_CONFIG['name']
+        ...COLUMN_WIDTH_CONFIG['longName']
       },
       {
         title: t('project.task.workflow_state'),

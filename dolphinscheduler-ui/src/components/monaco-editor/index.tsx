@@ -164,7 +164,7 @@ export default defineComponent({
       <div
         ref='editorRef'
         style={{
-          height: '300px',
+          height: '600px',
           width: '100%',
           border: '1px solid #eee'
         }}

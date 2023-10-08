@@ -81,12 +81,12 @@ export function useTable() {
       {
         title: t('project.task.task_name'),
         key: 'name',
-        ...COLUMN_WIDTH_CONFIG['name']
+        ...COLUMN_WIDTH_CONFIG['longName']
       },
       {
         title: t('project.task.workflow_name'),
         key: 'processDefinitionName',
-        ...COLUMN_WIDTH_CONFIG['name']
+        ...COLUMN_WIDTH_CONFIG['longName']
       },
       {
         title: t('project.task.node_type'),

@@ -40,6 +40,15 @@ export const COLUMN_WIDTH_CONFIG = {
       tooltip: true
     }
   },
+  longNameEllipsis: {
+    style: 'max-width: 380px;line-height: 1.5'
+  },
+  longName: {
+    width: 380,
+    ellipsis: {
+      tooltip: true
+    }
+  },
   state: {
     width: 120
   },
@@ -69,7 +78,7 @@ export const COLUMN_WIDTH_CONFIG = {
     width: 120
   },
   note: {
-    width: 180,
+    width: 200,
     ellipsis: {
       tooltip: true
     }

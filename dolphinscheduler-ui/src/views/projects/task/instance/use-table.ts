@@ -82,12 +82,12 @@ export function useTable() {
       {
         title: t('project.task.task_name'),
         key: 'name',
-        ...COLUMN_WIDTH_CONFIG['name']
+        ...COLUMN_WIDTH_CONFIG['longName']
       },
       {
         title: t('project.task.workflow_instance'),
         key: 'processInstanceName',
-        ...COLUMN_WIDTH_CONFIG['linkName'],
+        ...COLUMN_WIDTH_CONFIG['longName'],
         render: (row: {
           processInstanceId: number
           processInstanceName: string
@@ -106,7 +106,7 @@ export function useTable() {
               default: () =>
                 h(
                   NEllipsis,
-                  COLUMN_WIDTH_CONFIG['linkEllipsis'],
+                  COLUMN_WIDTH_CONFIG['longNameEllipsis'],
                   () => row.processInstanceName
                 )
             }

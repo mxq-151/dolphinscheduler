@@ -72,7 +72,6 @@ export default defineComponent({
         }
         
       }
-
       createProcessDefinition(
         {
           taskDefinitionJson: JSON.stringify(taskDefinitions),
