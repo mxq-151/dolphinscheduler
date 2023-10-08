@@ -244,15 +244,7 @@ export default defineComponent({
               <NSelect
                 options={[
                   { value: 'SERIAL_WAIT', label: t('project.dag.serial_wait') },
-                  { value: 'PARALLEL', label: t('project.dag.parallel') },
-                  {
-                    value: 'SERIAL_DISCARD',
-                    label: t('project.dag.serial_discard')
-                  },
-                  {
-                    value: 'SERIAL_PRIORITY',
-                    label: t('project.dag.serial_priority')
-                  }
+                  { value: 'PARALLEL', label: t('project.dag.parallel') }
                 ]}
                 v-model:value={formValue.value.executionType}
               />
