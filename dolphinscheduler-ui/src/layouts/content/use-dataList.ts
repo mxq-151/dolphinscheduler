@@ -96,6 +96,25 @@ export function useDataList() {
         icon: renderIcon(HomeOutlined)
       },
       {
+        label: () =>
+          h(NEllipsis, null, { default: () => t('menu.task_analysis') }),
+        key: 'task-analysis',
+        icon: renderIcon(ContainerOutlined),
+        children: [
+          {
+            label: t('menu.task'),
+            key: 'instance',
+            icon: renderIcon(SettingOutlined),
+            children: [
+              {
+                label: t('menu.task_instance'),
+                key: `/task-analysis/instance`
+              }
+            ]
+          }
+        ]
+      },
+      {
         label: () => h(NEllipsis, null, { default: () => t('menu.project') }),
         key: 'projects',
         icon: renderIcon(ProfileOutlined),

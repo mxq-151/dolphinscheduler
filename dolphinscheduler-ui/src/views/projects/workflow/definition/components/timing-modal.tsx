@@ -85,9 +85,13 @@ export default defineComponent({
       getPreviewSchedule
     } = useModal(timingState, ctx)
 
+    // const environmentOptions = computed(() =>
+    //   variables.environmentList.filter((item: any) =>
+    //     item.workerGroups?.includes(timingState.timingForm.workerGroup)
+    //   )
+    // )
     const environmentOptions = computed(() =>
-      variables.environmentList.filter((item: any) =>
-        item.workerGroups?.includes(timingState.timingForm.workerGroup)
+      variables.environmentList.filter((item)=> item.value==timingState.timingForm.environmentCode).map((item)=>item.workerGroups).flat().map((wg)=>({value:wg,label:wg})
       )
     )
 

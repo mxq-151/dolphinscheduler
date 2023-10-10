@@ -17,6 +17,7 @@
 
 export default {
   home: '首页',
+  task_analysis: '作业分析',
   project: '项目管理',
   resources: '资源中心',
   datasource: '数据源中心',
