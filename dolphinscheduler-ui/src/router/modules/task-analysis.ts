@@ -21,6 +21,7 @@ import utils from '@/utils'
 // All TSX files under the views folder automatically generate mapping relationship
 const modules = import.meta.glob('/src/views/**/**.tsx')
 const components: { [key: string]: Component } = utils.mapping(modules)
+console.log(components)
 
 export default {
   path: '/task-analysis',
@@ -32,7 +33,7 @@ export default {
     {
       path: '/task-analysis/instance',
       name: 'instance',
-      component: components['task-analysis-instance-task'],
+      component: components['task-analysis-instance'],
       meta: {
         title: '调度作业分析-task-analysis',
         activeMenu: 'task-analysis',
