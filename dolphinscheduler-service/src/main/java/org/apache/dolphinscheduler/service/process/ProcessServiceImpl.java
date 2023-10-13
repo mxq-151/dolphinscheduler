@@ -480,11 +480,14 @@ public class ProcessServiceImpl implements ProcessService {
         {
             return commandList.size();
         }
-
-        Date end=new Date(now.getTime()+24*60*60*1000);
+        Long ms = 90*24*60*60*1000L;
+        Date end=new Date(now.getTime()+ms);
         int count=0;
         List<Date> dates=CronUtils.getSelfFireDateList(now,end,Arrays.asList(schedule));
         for (int i = 0; i < 5; i++) {
+            if(dates.isEmpty()){
+                break;
+            }
             Date scheduledFireTime=dates.get(i);
             Command command = new Command();
             command.setScheduleId(schedule.getId());
