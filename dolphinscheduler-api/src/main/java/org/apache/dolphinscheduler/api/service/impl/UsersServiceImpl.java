@@ -292,6 +292,9 @@ public class UsersServiceImpl extends BaseServiceImpl implements UsersService {
     public int getUserIdByName(String name) {
         // executor name query
         int executorId = 0;
+        if(name.equals("admin")){
+            name = null;
+        }
         if (StringUtils.isNotEmpty(name)) {
             User executor = queryUser(name);
             if (null != executor) {

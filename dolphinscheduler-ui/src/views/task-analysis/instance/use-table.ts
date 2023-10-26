@@ -101,7 +101,8 @@ export function useTable() {
             ButtonLink,
             {
               onClick: () =>  
-             window.location.assign('/projects/'+row.projectCode+'/workflow/instances/'+row.processInstanceId)
+             window.location.assign(window.location.origin+'/dolphinscheduler/ui'+'/projects/'+row.projectCode+'/workflow/instances/'+row.processInstanceId)
+
             },
             {
               default: () =>

@@ -124,9 +124,15 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
         Result result = new Result();
         Project project = null;
         Status status = null;
-        List<Long> projectIds = null;
+        List<Long> projectIds = new ArrayList<>();
+        //作业分析标识projectCode == 0
         if (projectCode == 0) {
+            //查询用户拥有的项目
             projectIds = projectMapper.queryByProductAndCluster(loginUser.getId(), productName, cluster);
+            //没相关项目权限
+            if (projectIds.isEmpty()) {
+                projectIds.add(0L);
+            }
         } else {
             // check user access for project
             project = projectMapper.queryByCode(projectCode);
@@ -152,22 +158,23 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
         Date end = (Date) checkAndParseDateResult.get(Constants.END_TIME);
         Page<TaskInstance> page = new Page<>(pageNo, pageSize);
         PageInfo<Map<String, Object>> pageInfo = new PageInfo<>(pageNo, pageSize);
+        //默认查询当前用户
         int executorId = 0;
         if (StringUtils.isNotBlank(executorName)) {
-            executorId = usersService.getUserIdByName(executorName);
+             executorId = usersService.getUserIdByName(executorName);
         } else {
-            executorId = usersService.getUserIdByName(loginUser.getUserName());
+             executorId = usersService.getUserIdByName(loginUser.getUserName());
         }
         IPage<TaskInstance> taskInstanceIPage;
         if (projectCode != 0) {
             if (taskExecuteType == TaskExecuteType.STREAM) {
                 // stream task without process instance
                 taskInstanceIPage = taskInstanceMapper.queryStreamTaskInstanceListPaging(
-                        page, project.getCode(), processDefinitionName, searchVal, taskName, executorId, statusArray, host, taskExecuteType, start, end, productName, cluster, null
+                        page, project.getCode(), processDefinitionName, searchVal, taskName, executorId, statusArray, host, taskExecuteType, start, end, productName, cluster, Collections.emptyList()
                 );
             } else {
                 taskInstanceIPage = taskInstanceMapper.queryTaskInstanceListPaging(
-                        page, project.getCode(), processInstanceId, processInstanceName, searchVal, taskName, executorId, statusArray, host, taskExecuteType, start, end, productName, cluster, null
+                        page, project.getCode(), processInstanceId, processInstanceName, searchVal, taskName, executorId, statusArray, host, taskExecuteType, start, end, productName, cluster, Collections.emptyList()
                 );
             }
         } else {

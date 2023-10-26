@@ -36,6 +36,7 @@ import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.dao.entity.User;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
