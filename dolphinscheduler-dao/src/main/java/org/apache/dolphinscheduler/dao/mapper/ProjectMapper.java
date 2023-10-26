@@ -143,4 +143,7 @@ public interface ProjectMapper extends BaseMapper<Project> {
      * @return projectList
      */
     List<Project> queryAllProjectForDependent();
+
+
+    List<Long> queryByProductAndCluster(@Param("userId") Integer userId, @Param("productName") String productName, @Param("cluster") String cluster);
 }

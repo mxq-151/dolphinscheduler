@@ -113,6 +113,12 @@ export function useTable() {
           )
       },
       {
+        title: t('project.task.state'),
+        key: 'state',
+        ...COLUMN_WIDTH_CONFIG['state'],
+        render: (row: IRecord) => renderStateCell(row.state, t)
+      },
+      {
         title: t('project.task.executor'),
         key: 'executorName',
         ...COLUMN_WIDTH_CONFIG['name']
@@ -122,12 +128,7 @@ export function useTable() {
         key: 'taskType',
         ...COLUMN_WIDTH_CONFIG['type']
       },
-      {
-        title: t('project.task.state'),
-        key: 'state',
-        ...COLUMN_WIDTH_CONFIG['state'],
-        render: (row: IRecord) => renderStateCell(row.state, t)
-      },
+
       {
         title: t('project.task.submit_time'),
         ...COLUMN_WIDTH_CONFIG['time'],

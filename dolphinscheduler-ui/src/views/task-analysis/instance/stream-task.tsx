@@ -73,13 +73,18 @@ const BatchTaskInstance = defineComponent({
       onSearch()
     }
 
-    const onClearSearchHost = () => {
-      variables.host = null
+    const onClearSearchProductName = () => {
+      variables.productName = null
+      onSearch()
+    }
+
+    const onClearSearchClusterName = () => {
+      variables.cluster = null
       onSearch()
     }
 
     const onClearSearchStateType = () => {
-      variables.stateType = null
+      variables.stateType = 'FAILURE'
       onSearch()
     }
 
@@ -163,7 +168,8 @@ const BatchTaskInstance = defineComponent({
       onClearSearchTaskName,
       onClearSearchWorkFlowName,
       onClearSearchExecutorName,
-      onClearSearchHost,
+      onClearSearchProductName,
+      onClearSearchClusterName,
       onClearSearchStateType,
       onClearSearchTime,
       onConfirmModal,
@@ -212,11 +218,19 @@ const BatchTaskInstance = defineComponent({
             />
             <NInput
               allowInput={this.trim}
-              v-model={[this.host, 'value']}
+              v-model={[this.productName, 'value']}
               size='small'
-              placeholder={t('project.task.host')}
+              placeholder={t('project.task.product_name')}
               clearable
-              onClear={this.onClearSearchHost}
+              onClear={this.onClearSearchProductName}
+            />
+            <NInput
+              allowInput={this.trim}
+              v-model={[this.cluster, 'value']}
+              size='small'
+              placeholder={t('project.task.cluster_name')}
+              clearable
+              onClear={this.onClearSearchClusterName}
             />
             <NSelect
               v-model={[this.stateType, 'value']}

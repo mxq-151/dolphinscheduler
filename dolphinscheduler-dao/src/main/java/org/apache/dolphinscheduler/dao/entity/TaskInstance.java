@@ -103,6 +103,12 @@ public class TaskInstance implements Serializable {
     private int taskGroupPriority;
 
     /**
+     * project code
+     */
+    @TableField(exist = false)
+    private long projectCode;
+
+    /**
      * state
      */
     private TaskExecutionStatus state;

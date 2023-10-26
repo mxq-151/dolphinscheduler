@@ -60,7 +60,9 @@ public interface TaskInstanceService {
                                String host,
                                TaskExecuteType taskExecuteType,
                                Integer pageNo,
-                               Integer pageSize);
+                               Integer pageSize,
+                               String productName,
+                               String cluster);
 
     /**
      * change one task instance's state from failure to forced success
@@ -91,4 +93,5 @@ public interface TaskInstanceService {
      * @return
      */
     Result stopTask(User loginUser, long projectCode, Integer taskInstanceId);
+
 }

@@ -54,7 +54,7 @@ public interface TaskInstanceMapper extends BaseMapper<TaskInstance> {
                                           @Param("taskCode") Long taskCode);
 
     List<TaskInstance> queryByProcessInstanceIdsAndTaskCodes(@Param("processInstanceIds") List<Integer> processInstanceIds,
-                                                  @Param("taskCodes") List<Long> taskCodes);
+                                                             @Param("taskCodes") List<Long> taskCodes);
 
     Integer countTask(@Param("projectCodes") Long[] projectCodes,
                       @Param("taskIds") int[] taskIds);
@@ -99,20 +99,27 @@ public interface TaskInstanceMapper extends BaseMapper<TaskInstance> {
                                                     @Param("host") String host,
                                                     @Param("taskExecuteType") TaskExecuteType taskExecuteType,
                                                     @Param("startTime") Date startTime,
-                                                    @Param("endTime") Date endTime
+                                                    @Param("endTime") Date endTime,
+                                                    @Param("productName") String productName,
+                                                    @Param("cluster") String cluster,
+                                                    @Param("projectIds") List<Long> ids
     );
 
     IPage<TaskInstance> queryStreamTaskInstanceListPaging(IPage<TaskInstance> page,
-                                                    @Param("projectCode") Long projectCode,
-                                                    @Param("processDefinitionName") String processDefinitionName,
-                                                    @Param("searchVal") String searchVal,
-                                                    @Param("taskName") String taskName,
-                                                    @Param("executorId") int executorId,
-                                                    @Param("states") int[] statusArray,
-                                                    @Param("host") String host,
-                                                    @Param("taskExecuteType") TaskExecuteType taskExecuteType,
-                                                    @Param("startTime") Date startTime,
-                                                    @Param("endTime") Date endTime);
+                                                          @Param("projectCode") Long projectCode,
+                                                          @Param("processDefinitionName") String processDefinitionName,
+                                                          @Param("searchVal") String searchVal,
+                                                          @Param("taskName") String taskName,
+                                                          @Param("executorId") int executorId,
+                                                          @Param("states") int[] statusArray,
+                                                          @Param("host") String host,
+                                                          @Param("taskExecuteType") TaskExecuteType taskExecuteType,
+                                                          @Param("startTime") Date startTime,
+                                                          @Param("endTime") Date endTime,
+                                                          @Param("productName") String productName,
+                                                          @Param("cluster") String cluster,
+                                                          @Param("projectIds") List<Long> ids
+    );
 
     List<TaskInstance> loadAllInfosNoRelease(@Param("processInstanceId") int processInstanceId,
                                              @Param("status") int status);

@@ -219,6 +219,8 @@ export default {
     create_task: '创建任务',
     workflow_instance: '工作流实例',
     workflow_name: '工作流名称',
+    product_name:'产品名称',
+    cluster_name:'所属集群名称',
     workflow_name_tips: '请选择工作流名称',
     workflow_state: '工作流状态',
     version: '版本',

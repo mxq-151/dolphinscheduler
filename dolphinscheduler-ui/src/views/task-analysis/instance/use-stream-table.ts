@@ -44,7 +44,7 @@ import type { TaskInstancesRes, ITaskState } from './types'
 export function useTable() {
   const { t } = useI18n()
   const route = useRoute()
-  const projectCode = Number(route.params.projectCode)
+  const projectCode = Number(0)
   const processInstanceId = Number(route.params.processInstanceId)
 
   const variables = reactive({
@@ -56,7 +56,7 @@ export function useTable() {
     searchVal: null,
     processInstanceId: processInstanceId ? processInstanceId : null,
     host: null,
-    stateType: null,
+    stateType: 'FAILURE',
     datePickerRange: null,
     executorName: null,
     processDefinitionName: null,
@@ -67,7 +67,9 @@ export function useTable() {
     logRef: '',
     logLoadingRef: true,
     skipLineNum: 0,
-    limit: 1000
+    limit: 1000,
+    productName: null ,
+    cluster: null
   })
 
   const createColumns = (variables: any) => {
@@ -89,27 +91,23 @@ export function useTable() {
         ...COLUMN_WIDTH_CONFIG['longName']
       },
       {
-        title: t('project.task.node_type'),
-        key: 'taskType',
-        ...COLUMN_WIDTH_CONFIG['type']
-      },
-      {
         title: t('project.task.state'),
         key: 'state',
         ...COLUMN_WIDTH_CONFIG['state'],
         render: (row: any) => renderStateCell(row.state, t)
       },
       {
+        title: t('project.task.node_type'),
+        key: 'taskType',
+        ...COLUMN_WIDTH_CONFIG['type']
+      },
+    
+      {
         title: t('project.task.executor'),
         key: 'executorName',
         ...COLUMN_WIDTH_CONFIG['name']
       },
-      {
-        title: t('project.task.host'),
-        key: 'host',
-        ...COLUMN_WIDTH_CONFIG['name'],
-        render: (row: any) => row.host || '-'
-      },
+     
       {
         title: t('project.task.app_id'),
         key: 'applicationID',
@@ -139,6 +137,12 @@ export function useTable() {
         key: 'duration',
         ...COLUMN_WIDTH_CONFIG['duration'],
         render: (row: any) => h('span', null, row.duration ? row.duration : '-')
+      },
+      {
+        title: t('project.task.host'),
+        key: 'host',
+        ...COLUMN_WIDTH_CONFIG['name'],
+        render: (row: any) => row.host || '-'
       },
       {
         title: t('project.task.operation'),
@@ -297,7 +301,9 @@ export function useTable() {
         : '',
       executorName: variables.executorName,
       processDefinitionName: variables.processDefinitionName,
-      taskExecuteType: 'STREAM' as 'BATCH' | 'STREAM'
+      taskExecuteType: 'STREAM' as 'BATCH' | 'STREAM',
+      productName: variables.productName,
+      cluster: variables.cluster
     } as any
 
     queryTaskListPaging(data, { projectCode })

@@ -17,6 +17,7 @@
 
 export default {
   home: 'Home',
+  task_analysis: 'Task Analysis',
   project: 'Project',
   resources: 'Resources',
   datasource: 'Datasource',

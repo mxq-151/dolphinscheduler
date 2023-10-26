@@ -67,18 +67,19 @@ public class TaskInstanceController extends BaseController {
     /**
      * query task list paging
      *
-     * @param loginUser login user
-     * @param projectCode project code
+     * @param loginUser         login user
+     * @param projectCode       project code
      * @param processInstanceId process instance id
-     * @param searchVal search value
-     * @param taskName task name
-     * @param stateType state type
-     * @param host host
-     * @param startTime start time
-     * @param endTime end time
-     * @param pageNo page number
-     * @param pageSize page size
-     * @param taskExecuteType task execute type
+     * @param searchVal         search value
+     * @param taskName          task name
+     * @param stateType         state type
+     * @param host              host
+     * @param startTime         start time
+     * @param endTime           end time
+     * @param pageNo            page number
+     * @param pageSize          page size
+     * @param taskExecuteType   task execute type
+     * @param productName   product name
      * @return task list page
      */
     @ApiOperation(value = "queryTaskListPaging", notes = "QUERY_TASK_INSTANCE_LIST_PAGING_NOTES")
@@ -95,6 +96,7 @@ public class TaskInstanceController extends BaseController {
             @ApiImplicitParam(name = "taskExecuteType", value = "TASK_EXECUTE_TYPE", required = false, dataTypeClass = TaskExecuteType.class, example = "STREAM"),
             @ApiImplicitParam(name = "pageNo", value = "PAGE_NO", required = true, dataTypeClass = int.class, example = "1"),
             @ApiImplicitParam(name = "pageSize", value = "PAGE_SIZE", required = true, dataTypeClass = int.class, example = "20"),
+            @ApiImplicitParam(name = "productName", value = "PRODUCT_NAME", required = false, dataTypeClass = String.class, example = "xygj")
     })
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
@@ -114,7 +116,9 @@ public class TaskInstanceController extends BaseController {
                                       @RequestParam(value = "endDate", required = false) String endTime,
                                       @RequestParam(value = "taskExecuteType", required = false, defaultValue = "BATCH") TaskExecuteType taskExecuteType,
                                       @RequestParam("pageNo") Integer pageNo,
-                                      @RequestParam("pageSize") Integer pageSize) {
+                                      @RequestParam("pageSize") Integer pageSize,
+                                      @RequestParam(value = "productName", required = false) String productName,
+                                      @RequestParam(value = "cluster", required = false) String cluster) {
         Result result = checkPageParams(pageNo, pageSize);
         if (!result.checkResult()) {
             return result;
@@ -123,16 +127,17 @@ public class TaskInstanceController extends BaseController {
         result = taskInstanceService.queryTaskListPaging(loginUser, projectCode, processInstanceId, processInstanceName,
                 processDefinitionName,
                 taskName, executorName, startTime, endTime, searchVal, stateType, host, taskExecuteType, pageNo,
-                pageSize);
+                pageSize, productName,cluster);
         return result;
     }
+
 
     /**
      * change one task instance's state from FAILURE to FORCED_SUCCESS
      *
-     * @param loginUser login user
+     * @param loginUser   login user
      * @param projectCode project code
-     * @param id task instance id
+     * @param id          task instance id
      * @return the result code and msg
      */
     @ApiOperation(value = "force-success", notes = "FORCE_TASK_SUCCESS")
@@ -153,9 +158,9 @@ public class TaskInstanceController extends BaseController {
     /**
      * task savepoint, for stream task
      *
-     * @param loginUser login user
+     * @param loginUser   login user
      * @param projectCode project code
-     * @param id task instance id
+     * @param id          task instance id
      * @return the result code and msg
      */
     @ApiOperation(value = "savepoint", notes = "TASK_SAVEPOINT")
@@ -175,9 +180,9 @@ public class TaskInstanceController extends BaseController {
     /**
      * task stop, for stream task
      *
-     * @param loginUser login user
+     * @param loginUser   login user
      * @param projectCode project code
-     * @param id task instance id
+     * @param id          task instance id
      * @return the result code and msg
      */
     @ApiOperation(value = "stop", notes = "TASK_INSTANCE_STOP")

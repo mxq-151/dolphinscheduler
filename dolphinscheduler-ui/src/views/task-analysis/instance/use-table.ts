@@ -44,9 +44,10 @@ export function useTable() {
   const { t } = useI18n()
   const route = useRoute()
   const router: Router = useRouter()
-  const projectCode = Number(route.params.projectCode)
+  const projectCode = Number(0)
   const processInstanceId = Number(route.params.processInstanceId)
   const taskName = route.params.taskName
+
 
   const variables = reactive({
     columns: [],
@@ -57,7 +58,7 @@ export function useTable() {
     searchVal: ref(taskName || null),
     processInstanceId: ref(processInstanceId ? processInstanceId : null),
     host: ref(null),
-    stateType: ref(null),
+    stateType: ref('FAILURE'),
     datePickerRange: ref(null),
     executorName: ref(null),
     processInstanceName: ref(null),
@@ -68,7 +69,10 @@ export function useTable() {
     logRef: '',
     logLoadingRef: ref(true),
     skipLineNum: ref(0),
-    limit: ref(1000)
+    limit: ref(1000),
+    projectCode: ref(projectCode),
+    productName: ref(null),
+    cluster: ref(null)
   })
 
   const createColumns = (variables: any) => {
@@ -91,16 +95,13 @@ export function useTable() {
         render: (row: {
           processInstanceId: number
           processInstanceName: string
+          projectCode: number
         }) =>
           h(
             ButtonLink,
             {
-              onClick: () =>
-                void router.push({
-                  name: 'workflow-instance-detail',
-                  params: { id: row.processInstanceId },
-                  query: { code: projectCode }
-                })
+              onClick: () =>  
+             window.location.assign('/projects/'+row.projectCode+'/workflow/instances/'+row.processInstanceId)
             },
             {
               default: () =>
@@ -113,6 +114,12 @@ export function useTable() {
           )
       },
       {
+        title: t('project.task.state'),
+        key: 'state',
+        ...COLUMN_WIDTH_CONFIG['state'],
+        render: (row: IRecord) => renderStateCell(row.state, t)
+      },
+      {
         title: t('project.task.executor'),
         key: 'executorName',
         ...COLUMN_WIDTH_CONFIG['name']
@@ -122,12 +129,7 @@ export function useTable() {
         key: 'taskType',
         ...COLUMN_WIDTH_CONFIG['type']
       },
-      {
-        title: t('project.task.state'),
-        key: 'state',
-        ...COLUMN_WIDTH_CONFIG['state'],
-        render: (row: IRecord) => renderStateCell(row.state, t)
-      },
+
       {
         title: t('project.task.submit_time'),
         ...COLUMN_WIDTH_CONFIG['time'],
@@ -281,7 +283,9 @@ export function useTable() {
         stateType: variables.stateType,
         datePickerRange: variables.datePickerRange,
         executorName: variables.executorName,
-        processInstanceName: variables.processInstanceName
+        processInstanceName: variables.processInstanceName,
+        productName: variables.productName,
+        cluster: variables.cluster
       })
     })
   }
@@ -303,11 +307,13 @@ export function useTable() {
         ? format(parseTime(params.datePickerRange[1]), 'yyyy-MM-dd HH:mm:ss')
         : '',
       executorName: params.executorName,
-      processInstanceName: params.processInstanceName
+      processInstanceName: params.processInstanceName,
+      productName: params.productName,
+      cluster: params.cluster
     }
 
     const { state } = useAsyncState(
-      queryTaskListPaging(data, { projectCode }).then(
+      queryTaskListPaging(data, {projectCode}).then(
         (res: TaskInstancesRes) => {
           variables.tableData = res.totalList as IRecord[]
           variables.totalPage = res.totalPage

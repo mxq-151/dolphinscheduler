@@ -298,8 +298,12 @@ public class ProcessInstanceServiceImpl extends BaseServiceImpl implements Proce
 
         Page<ProcessInstance> page = new Page<>(pageNo, pageSize);
         PageInfo<ProcessInstance> pageInfo = new PageInfo<>(pageNo, pageSize);
-        int executorId = usersService.getUserIdByName(executorName);
-
+        int executorId = 0;
+        if (StringUtils.isNotBlank(executorName)){
+            executorId = usersService.getUserIdByName(executorName);
+        }else {
+            executorId = usersService.getUserIdByName(loginUser.getUserName());
+        }
         IPage<ProcessInstance> processInstanceList = processInstanceMapper.queryProcessInstanceListPaging(page,
                 project.getCode(), processDefineCode, searchVal, executorId, statusArray, host, start, end);
 

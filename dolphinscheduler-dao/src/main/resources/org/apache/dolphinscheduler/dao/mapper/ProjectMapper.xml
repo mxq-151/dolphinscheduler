@@ -78,7 +78,7 @@
         from t_ds_project p
         join t_ds_user u on p.user_id = u.id
         where p.name = #{projectName} and p.cluster=#{cluster}
-        limit 2
+        limit 1
     </select>
     <select id="queryProjectListPaging" resultType="org.apache.dolphinscheduler.dao.entity.Project">
 
@@ -198,4 +198,22 @@
         select code, name,cluster
         from t_ds_project
     </select>
+    <select id="queryByProductAndCluster" resultType="java.lang.Long">
+        select
+        dp.id
+        from t_ds_project dp
+        left join t_ds_relation_project_user drpu on dp.id = drpu.project_id
+        where dp.flag=1
+        <if test="productName != null and productName !=''">
+            and dp.name LIKE concat('%', #{productName}, '%')
+        </if>
+        <if test="cluster != null and cluster !=''">
+            and dp.cluster LIKE concat('%', #{cluster}, '%')
+        </if>
+        <if test="userId != 0 and userId != 1">
+            and drpu.user_id = #{userId}
+        </if>
+--         limit 1
+    </select>
+
 </mapper>

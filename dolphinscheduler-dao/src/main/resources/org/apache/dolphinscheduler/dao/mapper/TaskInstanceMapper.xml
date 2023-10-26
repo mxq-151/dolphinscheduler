@@ -205,13 +205,30 @@
         instance.dry_run,
         instance.task_group_id,
         instance.task_execute_type,
-        process.name AS process_instance_name
+        process.name AS process_instance_name,
+        project.code AS project_code
         FROM
         t_ds_task_definition_log define
         LEFT JOIN t_ds_task_instance instance ON define.code = instance.task_code
         AND define.version = instance.task_definition_version
         LEFT JOIN t_ds_process_instance process ON process.id = instance.process_instance_id
-        where define.project_code = #{projectCode}
+        LEFT JOIN t_ds_project project on project.code = define.project_code
+        where 1=1
+        <if test="projectCode != 0">
+            and define.project_code = #{projectCode}
+        </if>
+        <if test="projectCode == 0 and productName != null and productName != '' ">
+            and project.name like concat('%', #{productName}, '%')
+        </if>
+        <if test="projectCode == 0 and cluster != null and cluster != ''">
+            and project.cluster  like concat('%', #{cluster}, '%')
+        </if>
+        <if test="projectCode == 0 and projectIds != null and projectIds.size() != 0">
+            and project.id in
+            <foreach collection="projectIds" index="index" item="i" open="(" separator="," close=")">
+                #{i}
+            </foreach>
+        </if>
         <if test="startTime != null">
             and instance.start_time <![CDATA[ >=]]> #{startTime}
         </if>
@@ -255,10 +272,29 @@
         ,
         process.name as process_definition_name
         from t_ds_task_definition_log define
-        left join t_ds_task_instance instance on define.code=instance.task_code and define.version=instance.task_definition_version
-        left join t_ds_process_task_relation relation on relation.post_task_code = define.code and relation.post_task_version = define.version
-        left join t_ds_process_definition process on process.code=relation.process_definition_code and process.version = relation.process_definition_version
-        where define.project_code = #{projectCode}
+        left join t_ds_task_instance instance on define.code=instance.task_code and
+        define.version=instance.task_definition_version
+        left join t_ds_process_task_relation relation on relation.post_task_code = define.code and
+        relation.post_task_version = define.version
+        left join t_ds_process_definition process on process.code=relation.process_definition_code and process.version =
+        relation.process_definition_version
+        left join t_ds_project project on project.code = define.project_code
+        where 1=1
+        <if test="projectCode != 0">
+            and define.project_code = #{projectCode}
+        </if>
+        <if test="projectCode == 0 and productName != null and productName != ''">
+            and project.name like concat('%', #{productName}, '%')
+        </if>
+        <if test="projectCode == 0 and cluster != null and cluster != ''">
+            and project.cluster  like concat('%', #{cluster}, '%')
+        </if>
+        <if test="projectCode == 0 and projectIds != null and projectIds.size() != 0">
+            and project.id in
+            <foreach collection="projectIds" index="index" item="i" open="(" separator="," close=")">
+                #{i}
+            </foreach>
+        </if>
         <if test="startTime != null">
             and instance.start_time <![CDATA[ >=]]> #{startTime}
         </if>

@@ -111,6 +111,9 @@ public class ShellCommandExecutor extends AbstractCommandExecutor {
             } else {
                 if (taskRequest.getEnvFile() != null) {
                     sb.append("source ").append(taskRequest.getEnvFile()).append("\n");
+                    sb.append("export -n SPRING_DATASOURCE_URL\n");
+                    sb.append("export -n SPRING_DATASOURCE_USERNAME\n");
+                    sb.append("export -n SPRING_DATASOURCE_PASSWORD\n");
                 }
             }
         }

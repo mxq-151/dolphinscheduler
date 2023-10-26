@@ -216,6 +216,8 @@ export default {
     create_task: 'Create Task',
     workflow_instance: 'Workflow Instance',
     workflow_name: 'Workflow Name',
+    product_name:'Product Name',
+    cluster_name:'Cluster Name',
     workflow_name_tips: 'Please select workflow name',
     workflow_state: 'Workflow State',
     version: 'Version',
