@@ -268,7 +268,7 @@ public class ProcessInstanceServiceImpl extends BaseServiceImpl implements Proce
     public Result queryProcessInstanceList(User loginUser, long projectCode, long processDefineCode, String startDate,
                                            String endDate, String searchVal, String executorName,
                                            WorkflowExecutionStatus stateType, String host, String otherParamsJson,
-                                           Integer pageNo, Integer pageSize) {
+                                           Integer pageNo, Integer pageSize,long processInstanceId) {
 
         Result result = new Result();
         Project project = projectMapper.queryByCode(projectCode);
@@ -305,7 +305,7 @@ public class ProcessInstanceServiceImpl extends BaseServiceImpl implements Proce
             executorId = usersService.getUserIdByName(loginUser.getUserName());
         }
         IPage<ProcessInstance> processInstanceList = processInstanceMapper.queryProcessInstanceListPaging(page,
-                project.getCode(), processDefineCode, searchVal, executorId, statusArray, host, start, end);
+                project.getCode(), processDefineCode, searchVal, executorId, statusArray, host, start, end, processInstanceId);
 
         List<ProcessInstance> processInstances = processInstanceList.getRecords();
         List<Integer> userIds = Collections.emptyList();

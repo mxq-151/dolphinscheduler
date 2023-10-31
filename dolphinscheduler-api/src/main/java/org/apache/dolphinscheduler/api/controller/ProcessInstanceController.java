@@ -86,7 +86,8 @@ public class ProcessInstanceController extends BaseController {
             @ApiImplicitParam(name = "startDate", value = "START_DATE", dataTypeClass = String.class),
             @ApiImplicitParam(name = "endDate", value = "END_DATE", dataTypeClass = String.class),
             @ApiImplicitParam(name = "pageNo", value = "PAGE_NO", required = true, dataTypeClass = int.class, example = "1"),
-            @ApiImplicitParam(name = "pageSize", value = "PAGE_SIZE", required = true, dataTypeClass = int.class, example = "10")
+            @ApiImplicitParam(name = "pageSize", value = "PAGE_SIZE", required = true, dataTypeClass = int.class, example = "10"),
+            @ApiImplicitParam(name = "processInstanceId", value = "PROCESS_INSTANCE_ID", required = false, dataTypeClass = long.class, example = "103434")
     })
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
@@ -103,7 +104,8 @@ public class ProcessInstanceController extends BaseController {
                                            @RequestParam(value = "endDate", required = false) String endTime,
                                            @RequestParam(value = "otherParamsJson", required = false) String otherParamsJson,
                                            @RequestParam("pageNo") Integer pageNo,
-                                           @RequestParam("pageSize") Integer pageSize) {
+                                           @RequestParam("pageSize") Integer pageSize,
+                                           @RequestParam(value = "processInstanceId", required = false,defaultValue = "0") long processInstanceId) {
 
         Result result = checkPageParams(pageNo, pageSize);
         if (!result.checkResult()) {
@@ -112,7 +114,7 @@ public class ProcessInstanceController extends BaseController {
         searchVal = ParameterUtils.handleEscapes(searchVal);
         result = processInstanceService.queryProcessInstanceList(loginUser, projectCode, processDefineCode, startTime,
                 endTime,
-                searchVal, executorName, stateType, host, otherParamsJson, pageNo, pageSize);
+                searchVal, executorName, stateType, host, otherParamsJson, pageNo, pageSize,processInstanceId);
         return result;
     }
 

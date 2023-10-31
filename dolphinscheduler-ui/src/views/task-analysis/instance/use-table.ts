@@ -101,8 +101,12 @@ export function useTable() {
             ButtonLink,
             {
               onClick: () =>  
-             window.location.assign(window.location.origin+'/dolphinscheduler/ui'+'/projects/'+row.projectCode+'/workflow/instances/'+row.processInstanceId)
-
+            //  window.location.assign(window.location.origin+'/dolphinscheduler/ui'+'/projects/'+row.projectCode+'/workflow/instances/'+row.processInstanceId)
+            router.push(
+              "/projects/"+row.projectCode+"/workflow/instances?processInstanceId="+row.processInstanceId+"&processInstanceName="+row.processInstanceName
+            )
+              // "dolphinscheduler/ui/projects/"+row.projectCode+"/workflow/instances?processInstanceId="+processInstanceId
+            
             },
             {
               default: () =>

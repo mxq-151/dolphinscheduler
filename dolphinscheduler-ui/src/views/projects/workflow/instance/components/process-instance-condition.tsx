@@ -21,16 +21,19 @@ import { defineComponent, getCurrentInstance, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { format } from 'date-fns'
 import { workflowExecutionStateType } from '@/common/common'
+import { useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'ProcessInstanceCondition',
   emits: ['handleSearch'],
   setup(props, ctx) {
-    const searchValRef = ref('')
+    const route = useRoute()
+    const searchValRef = ref(route.query.processInstanceName||'')
     const executorNameRef = ref('')
     const hostRef = ref('')
     const stateTypeRef = ref('')
     const startEndTimeRef = ref()
+    const processInstanceId = ref(Number(route.query.processInstanceId||0))
 
     const handleSearch = () => {
       let startDate = ''
@@ -46,18 +49,24 @@ export default defineComponent({
         )
       }
 
+      
+
       ctx.emit('handleSearch', {
         searchVal: searchValRef.value,
         executorName: executorNameRef.value,
         host: hostRef.value,
         stateType: stateTypeRef.value,
         startDate,
-        endDate
+        endDate,
+        processInstanceId
       })
     }
+    
+
 
     const onClearSearchVal = () => {
       searchValRef.value = ''
+      processInstanceId.value = Number(0)
       handleSearch()
     }
 
@@ -79,6 +88,7 @@ export default defineComponent({
       hostRef,
       stateTypeRef,
       startEndTimeRef,
+      processInstanceId,
       handleSearch,
       onClearSearchVal,
       onClearSearchExecutor,

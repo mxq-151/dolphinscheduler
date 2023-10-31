@@ -188,7 +188,7 @@ public class ProcessInstanceMapperTest extends BaseDaoTest {
                 stateArray,
                 processInstance.getHost(),
                 null,
-                null);
+                null,343L);
         Assert.assertNotEquals(processInstanceIPage.getTotal(), 0);
 
         processDefinitionMapper.deleteById(processDefinition.getId());

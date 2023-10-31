@@ -29,14 +29,13 @@ import { useTable } from './use-table'
 import Card from '@/components/card'
 import ProcessInstanceCondition from './components/process-instance-condition'
 import type { IWorkflowInstanceSearch } from './types'
-
 export default defineComponent({
   name: 'WorkflowInstanceList',
   setup() {
     let setIntervalP: number
     const { variables, createColumns, getTableData, batchDeleteInstance } =
       useTable()
-
+      
     const requestData = () => {
       getTableData()
     }
@@ -48,6 +47,7 @@ export default defineComponent({
       variables.stateType = params.stateType
       variables.startDate = params.startDate
       variables.endDate = params.endDate
+      variables.processInstanceId = params.processInstanceId
       variables.page = 1
       requestData()
     }

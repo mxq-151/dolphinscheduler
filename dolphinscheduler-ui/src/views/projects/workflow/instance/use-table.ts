@@ -18,7 +18,7 @@
 import _ from 'lodash'
 import { reactive, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRouter,useRoute } from 'vue-router'
 import ButtonLink from '@/components/button-link'
 import { RowKey } from 'naive-ui/lib/data-table/src/interface'
 
@@ -50,6 +50,8 @@ import { IWorkflowExecutionState } from "@/common/types";
 export function useTable() {
   const { t } = useI18n()
   const router: Router = useRouter()
+  const route = useRoute()
+  const processInstanceId= Number(route.query.processInstanceId || '')
 
   const variables = reactive({
     columns: [],
@@ -66,6 +68,7 @@ export function useTable() {
     startDate: ref(),
     endDate: ref(),
     projectCode: ref(Number(router.currentRoute.value.params.projectCode)),
+    processInstanceId:ref(processInstanceId),
     loadingRef: ref(false)
   })
 
@@ -248,7 +251,8 @@ export function useTable() {
       host: variables.host,
       stateType: variables.stateType,
       startDate: variables.startDate,
-      endDate: variables.endDate
+      endDate: variables.endDate,
+      processInstanceId: variables.processInstanceId
     }
     queryProcessInstanceListPaging({ ...params }, variables.projectCode).then(
       (res: any) => {

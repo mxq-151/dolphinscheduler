@@ -115,7 +115,8 @@ public interface ProcessInstanceMapper extends BaseMapper<ProcessInstance> {
                                                           @Param("states") int[] statusArray,
                                                           @Param("host") String host,
                                                           @Param("startTime") Date startTime,
-                                                          @Param("endTime") Date endTime);
+                                                          @Param("endTime") Date endTime,
+                                                          @Param("processInstanceId") Long processInstanceId);
 
     /**
      * set failover by host and state array

@@ -57,7 +57,7 @@ public class ProcessInstanceControllerTest extends AbstractControllerTest {
         PowerMockito.when(processInstanceService
                 .queryProcessInstanceList(Mockito.any(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(),
                         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-                        Mockito.any(), Mockito.any()))
+                        Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(mockResult);
 
         MultiValueMap<String, String> paramsMap = new LinkedMultiValueMap<>();

@@ -82,7 +82,8 @@ public interface ProcessInstanceService {
                                     String host,
                                     String otherParamsJson,
                                     Integer pageNo,
-                                    Integer pageSize);
+                                    Integer pageSize,
+                                    long processInstanceId);
 
     /**
      * query task list by process instance id

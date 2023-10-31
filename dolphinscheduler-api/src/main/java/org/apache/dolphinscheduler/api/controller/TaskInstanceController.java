@@ -96,7 +96,8 @@ public class TaskInstanceController extends BaseController {
             @ApiImplicitParam(name = "taskExecuteType", value = "TASK_EXECUTE_TYPE", required = false, dataTypeClass = TaskExecuteType.class, example = "STREAM"),
             @ApiImplicitParam(name = "pageNo", value = "PAGE_NO", required = true, dataTypeClass = int.class, example = "1"),
             @ApiImplicitParam(name = "pageSize", value = "PAGE_SIZE", required = true, dataTypeClass = int.class, example = "20"),
-            @ApiImplicitParam(name = "productName", value = "PRODUCT_NAME", required = false, dataTypeClass = String.class, example = "xygj")
+            @ApiImplicitParam(name = "productName", value = "PRODUCT_NAME", required = false, dataTypeClass = String.class, example = "xygj"),
+            @ApiImplicitParam(name = "cluster", value = "CLUSTER", required = false, dataTypeClass = String.class, example = "nm-public")
     })
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
