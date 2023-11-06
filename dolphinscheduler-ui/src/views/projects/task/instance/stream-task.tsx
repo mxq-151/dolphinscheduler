@@ -92,7 +92,7 @@ const BatchTaskInstance = defineComponent({
       variables.showModalRef = false
     }
 
-    const getLogs = (row: any) => {
+    const getLogs = (row: any,count: number) => {
       const { state } = useAsyncState(
         queryLog({
           taskInstanceId: Number(row.id),
@@ -103,7 +103,13 @@ const BatchTaskInstance = defineComponent({
             variables.logRef += res.message
             variables.limit += 1000
             variables.skipLineNum += res.lineNum
-            getLogs(row)
+            if (count<300){
+              setTimeout(()=>{
+                let tmp=count
+                count++
+                getLogs(row,tmp)
+              },2000);
+            }
           } else {
             variables.logLoadingRef = false
           }
@@ -118,7 +124,7 @@ const BatchTaskInstance = defineComponent({
       variables.logRef = ''
       variables.limit = 1000
       variables.skipLineNum = 0
-      getLogs(row)
+      getLogs(row,0)
     }
 
     const trim = getCurrentInstance()?.appContext.config.globalProperties.trim
@@ -143,7 +149,7 @@ const BatchTaskInstance = defineComponent({
       () => variables.showModalRef,
       () => {
         if (variables.showModalRef) {
-          getLogs(variables.row)
+          getLogs(variables.row,0)
         } else {
           variables.row = {}
           variables.logRef = ''

@@ -96,16 +96,16 @@ export function useTable() {
           processInstanceId: number
           processInstanceName: string
           projectCode: number
+          executorName: string
+          
         }) =>
           h(
             ButtonLink,
             {
               onClick: () =>  
-            //  window.location.assign(window.location.origin+'/dolphinscheduler/ui'+'/projects/'+row.projectCode+'/workflow/instances/'+row.processInstanceId)
             router.push(
-              "/projects/"+row.projectCode+"/workflow/instances?processInstanceId="+row.processInstanceId+"&processInstanceName="+row.processInstanceName
+              "/projects/"+row.projectCode+"/workflow/instances?processInstanceId="+row.processInstanceId+"&processInstanceName="+row.processInstanceName+"&executorName="+row.executorName
             )
-              // "dolphinscheduler/ui/projects/"+row.projectCode+"/workflow/instances?processInstanceId="+processInstanceId
             
             },
             {
@@ -183,37 +183,6 @@ export function useTable() {
         render(row: any) {
           return h(NSpace, null, {
             default: () => [
-              h(
-                NTooltip,
-                {},
-                {
-                  trigger: () =>
-                    h(
-                      NButton,
-                      {
-                        tag: 'div',
-                        circle: true,
-                        type: 'info',
-                        size: 'small',
-                        disabled: !(
-                          row.state === 'FAILURE' ||
-                          row.state === 'NEED_FAULT_TOLERANCE' ||
-                          row.state === 'KILL'
-                        ),
-                        onClick: () => {
-                          handleForcedSuccess(row)
-                        }
-                      },
-                      {
-                        icon: () =>
-                          h(NIcon, null, {
-                            default: () => h(CheckCircleOutlined)
-                          })
-                      }
-                    ),
-                  default: () => t('project.task.forced_success')
-                }
-              ),
               h(
                 NTooltip,
                 {},
@@ -307,10 +276,10 @@ export function useTable() {
       stateType: params.stateType,
       startDate: params.datePickerRange
         ? format(parseTime(params.datePickerRange[0]), 'yyyy-MM-dd HH:mm:ss')
-        : '',
+        : format(new Date().getTime() - 15 * 24 * 60 * 60 * 1000,'yyyy-MM-dd HH:mm:ss'),
       endDate: params.datePickerRange
         ? format(parseTime(params.datePickerRange[1]), 'yyyy-MM-dd HH:mm:ss')
-        : '',
+        : format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
       executorName: params.executorName,
       processInstanceName: params.processInstanceName,
       productName: params.productName,

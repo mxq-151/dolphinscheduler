@@ -52,6 +52,7 @@ export function useTable() {
   const router: Router = useRouter()
   const route = useRoute()
   const processInstanceId= Number(route.query.processInstanceId || '')
+  const executorName= String(route.query.executorName||'')
 
   const variables = reactive({
     columns: [],
@@ -62,7 +63,7 @@ export function useTable() {
     pageSize: ref(10),
     totalPage: ref(1),
     searchVal: ref(),
-    executorName: ref(),
+    executorName: ref(executorName),
     host: ref(),
     stateType: ref(),
     startDate: ref(),

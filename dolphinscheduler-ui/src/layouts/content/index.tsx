@@ -69,13 +69,11 @@ const Content = defineComponent({
       () => route.path,
       () => {
         if (route.path !== '/login') {
-          routeStore.setLastRoute(route.path)
-
+         
           state.isShowSide = route.meta.showSide as boolean
-          if (route.matched[1].path === '/projects/:projectCode') {
+          if (route.matched[1].path.includes("/projects/:projectCode")) {
             changeMenuOption(state)
           }
-
           getSideMenu(state)
 
           const currentSide = (

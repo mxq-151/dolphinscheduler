@@ -103,34 +103,46 @@ const BatchTaskInstance = defineComponent({
     const onConfirmModal = () => {
       variables.showModalRef = false
     }
+    
 
-    const getLogs = (row: any) => {
-      const { state } = useAsyncState(
-        queryLog({
-          taskInstanceId: Number(row.id),
-          limit: variables.limit,
-          skipLineNum: variables.skipLineNum
-        }).then((res: any) => {
-          if (res?.message) {
-            variables.logRef += res.message
-            variables.limit += 1000
-            variables.skipLineNum += res.lineNum
-            getLogs(row)
-          } else {
-            variables.logLoadingRef = false
+    const getLogs = (row: any,count: number) => {
+    const { state } = useAsyncState(
+      queryLog({
+        taskInstanceId: Number(row.id),
+        limit: variables.limit,
+        skipLineNum: variables.skipLineNum
+      }).then((res: any) => {
+        if (res?.message) {
+
+          variables.logRef += res.message
+          variables.limit += 1000
+          variables.skipLineNum += res.lineNum
+          if (count<300){
+            setTimeout(()=>{
+              let tmp=count
+              count++
+              getLogs(row,tmp)
+            },2000);
           }
-        }),
-        {}
-      )
+        } else {
+          variables.logLoadingRef = false
+        }
+      }),
+      {}
+    )
 
-      return state
+    return state
+     
     }
+
+
+
 
     const refreshLogs = (row: any) => {
       variables.logRef = ''
       variables.limit = 1000
       variables.skipLineNum = 0
-      getLogs(row)
+      getLogs(row,0)
     }
 
     const trim = getCurrentInstance()?.appContext.config.globalProperties.trim
@@ -148,7 +160,7 @@ const BatchTaskInstance = defineComponent({
       () => variables.showModalRef,
       () => {
         if (variables.showModalRef) {
-          getLogs(variables.row)
+          getLogs(variables.row,0)
         } else {
           variables.row = {}
           variables.logRef = ''

@@ -295,10 +295,10 @@ export function useTable() {
       stateType: variables.stateType,
       startDate: variables.datePickerRange
         ? format(parseTime(variables.datePickerRange[0]), 'yyyy-MM-dd HH:mm:ss')
-        : '',
+        : format(new Date().getTime() - 15 * 24 * 60 * 60 * 1000,'yyyy-MM-dd HH:mm:ss'),
       endDate: variables.datePickerRange
         ? format(parseTime(variables.datePickerRange[1]), 'yyyy-MM-dd HH:mm:ss')
-        : '',
+        : format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
       executorName: variables.executorName,
       processDefinitionName: variables.processDefinitionName,
       taskExecuteType: 'STREAM' as 'BATCH' | 'STREAM',

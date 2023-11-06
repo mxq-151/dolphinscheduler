@@ -55,8 +55,6 @@ router.beforeEach(
     NProgress.start()
     const userStore = useUserStore()
     const metaData: metaData = to.meta
-    console.log(from.fullPath)
-    console.log(to.fullPath)
     if (
       metaData.auth?.includes('ADMIN_USER') &&
       (userStore.getUserInfo as UserInfoRes).userType !== 'ADMIN_USER' &&
@@ -64,28 +62,25 @@ router.beforeEach(
     ) {
       to.fullPath = '/security/token-manage'
       next({ name: 'token-manage' })
-    } else if (from.fullPath.startsWith("/projects/") && !from.fullPath.includes("/projects/list") && !to.fullPath.includes("/projects/list") && to.fullPath.includes("/projects/")){
-      debugger
-      let baseurl="/projects"
-      let index=from.fullPath.indexOf("/",baseurl.length+1);
-      let toindex=to.fullPath.indexOf("/",baseurl.length+1);
-      let projectCode= from.fullPath.slice(baseurl.length,index)
-      let post=to.fullPath.slice(toindex,to.fullPath.length)
-      if(toindex == -1){
-        to.fullPath=baseurl+projectCode
-        debugger
-        next()
-      }else if(index == -1){
-          projectCode= from.fullPath.slice(baseurl.length)
-          post = to.fullPath.slice(toindex,to.fullPath.length)
-          to.fullPath=baseurl+projectCode+post
-          debugger
-          next()
-        }else{
-          to.fullPath=baseurl+projectCode+post
-          debugger
-          next()
-        }
+    // } else if (from.fullPath.startsWith("/projects/") && !from.fullPath.includes("/projects/list") && !to.fullPath.includes("/projects/list") && to.fullPath.includes("/projects/")){
+    //   let baseurl="/projects"
+    //   let index=from.fullPath.indexOf("/",baseurl.length+1);
+    //   let toindex=to.fullPath.indexOf("/",baseurl.length+1);
+    //   let projectCode= from.fullPath.slice(baseurl.length,index)
+    //   let post=to.fullPath.slice(toindex,to.fullPath.length)
+    //   if(toindex == -1){
+    //     to.fullPath=baseurl+projectCode
+    //     next()
+    //   }else if(index == -1){
+    //       projectCode= from.fullPath.slice(baseurl.length)
+    //       post = to.fullPath.slice(toindex,to.fullPath.length)
+    //       to.fullPath=baseurl+projectCode+post
+    //       next()
+    //     }else{
+    //       to.fullPath=baseurl+projectCode+post
+        
+    //       next()
+    //     }
   } else {
       next()
     }

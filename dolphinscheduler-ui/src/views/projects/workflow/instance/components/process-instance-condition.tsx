@@ -29,7 +29,7 @@ export default defineComponent({
   setup(props, ctx) {
     const route = useRoute()
     const searchValRef = ref(route.query.processInstanceName||'')
-    const executorNameRef = ref('')
+    const executorNameRef = ref(route.query.executorName||'')
     const hostRef = ref('')
     const stateTypeRef = ref('')
     const startEndTimeRef = ref()
