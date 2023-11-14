@@ -91,8 +91,7 @@ export default defineComponent({
     //   )
     // )
     const environmentOptions = computed(() =>
-      variables.environmentList.filter((item)=> item.value==timingState.timingForm.environmentCode).map((item)=>item.workerGroups).flat().map((wg)=>({value:wg,label:wg})
-      )
+       variables.environmentList
     )
 
     const hideModal = () => {
