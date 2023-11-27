@@ -62,6 +62,8 @@ public final class WeChatSender {
     private final String sendType;
     private final String showType;
 
+    private final String botToken;
+
     WeChatSender(Map<String, String> config) {
         weChatAgentIdChatId = config.get(WeChatAlertParamsConstants.NAME_ENTERPRISE_WE_CHAT_AGENT_ID);
         weChatUsers = config.get(WeChatAlertParamsConstants.NAME_ENTERPRISE_WE_CHAT_USERS);
@@ -75,6 +77,7 @@ public final class WeChatSender {
                 .replace(CORP_ID_REGEX, weChatCorpId)
                 .replace(SECRET_REGEX, weChatSecret);
         weChatToken = getToken();
+        botToken=weChatSecret;
     }
 
     private static String post(String url, String data) throws IOException {
@@ -196,10 +199,10 @@ public final class WeChatSender {
      *
      * @return Enterprise WeChat resp, demo: {"errcode":0,"errmsg":"ok","invaliduser":""}
      */
-    public AlertResult sendEnterpriseWeChat(String title, String content) {
+    public AlertResult sendEnterpriseWeChat(String title, String content,String phone) {
         AlertResult alertResult;
         String data = markdownByAlert(title, content);
-        if (null == weChatToken) {
+        if (null == weChatToken && !sendType.equals(WeChatType.BOTCHAT.getDescp()) ) {
             alertResult = new AlertResult();
             alertResult.setMessage("send we chat alert fail,get weChat token error");
             alertResult.setStatus(ALERT_STATUS);
@@ -207,6 +210,7 @@ public final class WeChatSender {
         }
         String enterpriseWeChatPushUrlReplace = "";
         Map<String, String> contentMap = new HashMap<>();
+        contentMap.put(WE_CHAT_USER_PHONE,phone);
         contentMap.put(WeChatAlertConstants.WE_CHAT_CONTENT_KEY, data);
         String msgJson = "";
         if (sendType.equals(WeChatType.APP.getDescp())) {
@@ -216,6 +220,10 @@ public final class WeChatSender {
         } else if (sendType.equals(WeChatType.APPCHAT.getDescp())) {
             enterpriseWeChatPushUrlReplace = WeChatAlertConstants.WE_CHAT_APP_CHAT_PUSH_URL.replace(TOKEN_REGEX, weChatToken);
             WechatAppChatMessage wechatAppChatMessage = new WechatAppChatMessage(weChatAgentIdChatId, showType, contentMap, WE_CHAT_MESSAGE_SAFE_PUBLICITY);
+            msgJson = JSONUtils.toJsonString(wechatAppChatMessage);
+        }else if (sendType.equals(WeChatType.BOTCHAT.getDescp())) {
+            enterpriseWeChatPushUrlReplace = WeChatAlertConstants.WE_CHAT_BOT_URL.replace(TOKEN_REGEX, botToken);
+            WechatAppChatMessage wechatAppChatMessage = new WechatAppChatMessage(showType, contentMap);
             msgJson = JSONUtils.toJsonString(wechatAppChatMessage);
         }
 
