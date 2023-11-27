@@ -102,7 +102,7 @@ export function useUserDetail() {
     phone: {
       trigger: ['input', 'blur'],
       validator(validator: any, value: string) {
-        if (value && !/^1(3|4|5|6|7|8)\d{9}$/.test(value)) {
+        if (value && !/^1[3-9]\d{9}$/.test(value)) {
           return new Error(t('security.user.phone_correct_tips'))
         }
       }

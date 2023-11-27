@@ -48,4 +48,9 @@ public class ProcessDefinitionDaoImpl implements ProcessDefinitionDao {
                 .records(processDefinitions.getRecords())
                 .build();
     }
+    @Override
+    public ProcessDefinition queryProcessDefinitionByCode(long ProcessDefinitionCode){
+        return processDefinitionMapper.queryByCode(ProcessDefinitionCode);
+    }
+
 }

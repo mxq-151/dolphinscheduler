@@ -24,6 +24,8 @@ public final class WeChatAlertConstants {
 
     static final String CHARSET = "UTF-8";
 
+    static final String WE_CHAT_BOT_URL = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={token}";
+
     static final String WE_CHAT_PUSH_URL = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={token}";
 
     static final String WE_CHAT_APP_CHAT_PUSH_URL = "https://qyapi.weixin.qq.com/cgi-bin/appchat/send?access_token" +
@@ -33,6 +35,7 @@ public final class WeChatAlertConstants {
 
     static final String WE_CHAT_CONTENT_KEY = "content";
 
+    static final String WE_CHAT_USER_PHONE= "mentioned_mobile_list";
     static final String WE_CHAT_MESSAGE_TYPE_TEXT = "text";
 
     static final Integer WE_CHAT_MESSAGE_SAFE_PUBLICITY = 0;

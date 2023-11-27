@@ -19,6 +19,7 @@ package org.apache.dolphinscheduler.alert;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dolphinscheduler.alert.api.AlertChannel;
 import org.apache.dolphinscheduler.alert.api.AlertConstants;
 import org.apache.dolphinscheduler.alert.api.AlertData;
@@ -32,8 +33,12 @@ import org.apache.dolphinscheduler.common.lifecycle.ServerLifeCycleManager;
 import org.apache.dolphinscheduler.common.thread.ThreadUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.AlertDao;
+import org.apache.dolphinscheduler.dao.UsersDao;
 import org.apache.dolphinscheduler.dao.entity.Alert;
 import org.apache.dolphinscheduler.dao.entity.AlertPluginInstance;
+import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
+import org.apache.dolphinscheduler.dao.entity.User;
+import org.apache.dolphinscheduler.dao.repository.ProcessDefinitionDao;
 import org.apache.dolphinscheduler.remote.command.alert.AlertSendResponseCommand;
 import org.apache.dolphinscheduler.remote.command.alert.AlertSendResponseResult;
 import org.slf4j.Logger;
@@ -56,11 +61,17 @@ public final class AlertSenderService extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(AlertSenderService.class);
 
     private final AlertDao alertDao;
+    private final UsersDao usersDao;
+
+    private final ProcessDefinitionDao processDefinitionDao;
+
     private final AlertPluginManager alertPluginManager;
     private final AlertConfig alertConfig;
 
-    public AlertSenderService(AlertDao alertDao, AlertPluginManager alertPluginManager, AlertConfig alertConfig) {
+    public AlertSenderService(AlertDao alertDao, UsersDao usersDao, ProcessDefinitionDao processDefinitionDao, AlertPluginManager alertPluginManager, AlertConfig alertConfig) {
         this.alertDao = alertDao;
+        this.usersDao = usersDao;
+        this.processDefinitionDao = processDefinitionDao;
         this.alertPluginManager = alertPluginManager;
         this.alertConfig = alertConfig;
     }
@@ -99,6 +110,16 @@ public final class AlertSenderService extends Thread {
                 alertDao.updateAlert(AlertStatus.EXECUTION_FAILURE, JSONUtils.toJsonString(alertResults), alertId);
                 continue;
             }
+
+            long processDefinitionCode = Optional.ofNullable(alert.getProcessDefinitionCode()).orElse(0L);
+            ProcessDefinition processDefinition = processDefinitionDao.queryProcessDefinitionByCode(processDefinitionCode);
+            String phone = "";
+            if (Optional.ofNullable(processDefinition).isPresent()){
+               User user = usersDao.queryUserbyId(processDefinition.getUserId());
+                if (Optional.ofNullable(user).isPresent()){
+                    phone = user.getPhone();
+                }
+            }
             AlertData alertData = AlertData.builder()
                     .id(alertId)
                     .content(alert.getContent())
@@ -106,6 +127,7 @@ public final class AlertSenderService extends Thread {
                     .title(alert.getTitle())
                     .warnType(alert.getWarningType().getCode())
                     .alertType(alert.getAlertType().getCode())
+                    .phone(phone)
                     .build();
 
             int sendSuccessCount = 0;

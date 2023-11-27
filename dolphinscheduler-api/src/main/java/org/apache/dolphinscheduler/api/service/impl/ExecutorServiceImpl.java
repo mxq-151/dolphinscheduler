@@ -624,7 +624,7 @@ public class ExecutorServiceImpl extends BaseServiceImpl implements ExecutorServ
         command.setProcessDefinitionVersion(processVersion);
 
         int create = processService.createCommand(command);
-        int count=this.processService.updateCommandByType(commandType.getCode(),processDefinitionCode,command.getScheduleTime(), CommandState.NOT_RUNNING.getCode());
+        int count=processService.updateCommandByType(commandType.getCode(),processDefinitionCode,command.getScheduleTime(), CommandState.NOT_RUNNING.getCode());
         logger.info("update process {} schedule {} command type {},num:{}",processDefinitionCode,command.getScheduleTime(),commandType,count);
         if (create > 0) {
             putMsg(result, Status.SUCCESS);

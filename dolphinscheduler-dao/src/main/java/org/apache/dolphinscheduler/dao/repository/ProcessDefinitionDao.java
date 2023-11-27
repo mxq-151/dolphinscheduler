@@ -37,4 +37,6 @@ public interface ProcessDefinitionDao {
                                                                   int userId,
                                                                   long projectCode);
 
+
+    ProcessDefinition queryProcessDefinitionByCode(long ProcessDefinitionCode);
 }

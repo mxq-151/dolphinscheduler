@@ -24,6 +24,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * alert data
  */
@@ -65,5 +67,8 @@ public class AlertData {
      * AlertType#code
      */
     private int alertType;
+
+
+    private String phone;
 
 }

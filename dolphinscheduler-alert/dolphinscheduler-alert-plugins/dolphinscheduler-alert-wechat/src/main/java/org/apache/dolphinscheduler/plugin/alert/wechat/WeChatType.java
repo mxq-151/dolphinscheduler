@@ -21,6 +21,7 @@ package org.apache.dolphinscheduler.plugin.alert.wechat;
 public enum WeChatType {
     APP(1, "APP/应用"),
     APPCHAT(2, "GROUP CHAT/群聊"),
+    BOTCHAT(3, "企业微信群聊机器人"),
     ;
 
     private final int code;
