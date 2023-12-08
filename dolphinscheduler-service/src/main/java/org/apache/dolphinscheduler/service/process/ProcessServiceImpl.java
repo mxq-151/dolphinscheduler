@@ -1392,7 +1392,12 @@ public class ProcessServiceImpl implements ProcessService {
                         retryTimes);
                 Thread.sleep(commitInterval);
             } catch (Exception e) {
-                logger.error("task commit to db failed", e);
+                try {
+                    Thread.sleep(commitInterval);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+                logger.error("task commit to db failed {}, taskCode: {}, retry times: {}  max retry times: {} state:{}",  e,taskInstance.getTaskCode(), retryTimes,commitRetryTimes,processInstance.getState());
             } finally {
                 retryTimes += 1;
             }

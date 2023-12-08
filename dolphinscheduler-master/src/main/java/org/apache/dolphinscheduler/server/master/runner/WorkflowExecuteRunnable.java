@@ -222,14 +222,14 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
      * @param stateWheelExecuteThread stateWheelExecuteThread
      */
     public WorkflowExecuteRunnable(
-                                   @NonNull ProcessInstance processInstance,
-                                   @NonNull ProcessService processService,
-                                   @NonNull ProcessInstanceDao processInstanceDao,
-                                   @NonNull NettyExecutorManager nettyExecutorManager,
-                                   @NonNull ProcessAlertManager processAlertManager,
-                                   @NonNull MasterConfig masterConfig,
-                                   @NonNull StateWheelExecuteThread stateWheelExecuteThread,
-                                   @NonNull CuringParamsService curingParamsService) {
+            @NonNull ProcessInstance processInstance,
+            @NonNull ProcessService processService,
+            @NonNull ProcessInstanceDao processInstanceDao,
+            @NonNull NettyExecutorManager nettyExecutorManager,
+            @NonNull ProcessAlertManager processAlertManager,
+            @NonNull MasterConfig masterConfig,
+            @NonNull StateWheelExecuteThread stateWheelExecuteThread,
+            @NonNull CuringParamsService curingParamsService) {
         this.processService = processService;
         this.processInstanceDao = processInstanceDao;
         this.processInstance = processInstance;
@@ -421,7 +421,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
 
     /**
      * release task group
-     *
      */
     public void releaseTaskGroup(TaskInstance taskInstance) {
         if (taskInstance.getTaskGroupId() > 0) {
@@ -446,7 +445,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
 
     /**
      * crate new task instance to retry, different objects from the original
-     *
      */
     private void retryTaskInstance(TaskInstance taskInstance) throws StateEventHandleException {
         if (!taskInstance.taskCanRetry()) {
@@ -1658,8 +1656,13 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
                             "Task {} has been forced success, put it into complete task list and stop retrying, taskInstanceId: {}",
                             task.getName(), task.getId());
                     removeTaskFromStandbyList(task);
-                    completeTaskMap.put(task.getTaskCode(), task.getId());
-                    taskInstanceMap.put(task.getId(), task);
+                    if (task.getId() != null) {
+                        completeTaskMap.put(task.getTaskCode(), task.getId());
+                        taskInstanceMap.put(task.getId(), task);
+                    }else{
+                        logger.error("Task id is null and not to submit, TaskCode is {}",task.getTaskCode());
+                    }
+
                     submitPostNode(Long.toString(task.getTaskCode()));
                     continue;
                 }
@@ -1693,9 +1696,13 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
                                 processInstance.getId(),
                                 task.getTaskCode());
                     }
-                    completeTaskMap.put(task.getTaskCode(), task.getId());
-                    taskInstanceMap.put(task.getId(), task);
-                    errorTaskMap.put(task.getTaskCode(), task.getId());
+                    if (task.getId() != null) {
+                        completeTaskMap.put(task.getTaskCode(), task.getId());
+                        taskInstanceMap.put(task.getId(), task);
+                        errorTaskMap.put(task.getTaskCode(), task.getId());
+                    }else{
+                        logger.error("Task id is null and not to submit, TaskCode is {}",task.getTaskCode());
+                    }
                     activeTaskProcessorMaps.remove(task.getTaskCode());
                     logger.error("Task submitted failed, workflowInstanceId: {}, taskInstanceId: {}, taskCode: {}",
                             task.getProcessInstanceId(),
