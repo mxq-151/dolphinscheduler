@@ -273,7 +273,7 @@ public class StateWheelExecuteThread extends BaseDaemonThread {
                     continue;
                 }
                 TaskInstance taskInstance = taskInstanceOptional.get();
-                if (TimeoutFlag.OPEN == taskInstance.getTaskDefine().getTimeoutFlag()) {
+                if (taskInstance.getTaskDefine()!=null&&TimeoutFlag.OPEN == taskInstance.getTaskDefine().getTimeoutFlag()) {
                     long timeRemain = DateUtils.getRemainTime(taskInstance.getStartTime(),
                             (long) taskInstance.getTaskDefine().getTimeout()
                                     * Constants.SEC_2_MINUTES_TIME_UNIT);
