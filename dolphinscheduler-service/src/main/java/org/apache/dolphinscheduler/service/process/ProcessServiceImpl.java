@@ -298,6 +298,7 @@ public class ProcessServiceImpl implements ProcessService {
         //正在运行的作业
         ProcessInstance runningInstance=null;
         if (processDefinition.getExecutionType().typeIsSerial()) {
+//            Date start=new Date(System.currentTimeMillis()-3*60*60*1000);
             Date start=new Date(System.currentTimeMillis()-3*60*60*1000);
             runningInstance=this.processInstanceMapper.queryLastRunningProcess(command.getProcessDefinitionCode(),start,null,WorkflowExecutionStatus.getNeedFailoverWorkflowInstanceState());
         }
@@ -351,15 +352,17 @@ public class ProcessServiceImpl implements ProcessService {
 
         processInstance.setStateWithDesc(WorkflowExecutionStatus.SERIAL_WAIT, "wait by serial_wait strategy");
         processInstanceDao.upsertProcessInstance(processInstance);
+        Date start=new Date(System.currentTimeMillis()-3*60*60*1000);
         // serial wait
         // when we get the running instance(or waiting instance) only get the priority instance(by id)
         if (processDefinition.getExecutionType().typeIsSerialWait()) {
+
             List<ProcessInstance> runningProcessInstances =
                     this.processInstanceMapper.queryByProcessDefineCodeAndProcessDefinitionVersionAndStatusAndNextId(
                             processInstance.getProcessDefinitionCode(),
                             processInstance.getProcessDefinitionVersion(),
                             org.apache.dolphinscheduler.service.utils.Constants.RUNNING_PROCESS_STATE,
-                            processInstance.getId());
+                            processInstance.getId(),start,null);
             if (CollectionUtils.isEmpty(runningProcessInstances)) {
                 processInstance.setStateWithDesc(WorkflowExecutionStatus.RUNNING_EXECUTION,
                         "submit from serial_wait strategy");
@@ -371,7 +374,7 @@ public class ProcessServiceImpl implements ProcessService {
                             processInstance.getProcessDefinitionCode(),
                             processInstance.getProcessDefinitionVersion(),
                             org.apache.dolphinscheduler.service.utils.Constants.RUNNING_PROCESS_STATE,
-                            processInstance.getId());
+                            processInstance.getId(),null,null);
             if (CollectionUtils.isNotEmpty(runningProcessInstances)) {
                 processInstance.setStateWithDesc(WorkflowExecutionStatus.STOP, "stop by serial_discard strategy");
                 processInstanceDao.upsertProcessInstance(processInstance);
@@ -386,7 +389,7 @@ public class ProcessServiceImpl implements ProcessService {
                             processInstance.getProcessDefinitionCode(),
                             processInstance.getProcessDefinitionVersion(),
                             org.apache.dolphinscheduler.service.utils.Constants.RUNNING_PROCESS_STATE,
-                            processInstance.getId());
+                            processInstance.getId(),null,null);
             for (ProcessInstance info : runningProcessInstances) {
                 info.setCommandType(CommandType.STOP);
                 info.addHistoryCmd(CommandType.STOP);

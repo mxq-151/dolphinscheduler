@@ -257,7 +257,8 @@ public interface ProcessInstanceMapper extends BaseMapper<ProcessInstance> {
 
     List<ProcessInstance> queryByProcessDefineCodeAndProcessDefinitionVersionAndStatusAndNextId(@Param("processDefinitionCode") Long processDefinitionCode,
                                                                                                 @Param("processDefinitionVersion") int processDefinitionVersion, @Param("states") int[] states,
-                                                                                                @Param("id") Integer id);
+                                                                                                @Param("id") Integer id, @Param("startTime") Date startTime,
+                                                                                                @Param("endTime") Date endTime);
 
     boolean checkProcessExist(@Param("scheduleTime")Date scheduleTime, @Param("processDefinitionCode")Long processDefinitionCode,@Param("commandType")int commandType);
 

@@ -245,6 +245,9 @@
             and ((schedule_time <![CDATA[ >= ]]> #{startTime} and schedule_time <![CDATA[ <= ]]> #{endTime})
             or (start_time <![CDATA[ >= ]]> #{startTime} and start_time <![CDATA[ <= ]]> #{endTime}))
         </if>
+        <if test="startTime!=null and endTime == null ">
+            and start_time <![CDATA[ >= ]]> #{startTime}
+        </if>
         order by start_time desc limit 1
     </select>
 
@@ -299,6 +302,9 @@
         and next_process_instance_id=0
         <if test="id != null">
             and id <![CDATA[ < ]]> #{id}
+        </if>
+        <if test="startTime!=null and endTime == null ">
+            and start_time <![CDATA[ >= ]]> #{startTime}
         </if>
         order by id desc
     </select>
