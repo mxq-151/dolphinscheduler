@@ -83,7 +83,7 @@ public class TaskExecutionCheckerUtils {
         }
     }
 
-    public static void downloadResourcesIfNeeded(StorageOperate storageOperate, TaskExecutionContext taskExecutionContext, Logger logger) {
+    public static synchronized void downloadResourcesIfNeeded(StorageOperate storageOperate, TaskExecutionContext taskExecutionContext, Logger logger) {
         String execLocalPath = taskExecutionContext.getExecutePath();
         Map<String, String> projectRes = taskExecutionContext.getResources();
         if (MapUtils.isEmpty(projectRes)) {
