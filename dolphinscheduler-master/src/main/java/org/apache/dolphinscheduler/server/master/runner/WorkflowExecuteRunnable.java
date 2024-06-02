@@ -593,6 +593,13 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
         }
 
         try {
+
+            boolean  find=true;
+
+            if(find)
+            {
+                throw new RuntimeException("---------KKKKKK-----------");
+            }
             LoggerUtils.setWorkflowInstanceIdMDC(processInstance.getId());
             if (workflowRunnableStatus == WorkflowRunnableStatus.CREATED) {
                 buildFlowDag();
@@ -1646,10 +1653,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
         return this.processInstance.getState().isFinished();
     }
 
-    public int tryNum()
-    {
-       return this.tryNum;
-    }
 
     /**
      * handling the list of tasks to be submitted
