@@ -138,8 +138,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
      */
     private String key;
 
-    private  int tryNum=0;
-
     private WorkflowRunnableStatus workflowRunnableStatus = WorkflowRunnableStatus.CREATED;
 
     /**
@@ -601,11 +599,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
                 workflowRunnableStatus = WorkflowRunnableStatus.INITIALIZE_DAG;
                 logger.info("workflowStatue changed to :{}", workflowRunnableStatus);
             }
-            boolean find=true;
-            if(find)
-            {
-                throw new RuntimeException("KKKKKKKKKKKKKKO-----------");
-            }
 
             if (workflowRunnableStatus == WorkflowRunnableStatus.INITIALIZE_DAG) {
                 initTaskQueue();
@@ -620,8 +613,12 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             return WorkflowSubmitStatue.SUCCESS;
         } catch (Exception e) {
             e.getStackTrace();
-            this.tryNum++;
             logger.error("Start workflow error", e);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+
+            }
             return WorkflowSubmitStatue.FAILED;
         } finally {
             LoggerUtils.removeWorkflowInstanceIdMDC();
