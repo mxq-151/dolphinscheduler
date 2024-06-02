@@ -138,6 +138,8 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
      */
     private String key;
 
+    private  int tryNum=0;
+
     private WorkflowRunnableStatus workflowRunnableStatus = WorkflowRunnableStatus.CREATED;
 
     /**
@@ -611,6 +613,8 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             }
             return WorkflowSubmitStatue.SUCCESS;
         } catch (Exception e) {
+            e.getStackTrace();
+            this.tryNum++;
             logger.error("Start workflow error", e);
             return WorkflowSubmitStatue.FAILED;
         } finally {
@@ -1637,6 +1641,11 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
 
     public boolean workFlowFinish() {
         return this.processInstance.getState().isFinished();
+    }
+
+    public int tryNum()
+    {
+       return this.tryNum;
     }
 
     /**

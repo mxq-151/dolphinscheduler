@@ -182,7 +182,7 @@ export function useDependent(model: { [field: string]: any }): IJsonItem[] {
     const result = await queryAllProjectListForDependent()
     projectList.value = result.map((item: { code: number; name: string; cluster: string }) => ({
       value: item.code,
-      label: () => h(NEllipsis, null, item.name+"("+item.cluster+")")
+      label: item.name+"("+item.cluster+")"
     }))
     return projectList
   }
@@ -193,7 +193,7 @@ export function useDependent(model: { [field: string]: any }): IJsonItem[] {
     const result = await queryProcessDefinitionList(code)
     const processList = result.map((item: { code: number; name: string }) => ({
       value: item.code,
-      label: () => h(NEllipsis, null, item.name)
+      label: item.name
     }))
     processCache[code] = processList
 
