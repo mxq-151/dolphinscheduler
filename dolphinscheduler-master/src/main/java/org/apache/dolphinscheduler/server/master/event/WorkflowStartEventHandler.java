@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.server.master.event;
 
+import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.dao.entity.ProcessInstance;
 import org.apache.dolphinscheduler.server.master.cache.ProcessInstanceExecCacheManager;
 import org.apache.dolphinscheduler.server.master.metrics.ProcessInstanceMetrics;
@@ -27,6 +28,7 @@ import org.apache.dolphinscheduler.server.master.runner.WorkflowSubmitStatue;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.dolphinscheduler.service.process.ProcessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,9 @@ public class WorkflowStartEventHandler implements WorkflowEventHandler {
 
     @Autowired
     private StateWheelExecuteThread stateWheelExecuteThread;
+
+    @Autowired
+    private ProcessService processService;
 
     @Autowired
     private WorkflowExecuteThreadPool workflowExecuteThreadPool;
@@ -76,6 +81,8 @@ public class WorkflowStartEventHandler implements WorkflowEventHandler {
 
                         workflowEvent.setRetryCount(workflowEvent.getRetryCount()+1);
                         workflowEventQueue.addEvent(workflowEvent);
+                    }else {
+                        processService.updateProcessInstanceStateById(processInstance.getId(), WorkflowExecutionStatus.FAILURE);
                     }
 
                 }
