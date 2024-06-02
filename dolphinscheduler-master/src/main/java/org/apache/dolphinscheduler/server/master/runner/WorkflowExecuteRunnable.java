@@ -601,6 +601,12 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
                 workflowRunnableStatus = WorkflowRunnableStatus.INITIALIZE_DAG;
                 logger.info("workflowStatue changed to :{}", workflowRunnableStatus);
             }
+            boolean find=true;
+            if(find)
+            {
+                throw new RuntimeException("KKKKKKKKKKKKKKO-----------");
+            }
+
             if (workflowRunnableStatus == WorkflowRunnableStatus.INITIALIZE_DAG) {
                 initTaskQueue();
                 workflowRunnableStatus = WorkflowRunnableStatus.INITIALIZE_QUEUE;

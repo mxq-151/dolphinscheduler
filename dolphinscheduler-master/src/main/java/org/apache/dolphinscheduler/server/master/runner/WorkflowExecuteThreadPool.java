@@ -135,14 +135,6 @@ public class WorkflowExecuteThreadPool extends ThreadPoolTaskExecutor {
                         notifyProcessChanged(workflowExecuteThread.getProcessInstance());
                         logger.info("Workflow instance is finished.");
                     }
-                    if(workflowExecuteThread.tryNum()>=10)
-                    {
-                        stateWheelExecuteThread
-                                .removeProcess4TimeoutCheck(workflowExecuteThread.getProcessInstance().getId());
-                        processInstanceExecCacheManager.removeByProcessInstanceId(processInstanceId);
-                        notifyProcessChanged(workflowExecuteThread.getProcessInstance());
-                        logger.warn("Workflow instance is retry too much");
-                    }
                 } catch (Exception e) {
                     logger.error("Workflow instance is finished, but notify changed error", e);
                 } finally {

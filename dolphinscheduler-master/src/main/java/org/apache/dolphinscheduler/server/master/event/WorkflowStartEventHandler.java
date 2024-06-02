@@ -69,9 +69,15 @@ public class WorkflowStartEventHandler implements WorkflowEventHandler {
                         stateWheelExecuteThread.addProcess4TimeoutCheck(processInstance);
                     }
                 } else {
-                    logger.error("Failed to submit the workflow instance, will resend the workflow start event: {}",
-                                 workflowEvent);
-                    workflowEventQueue.addEvent(workflowEvent);
+                    if(workflowEvent.getRetryCount()<10)
+                    {
+                        logger.error("Failed to submit the workflow instance, will resend the workflow start event: {}",
+                                workflowEvent);
+
+                        workflowEvent.setRetryCount(workflowEvent.getRetryCount()+1);
+                        workflowEventQueue.addEvent(workflowEvent);
+                    }
+
                 }
             });
     }
