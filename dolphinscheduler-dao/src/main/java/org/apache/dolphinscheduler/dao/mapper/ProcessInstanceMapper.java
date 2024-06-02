@@ -139,7 +139,7 @@ public interface ProcessInstanceMapper extends BaseMapper<ProcessInstance> {
                                      @Param("destState") WorkflowExecutionStatus destState);
 
     int updateProcessInstanceStateById(@Param("id") int id,
-                                     @Param("destState") WorkflowExecutionStatus destState);
+                                     @Param("destState") int destState);
 
     /**
      * update process instance by tenantId

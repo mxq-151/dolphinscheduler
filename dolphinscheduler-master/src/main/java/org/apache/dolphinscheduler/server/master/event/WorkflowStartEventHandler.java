@@ -82,8 +82,9 @@ public class WorkflowStartEventHandler implements WorkflowEventHandler {
                         workflowEvent.setRetryCount(workflowEvent.getRetryCount()+1);
                         workflowEventQueue.addEvent(workflowEvent);
                     }else {
-                        logger.warn("update process:{} to fail state",processInstance.getId());
-                        processService.updateProcessInstanceStateById(processInstance.getId(), WorkflowExecutionStatus.FAILURE);
+
+                        int count=processService.updateProcessInstanceStateById(processInstance.getId(), WorkflowExecutionStatus.FAILURE);
+                        logger.warn("update process:{} to fail state,affected:{}",processInstance.getId(),count);
                     }
 
                 }

@@ -1974,7 +1974,7 @@ public class ProcessServiceImpl implements ProcessService {
 
     @Override
     public int updateProcessInstanceStateById(int id, WorkflowExecutionStatus destState) {
-        return this.processInstanceMapper.updateProcessInstanceStateById(id,destState);
+        return this.processInstanceMapper.updateProcessInstanceStateById(id,destState.getCode());
     }
 
     /**
