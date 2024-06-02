@@ -21,7 +21,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 public class WorkflowEvent {
 
     private WorkflowEventType workflowEventType;
@@ -29,5 +28,11 @@ public class WorkflowEvent {
     private int workflowInstanceId;
 
     private int retryCount=0;
+
+    public WorkflowEvent(WorkflowEventType workflowEventType,int workflowInstanceId)
+    {
+        this.workflowEventType=workflowEventType;
+        this.workflowInstanceId=workflowInstanceId;
+    }
 
 }
