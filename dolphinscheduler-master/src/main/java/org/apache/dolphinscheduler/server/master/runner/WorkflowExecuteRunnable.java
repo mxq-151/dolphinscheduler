@@ -611,6 +611,7 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             }
             return WorkflowSubmitStatue.SUCCESS;
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("Start workflow error", e);
             return WorkflowSubmitStatue.FAILED;
         } finally {
