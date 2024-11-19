@@ -1975,6 +1975,11 @@ public class ProcessServiceImpl implements ProcessService {
         return processInstanceMapMapper.updateById(processInstanceMap);
     }
 
+    @Override
+    public int updateProcessInstanceStateById(int id, WorkflowExecutionStatus destState) {
+        return this.processInstanceMapper.updateProcessInstanceStateById(id,destState.getCode());
+    }
+
     /**
      * create work process instance map
      *

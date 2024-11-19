@@ -593,12 +593,20 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
         }
 
         try {
+
+            boolean  find=true;
+
+            if(find)
+            {
+                throw new RuntimeException("---------KKKKKK-----------");
+            }
             LoggerUtils.setWorkflowInstanceIdMDC(processInstance.getId());
             if (workflowRunnableStatus == WorkflowRunnableStatus.CREATED) {
                 buildFlowDag();
                 workflowRunnableStatus = WorkflowRunnableStatus.INITIALIZE_DAG;
                 logger.info("workflowStatue changed to :{}", workflowRunnableStatus);
             }
+
             if (workflowRunnableStatus == WorkflowRunnableStatus.INITIALIZE_DAG) {
                 initTaskQueue();
                 workflowRunnableStatus = WorkflowRunnableStatus.INITIALIZE_QUEUE;
@@ -611,7 +619,13 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
             }
             return WorkflowSubmitStatue.SUCCESS;
         } catch (Exception e) {
+            e.getStackTrace();
             logger.error("Start workflow error", e);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+
+            }
             return WorkflowSubmitStatue.FAILED;
         } finally {
             LoggerUtils.removeWorkflowInstanceIdMDC();
@@ -1638,6 +1652,7 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
     public boolean workFlowFinish() {
         return this.processInstance.getState().isFinished();
     }
+
 
     /**
      * handling the list of tasks to be submitted

@@ -19,6 +19,7 @@ package org.apache.dolphinscheduler.service.process;
 
 import org.apache.dolphinscheduler.common.enums.AuthorizationType;
 import org.apache.dolphinscheduler.common.enums.TaskGroupQueueStatus;
+import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.common.graph.DAG;
 import org.apache.dolphinscheduler.common.model.TaskNodeRelation;
 import org.apache.dolphinscheduler.common.utils.CodeGenerateUtils;
@@ -158,6 +159,8 @@ public interface ProcessService {
     List<TaskInstance> findPreviousTaskListByWorkProcessId(Integer processInstanceId);
 
     int updateWorkProcessInstanceMap(ProcessInstanceMap processInstanceMap);
+
+    int updateProcessInstanceStateById(int id, WorkflowExecutionStatus destState);
 
     int createWorkProcessInstanceMap(ProcessInstanceMap processInstanceMap);
 
