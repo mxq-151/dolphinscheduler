@@ -57,6 +57,8 @@ export function useDependent({
       ...Fields.useTaskDefinition({ projectCode, from, readonly, data, model }),
       Fields.useRunFlag(),
       Fields.useDescription(),
+      Fields.useOaType(),
+      Fields.useOaRequestId(),
       Fields.useTaskPriority(),
       Fields.useWorkerGroup(),
       Fields.useEnvironmentName(model, !data?.id),

@@ -84,13 +84,16 @@ public class AccessLogAspect {
                 // handle login info
                 String userName = parseLoginInfo(request);
 
+                String ip=getClientIp(request);
+
                 // handle args
                 String argsString = parseArgs(proceedingJoinPoint, annotation);
                 // handle sensitive data in the string
                 argsString = handleSensitiveData(argsString);
-                logger.info("REQUEST TRACE_ID:{}, LOGIN_USER:{}, URI:{}, METHOD:{}, HANDLER:{}, ARGS:{}",
+                logger.info("REQUEST TRACE_ID:{}, LOGIN_USER:{}, IP:{}, URI:{}, METHOD:{}, HANDLER:{}, ARGS:{}",
                         traceId,
                         userName,
+                        ip,
                         request.getRequestURI(),
                         request.getMethod(),
                         proceedingJoinPoint.getSignature().getDeclaringTypeName() + "." + proceedingJoinPoint.getSignature().getName(),
@@ -98,6 +101,8 @@ public class AccessLogAspect {
 
             }
         }
+
+
 
         Object ob = proceedingJoinPoint.proceed();
 
@@ -107,6 +112,35 @@ public class AccessLogAspect {
         }
 
         return ob;
+    }
+
+    public static String getClientIp(HttpServletRequest request) {
+        // X-Forwarded-For 是一个 HTTP 扩展头部，用于标识通过 HTTP 代理或负载均衡方式连接到 web 服务器的客户端的原始 IP 地址
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null) {
+            // Proxy-Client-IP 是某些代理服务器添加的头部
+            xfHeader = request.getHeader("Proxy-Client-IP");
+        }
+        if (xfHeader == null) {
+            // WL-Proxy-Client-IP 是某些 WebLogic 服务器添加的头部
+            xfHeader = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (xfHeader == null) {
+            // HTTP_CLIENT_IP 是某些代理服务器添加的头部
+            xfHeader = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (xfHeader == null && request.getRemoteAddr() != null && !"".equals(request.getRemoteAddr())) {
+            // 如果没有找到代理头部，则使用 request.getRemoteAddr()
+            // 这个方法返回直接连接到服务器的客户端的 IP 地址
+            // 但在通过代理的情况下，它可能返回代理服务器的 IP 地址
+            xfHeader = request.getRemoteAddr();
+        }
+        // 处理 X-Forwarded-For 头部包含多个 IP 地址的情况
+        if (xfHeader != null) {
+            String[] ips = xfHeader.split(",");
+            return ips[0]; // 取第一个 IP 地址
+        }
+        return null; // 如果仍然没有找到 IP 地址，则返回 null
     }
 
     private String parseArgs(ProceedingJoinPoint proceedingJoinPoint, AccessLogAnnotation annotation) {

@@ -158,6 +158,16 @@ public class TaskDefinition {
     private TimeoutFlag timeoutFlag;
 
     /**
+     * 流程类型：B004或者B020
+     * */
+    private String oaType;
+
+    /**
+     * 流程ID
+     * */
+    private String oaRequestId;
+
+    /**
      * timeout notify strategy
      */
     @TableField(updateStrategy = FieldStrategy.IGNORED)

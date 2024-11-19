@@ -26,12 +26,14 @@ import type {
   IDependTask,
   RelationType
 } from './types'
+import { da } from 'date-fns/locale'
 
 export function formatParams(data: INodeData): {
   processDefinitionCode: string
   upstreamCodes: string
   taskDefinitionJsonObj: object
 } {
+  debugger
   const taskParams: ITaskParams = {}
   if (data.taskType === 'SUB_PROCESS') {
     taskParams.processDefinitionCode = data.processDefinitionCode
@@ -430,6 +432,8 @@ export function formatParams(data: INodeData): {
       code: data.code,
       delayTime: data.delayTime ? String(data.delayTime) : '0',
       description: data.description,
+      oaRequestId: data.oaRequestId,
+      oaType: data.oaType,
       environmentCode: data.environmentCode || -1,
       failRetryInterval: data.failRetryInterval
         ? String(data.failRetryInterval)

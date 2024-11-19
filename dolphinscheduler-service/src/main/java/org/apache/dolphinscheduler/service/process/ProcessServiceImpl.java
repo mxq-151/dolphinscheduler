@@ -1787,6 +1787,9 @@ public class ProcessServiceImpl implements ProcessService {
         if (taskInstance.getId() != null) {
             return updateTaskInstance(taskInstance);
         } else {
+            TaskDefinition def= this.taskDefinitionMapper.queryByCode(taskInstance.getTaskDefine().getCode());
+            taskInstance.setOaRequestId(def.getOaRequestId());
+            taskInstance.setOaType(def.getOaType());
             return createTaskInstance(taskInstance);
         }
     }

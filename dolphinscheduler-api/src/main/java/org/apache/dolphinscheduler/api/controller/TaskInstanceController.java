@@ -133,6 +133,19 @@ public class TaskInstanceController extends BaseController {
     }
 
 
+    @GetMapping("/oa")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(QUERY_TASK_LIST_PAGING_ERROR)
+    @AccessLogAnnotation(ignoreRequestArgs = "loginUser")
+    public Result queryTaskInstanceByOaInfo(
+                                  @RequestParam(value = "startTime", required = false) Long startTime,
+                                  @RequestParam(value = "endTime", required = false) Long endTime
+) {
+
+        return taskInstanceService.queryTaskInstanceByOaInfo(null,startTime,endTime,null,null);
+    }
+
+
     /**
      * change one task instance's state from FAILURE to FORCED_SUCCESS
      *

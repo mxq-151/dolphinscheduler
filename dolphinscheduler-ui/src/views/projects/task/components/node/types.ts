@@ -234,6 +234,8 @@ interface ITaskParams {
   rawScript?: string
   initScript?: string
   programType?: string
+  oaType?: string
+  oaRequestId: string
   sparkVersion?: string
   flinkVersion?: string
   jobManagerMemory?: string

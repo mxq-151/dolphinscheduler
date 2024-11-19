@@ -88,6 +88,9 @@ public interface TaskInstanceMapper extends BaseMapper<TaskInstance> {
                                                                                        @Param("projectCodes") Long[] projectCodes,
                                                                                        @Param("states") List<TaskExecutionStatus> states);
 
+    List<TaskInstance> queryByOaInfo(@Param("startTime") Date startTime, @Param("endTime") Date endTime);
+
+
     IPage<TaskInstance> queryTaskInstanceListPaging(IPage<TaskInstance> page,
                                                     @Param("projectCode") Long projectCode,
                                                     @Param("processInstanceId") Integer processInstanceId,

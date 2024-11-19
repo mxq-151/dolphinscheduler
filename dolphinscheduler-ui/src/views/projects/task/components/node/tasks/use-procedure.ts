@@ -36,6 +36,8 @@ export function useProcedure({
     taskType: 'PROCEDURE',
     flag: 'YES',
     description: '',
+    oaType: "",
+    oaRequestId:"",
     timeoutFlag: false,
     localParams: [],
     environmentCode: null,

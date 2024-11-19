@@ -94,6 +94,8 @@ interface TaskDefinitionVersionItem {
   taskParamMap: any
   flag: string
   taskPriority: string
+  oaType: string
+  oaRequestId: string
   userName?: any
   projectName?: any
   workerGroup: string

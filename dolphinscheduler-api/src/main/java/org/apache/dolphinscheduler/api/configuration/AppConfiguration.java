@@ -45,6 +45,9 @@ public class AppConfiguration implements WebMvcConfigurer {
 
     public static final String LOGIN_INTERCEPTOR_PATH_PATTERN = "/**/*";
     public static final String LOGIN_PATH_PATTERN = "/login";
+
+    public static final String OA_PATH_PATTERN = "/projects/0/task-instances/oa";
+
     public static final String REGISTER_PATH_PATTERN = "/users/register";
     public static final String PATH_PATTERN = "/**";
     public static final String LOCALE_LANGUAGE_COOKIE = "language";
@@ -102,7 +105,7 @@ public class AppConfiguration implements WebMvcConfigurer {
         }
         registry.addInterceptor(loginInterceptor())
                 .addPathPatterns(LOGIN_INTERCEPTOR_PATH_PATTERN)
-                .excludePathPatterns(LOGIN_PATH_PATTERN, REGISTER_PATH_PATTERN,
+                .excludePathPatterns(LOGIN_PATH_PATTERN,OA_PATH_PATTERN, REGISTER_PATH_PATTERN,
                         "/swagger-resources/**", "/webjars/**", "/v3/api-docs/**", "/api-docs/**",
                         "/doc.html", "/swagger-ui/**", "*.html", "/ui/**", "/error");
     }

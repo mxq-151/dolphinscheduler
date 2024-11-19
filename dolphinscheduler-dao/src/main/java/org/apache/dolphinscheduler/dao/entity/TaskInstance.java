@@ -306,6 +306,16 @@ public class TaskInstance implements Serializable {
      */
     private TaskExecuteType taskExecuteType;
 
+    /**
+     * 流程类型：B004或者B020
+     * */
+    private String oaType;
+
+    /**
+     * 流程ID
+     * */
+    private String oaRequestId;
+
     public void init(String host, Date startTime, String executePath) {
         this.host = host;
         this.startTime = startTime;

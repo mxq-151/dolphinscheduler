@@ -64,6 +64,13 @@ public interface TaskInstanceService {
                                String productName,
                                String cluster);
 
+
+    Result queryTaskInstanceByOaInfo(User loginUser,
+                                     Long startDate,
+                                     Long endDate,
+                                     Integer pageNo,
+                                     Integer pageSize);
+
     /**
      * change one task instance's state from failure to forced success
      *

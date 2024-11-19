@@ -18,6 +18,8 @@
 export { useName } from './use-name'
 export { useRunFlag } from './use-run-flag'
 export { useDescription } from './use-description'
+export { useOaType } from './use-oa-type'
+export { useOaRequestId } from './use-oa-request'
 export { useTaskPriority } from './use-task-priority'
 export { useWorkerGroup } from './use-worker-group'
 export { useEnvironmentName } from './use-environment-name'

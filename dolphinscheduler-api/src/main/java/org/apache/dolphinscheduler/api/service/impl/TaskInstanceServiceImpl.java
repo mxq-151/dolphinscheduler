@@ -212,6 +212,50 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
         return result;
     }
 
+    @Override
+    public Result queryTaskInstanceByOaInfo(User loginUser, Long startDate, Long endDate, Integer pageNo, Integer pageSize) {
+
+        Date start =null;
+
+        if(startDate!=null)
+        {
+            start=new Date(startDate);
+        }
+        Date end = null;
+
+        if(endDate!=null)
+        {
+            end=new Date(endDate);
+        }
+
+
+        List<TaskInstance> tasks=this.taskInstanceMapper.queryByOaInfo(start,end);
+        Set<Integer> set=new HashSet<>();
+        for(TaskInstance task:tasks)
+        {
+            Integer executor=task.getExecutorId();
+            set.add(executor);
+        }
+        List<User> users=usersService.queryUser(new ArrayList<>(set));
+
+        for(TaskInstance task:tasks)
+        {
+            for(User user:users)
+            {
+                if(user.getId()==task.getExecutorId())
+                {
+                    task.setExecutorName(user.getUserName());
+                    break;
+                }
+            }
+        }
+
+        Result<List<TaskInstance>> result = new Result<>();
+        result.setData(tasks);
+        putMsg(result, Status.SUCCESS);
+        return result;
+    }
+
     /**
      * change one task instance's state from failure to forced success
      *
