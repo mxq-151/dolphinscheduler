@@ -231,12 +231,16 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
 
         List<TaskInstance> tasks=this.taskInstanceMapper.queryByOaInfo(start,end);
         Set<Integer> set=new HashSet<>();
+        Set<Long> codes=new HashSet<>();
         for(TaskInstance task:tasks)
         {
             Integer executor=task.getExecutorId();
+            codes.add(task.getTaskCode());
             set.add(executor);
         }
         List<User> users=usersService.queryUser(new ArrayList<>(set));
+
+        List<TaskDefinition> list=this.taskDefinitionMapper.queryByCodeList(new ArrayList<>(codes));
 
         for(TaskInstance task:tasks)
         {
@@ -245,6 +249,16 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
                 if(user.getId()==task.getExecutorId())
                 {
                     task.setExecutorName(user.getUserName());
+                    break;
+                }
+            }
+
+            for(TaskDefinition definition:list)
+            {
+                if(definition.getCode()==task.getTaskCode())
+                {
+                    task.setOaRequestId(definition.getOaRequestId());
+                    task.setOaType(definition.getOaType());
                     break;
                 }
             }
