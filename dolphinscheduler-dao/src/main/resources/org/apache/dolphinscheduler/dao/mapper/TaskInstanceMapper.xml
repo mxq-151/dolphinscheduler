@@ -150,7 +150,7 @@
         <if test="endTime != null">
             and t.submit_time <![CDATA[ <= ]]> #{endTime}
         </if>
-
+        order by t.start_time desc
         limit 2000
     </select>
     <select id="queryByProcessInstanceIdsAndTaskCodes" resultType="org.apache.dolphinscheduler.dao.entity.TaskInstance">
