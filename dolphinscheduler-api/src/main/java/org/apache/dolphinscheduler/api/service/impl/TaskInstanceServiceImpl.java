@@ -220,6 +220,8 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
         if(startDate!=null)
         {
             start=new Date(startDate);
+        }else {
+            start=new Date(System.currentTimeMillis()-15*24*3600*1000);
         }
         Date end = null;
 
@@ -264,8 +266,9 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
             }
         }
 
+        List<TaskInstance> tmp=tasks.stream().filter(x ->x.getOaType()!=null && x.getOaType().length()>1).collect(Collectors.toList());
         Result<List<TaskInstance>> result = new Result<>();
-        result.setData(tasks);
+        result.setData(tmp);
         putMsg(result, Status.SUCCESS);
         return result;
     }

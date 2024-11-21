@@ -141,7 +141,7 @@
         select
         <include refid="baseSql"/>
         from t_ds_task_instance as t
-        where state in (6,7,8,9) and  oa_type is not null
+        where state in (6,7,8,9) and task_code in (select code from t_ds_task_definition where oa_type is not null)
 
         <if test="startTime != null">
             and t.start_time <![CDATA[ >= ]]> #{startTime}
