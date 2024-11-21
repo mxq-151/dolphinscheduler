@@ -221,7 +221,7 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
         {
             start=new Date(startDate);
         }else {
-            start=new Date(System.currentTimeMillis()-15*24*3600*1000);
+            start=new Date(System.currentTimeMillis()-1*24*3600*1000);
         }
         Date end = null;
 
