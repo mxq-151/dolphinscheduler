@@ -11,6 +11,7 @@ export function useOaRequestId(): IJsonItem {
       placeholder: '输入oa流程requestId',
       rows: 2,
       type: 'text'
-    }
+    },
+    value: null
   }
 }

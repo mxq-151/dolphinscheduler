@@ -34,7 +34,8 @@ export function formatParams(data: INodeData): {
   taskDefinitionJsonObj: object
 } {
   debugger
-  const taskParams: ITaskParams = {}
+  const taskParams: ITaskParams = {
+  }
   if (data.taskType === 'SUB_PROCESS') {
     taskParams.processDefinitionCode = data.processDefinitionCode
   }
@@ -425,6 +426,15 @@ export function formatParams(data: INodeData): {
       timeoutNotifyStrategy = 'WARNFAILED'
     }
   }
+
+  debugger
+  var oreq=null
+  var oa=null
+  if(data.oaType?.length && data.oaType.length>1)
+  {
+      oreq=data.oaRequestId
+      oa=data.oaType
+  }
   const params = {
     processDefinitionCode: data.processName ? String(data.processName) : '',
     upstreamCodes: data?.preTasks?.join(','),
@@ -432,8 +442,8 @@ export function formatParams(data: INodeData): {
       code: data.code,
       delayTime: data.delayTime ? String(data.delayTime) : '0',
       description: data.description,
-      oaRequestId: data.oaRequestId,
-      oaType: data.oaType,
+      oaRequestId: oreq,
+      oaType: oa,
       environmentCode: data.environmentCode || -1,
       failRetryInterval: data.failRetryInterval
         ? String(data.failRetryInterval)

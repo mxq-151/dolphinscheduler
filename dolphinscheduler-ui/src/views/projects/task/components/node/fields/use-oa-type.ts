@@ -70,11 +70,11 @@ export function useOaType(): IJsonItem {
     name: '流程类型',
     options,
     validate: {
-      required: true
+      required: false
     },
     props: {
       renderOption
     },
-    value: 'BOO4'
+    value: null
   }
 }

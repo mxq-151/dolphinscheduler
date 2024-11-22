@@ -594,12 +594,6 @@ public class WorkflowExecuteRunnable implements Callable<WorkflowSubmitStatue> {
 
         try {
 
-            boolean  find=true;
-
-            if(find)
-            {
-                throw new RuntimeException("---------KKKKKK-----------");
-            }
             LoggerUtils.setWorkflowInstanceIdMDC(processInstance.getId());
             if (workflowRunnableStatus == WorkflowRunnableStatus.CREATED) {
                 buildFlowDag();
