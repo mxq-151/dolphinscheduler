@@ -20,6 +20,7 @@ package org.apache.dolphinscheduler.plugin.alert.http;
 import org.apache.dolphinscheduler.alert.api.AlertData;
 import org.apache.dolphinscheduler.alert.api.AlertInfo;
 import org.apache.dolphinscheduler.alert.api.AlertResult;
+import org.apache.dolphinscheduler.common.enums.AlertType;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.spi.params.PluginParamsTransfer;
 import org.apache.dolphinscheduler.spi.params.base.PluginParams;
@@ -59,6 +60,88 @@ public class HttpAlertChannelTest {
         alertInfo.setAlertParams(paramsMap);
         AlertResult alertResult = alertChannel.process(alertInfo);
         Assert.assertEquals("true", alertResult.getStatus());
+    }
+
+    @Test
+    public void processFailTest() {
+        HttpAlertChannel alertChannel = new HttpAlertChannel();
+        AlertInfo alertInfo = new AlertInfo();
+        AlertData alertData = new AlertData();
+        alertData.setProcessDesc("affect-data:t_dws_tysl_device_quality");
+        alertData.setContent("[{\"projectCode\":13551860373440,\"projectName\":\"ehome_reportAnalysis\",\"owner\":\"admin\",\"processId\":1122111,\"processDefinitionCode\":14075724659136,\"processName\":\"ehome_reportAnalysis_B_reqinterfaceAppidDaySecond_lizc_11_prod-12-20250107164755909\",\"processType\":\"SCHEDULER\",\"processState\":\"SUCCESS\",\"recovery\":\"NO\",\"runTimes\":1,\"processStartTime\":\"2025-01-06 17:10:02\",\"processEndTime\":\"2025-01-06 17:10:18\",\"processHost\":\"sz-bigdata-master-04:5678\"}]");
+        alertInfo.setAlertData(alertData);
+        Map<String, String> paramsMap = PluginParamsTransfer.getPluginParamsMap(getParams2());
+        alertInfo.setAlertParams(paramsMap);
+        AlertResult alertResult = alertChannel.process(alertInfo);
+        Assert.assertEquals("true", alertResult.getStatus());
+    }
+
+    @Test
+    public void processTimeoutTest() {
+        HttpAlertChannel alertChannel = new HttpAlertChannel();
+        AlertInfo alertInfo = new AlertInfo();
+        AlertData alertData = new AlertData();
+        alertData.setAlertType(AlertType.PROCESS_INSTANCE_TIMEOUT.getCode());
+        alertData.setProcessDesc("affect-data:t_dws_tysl_device_quality");
+        alertData.setContent(" [{\"projectCode\":9250256554272,\"projectName\":\"ehome_etl\",\"owner\":\"admin\",\"processId\":1119004,\"processDefinitionCode\":14719135812160,\"processName\":\"public_etl_loadAibusinessData_zoujc_6_prod-5-20250106060008998\",\"taskCode\":14719102032064,\"taskName\":\"check\",\"event\":\"TIME_OUT\",\"warnLevel\":\"MIDDLE\",\"taskType\":\"SHELL\",\"taskStartTime\":\"2025-01-06 06:00:15\",\"taskHost\":\"sz-bigdata-coordinate-02:1234\"}]");
+        alertInfo.setAlertData(alertData);
+        Map<String, String> paramsMap = PluginParamsTransfer.getPluginParamsMap(getParams2());
+        alertInfo.setAlertParams(paramsMap);
+        AlertResult alertResult = alertChannel.process(alertInfo);
+        Assert.assertEquals("true", alertResult.getStatus());
+    }
+
+    @Test
+    public void serviceFailTest() {
+        HttpAlertChannel alertChannel = new HttpAlertChannel();
+        AlertInfo alertInfo = new AlertInfo();
+        AlertData alertData = new AlertData();
+        alertData.setAlertType(AlertType.FAULT_TOLERANCE_WARNING.getCode());
+        alertData.setProcessDesc("affect-data:t_dws_tysl_device_quality");
+        alertData.setContent(" [{\"type\":\"WORKER\",\"host\":\"/nodes/worker/sz-bigdata-coordinate-01:1234\",\"event\":\"SERVER_DOWN\",\"warningLevel\":\"SERIOUS\"}] ");
+        alertInfo.setAlertData(alertData);
+        Map<String, String> paramsMap = PluginParamsTransfer.getPluginParamsMap(getParams2());
+        alertInfo.setAlertParams(paramsMap);
+        AlertResult alertResult = alertChannel.process(alertInfo);
+        Assert.assertEquals("true", alertResult.getStatus());
+    }
+
+
+    private String getParams2() {
+
+        List<PluginParams> paramsList = new ArrayList<>();
+        InputParam urlParam = InputParam.newBuilder("url", "url")
+                .setValue("http://sz3-desk-alert.ctseelink.cn/api/desk/alert/add")
+                .addValidate(Validate.newBuilder().setRequired(true).build())
+                .build();
+
+        InputParam headerParams = InputParam.newBuilder("headerParams", "headerParams")
+                .addValidate(Validate.newBuilder().setRequired(true).build())
+                .setValue("{\"Content-Type\":\"application/json\"}")
+                .build();
+
+        InputParam bodyParams = InputParam.newBuilder("bodyParams", "bodyParams")
+                .addValidate(Validate.newBuilder().setRequired(true).build())
+                .setValue("{}")
+                .build();
+
+        InputParam content = InputParam.newBuilder("contentField", "contentField")
+                .setValue("unit-alert:lizc:李忠财,liurh:刘润浩,dengcy:邓操宇,pengjy:彭金原,zoujch:邹京辰,zoujc:邹京辰")
+                .addValidate(Validate.newBuilder().setRequired(true).build())
+                .build();
+
+        InputParam requestType = InputParam.newBuilder("requestType", "requestType")
+                .setValue("POST")
+                .addValidate(Validate.newBuilder().setRequired(true).build())
+                .build();
+
+        paramsList.add(urlParam);
+        paramsList.add(headerParams);
+        paramsList.add(bodyParams);
+        paramsList.add(content);
+        paramsList.add(requestType);
+
+        return JSONUtils.toJsonString(paramsList);
     }
 
     /**

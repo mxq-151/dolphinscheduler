@@ -114,7 +114,9 @@ public final class AlertSenderService extends Thread {
             long processDefinitionCode = Optional.ofNullable(alert.getProcessDefinitionCode()).orElse(0L);
             ProcessDefinition processDefinition = processDefinitionDao.queryProcessDefinitionByCode(processDefinitionCode);
             String phone = "";
+            String processDesc="";
             if (Optional.ofNullable(processDefinition).isPresent()){
+                processDesc=processDefinition.getDescription();
                User user = usersDao.queryUserbyId(processDefinition.getUserId());
                 if (Optional.ofNullable(user).isPresent()){
                     phone = user.getPhone();
@@ -128,6 +130,7 @@ public final class AlertSenderService extends Thread {
                     .warnType(alert.getWarningType().getCode())
                     .alertType(alert.getAlertType().getCode())
                     .phone(phone)
+                    .processDesc(processDesc)
                     .build();
 
             int sendSuccessCount = 0;

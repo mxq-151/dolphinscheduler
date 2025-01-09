@@ -71,4 +71,6 @@ public class AlertData {
 
     private String phone;
 
+    private String processDesc;
+
 }

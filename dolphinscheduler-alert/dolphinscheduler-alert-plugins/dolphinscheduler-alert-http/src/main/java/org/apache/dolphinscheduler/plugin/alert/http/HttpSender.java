@@ -155,11 +155,19 @@ public final class HttpSender {
      */
     private void setMsgInRequestBody(String msg) {
         try {
-            ObjectNode objectNode = JSONUtils.parseObject(bodyParams);
-            //set msg content field
-            objectNode.put(contentField, msg);
-            StringEntity entity = new StringEntity(JSONUtils.toJsonString(objectNode), DEFAULT_CHARSET);
-            ((HttpPost) httpRequest).setEntity(entity);
+            if(contentField.startsWith(HttpAlertChannel.ALERT_TAG))
+            {
+                ObjectNode objectNode = JSONUtils.parseObject(msg);
+                StringEntity entity = new StringEntity(JSONUtils.toJsonString(objectNode), DEFAULT_CHARSET);
+                ((HttpPost) httpRequest).setEntity(entity);
+            }else {
+                ObjectNode objectNode = JSONUtils.parseObject(bodyParams);
+                //set msg content field
+                objectNode.put(contentField, msg);
+                StringEntity entity = new StringEntity(JSONUtils.toJsonString(objectNode), DEFAULT_CHARSET);
+                ((HttpPost) httpRequest).setEntity(entity);
+            }
+
         } catch (Exception e) {
             logger.error("send http alert msg  exception : {}", e.getMessage());
         }
