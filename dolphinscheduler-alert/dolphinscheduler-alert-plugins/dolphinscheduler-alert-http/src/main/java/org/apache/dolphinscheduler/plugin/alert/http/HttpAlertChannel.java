@@ -46,7 +46,7 @@ public final class HttpAlertChannel implements AlertChannel {
 
         String contentField = paramsMap.get(HttpAlertConstants.NAME_CONTENT_FIELD);
         String[] relTable=null;
-        if(contentField.startsWith(ALERT_TAG))
+        if(contentField.startsWith(ALERT_TAG) && alertData.isNeedAlert())
         {
             String names=contentField.substring(ALERT_TAG.length()+1);
             String[] strs= names.split(",");
@@ -79,10 +79,11 @@ public final class HttpAlertChannel implements AlertChannel {
                 }else {
 
                     boolean match=false;
+                    String name= alertData.getUser();
                     for(String str:strs)
                     {
                         String[] tmp=str.split(":");
-                        if(processName.contains(tmp[0]))
+                        if(name!=null && name.equals(tmp[0]))
                         {
                             user=tmp[1];
                             match=true;

@@ -73,4 +73,8 @@ public class AlertData {
 
     private String processDesc;
 
+    boolean needAlert;
+
+    String user;
+
 }

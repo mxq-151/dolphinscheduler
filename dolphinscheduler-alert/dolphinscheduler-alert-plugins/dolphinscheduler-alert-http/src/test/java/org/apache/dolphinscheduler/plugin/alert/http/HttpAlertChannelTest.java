@@ -81,6 +81,8 @@ public class HttpAlertChannelTest {
         HttpAlertChannel alertChannel = new HttpAlertChannel();
         AlertInfo alertInfo = new AlertInfo();
         AlertData alertData = new AlertData();
+        alertData.setNeedAlert(true);
+        alertData.setUser("lizc");
         alertData.setAlertType(AlertType.PROCESS_INSTANCE_TIMEOUT.getCode());
         alertData.setProcessDesc("affect-data:t_dws_tysl_device_quality");
         alertData.setContent(" [{\"projectCode\":9250256554272,\"projectName\":\"ehome_etl\",\"owner\":\"admin\",\"processId\":1119004,\"processDefinitionCode\":14719135812160,\"processName\":\"public_etl_loadAibusinessData_zoujc_6_prod-5-20250106060008998\",\"taskCode\":14719102032064,\"taskName\":\"check\",\"event\":\"TIME_OUT\",\"warnLevel\":\"MIDDLE\",\"taskType\":\"SHELL\",\"taskStartTime\":\"2025-01-06 06:00:15\",\"taskHost\":\"sz-bigdata-coordinate-02:1234\"}]");
@@ -96,6 +98,8 @@ public class HttpAlertChannelTest {
         HttpAlertChannel alertChannel = new HttpAlertChannel();
         AlertInfo alertInfo = new AlertInfo();
         AlertData alertData = new AlertData();
+        alertData.setNeedAlert(true);
+        alertData.setUser("moxq");
         alertData.setAlertType(AlertType.FAULT_TOLERANCE_WARNING.getCode());
         alertData.setProcessDesc("affect-data:t_dws_tysl_device_quality");
         alertData.setContent(" [{\"type\":\"WORKER\",\"host\":\"/nodes/worker/sz-bigdata-coordinate-01:1234\",\"event\":\"SERVER_DOWN\",\"warningLevel\":\"SERIOUS\"}] ");

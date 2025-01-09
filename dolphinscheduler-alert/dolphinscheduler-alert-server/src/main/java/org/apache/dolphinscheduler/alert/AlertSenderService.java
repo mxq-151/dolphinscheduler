@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.alert;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,17 +29,17 @@ import org.apache.dolphinscheduler.alert.api.AlertResult;
 import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.AlertStatus;
 import org.apache.dolphinscheduler.common.enums.AlertType;
+import org.apache.dolphinscheduler.common.enums.ReleaseState;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.common.lifecycle.ServerLifeCycleManager;
 import org.apache.dolphinscheduler.common.thread.ThreadUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.AlertDao;
 import org.apache.dolphinscheduler.dao.UsersDao;
-import org.apache.dolphinscheduler.dao.entity.Alert;
-import org.apache.dolphinscheduler.dao.entity.AlertPluginInstance;
-import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
-import org.apache.dolphinscheduler.dao.entity.User;
+import org.apache.dolphinscheduler.dao.entity.*;
+import org.apache.dolphinscheduler.dao.mapper.ProcessInstanceMapper;
 import org.apache.dolphinscheduler.dao.repository.ProcessDefinitionDao;
+import org.apache.dolphinscheduler.dao.repository.ProcessInstanceDao;
 import org.apache.dolphinscheduler.remote.command.alert.AlertSendResponseCommand;
 import org.apache.dolphinscheduler.remote.command.alert.AlertSendResponseResult;
 import org.slf4j.Logger;
@@ -65,15 +66,18 @@ public final class AlertSenderService extends Thread {
 
     private final ProcessDefinitionDao processDefinitionDao;
 
+    private final ProcessInstanceMapper processInstanceMapper;
+
     private final AlertPluginManager alertPluginManager;
     private final AlertConfig alertConfig;
 
-    public AlertSenderService(AlertDao alertDao, UsersDao usersDao, ProcessDefinitionDao processDefinitionDao, AlertPluginManager alertPluginManager, AlertConfig alertConfig) {
+    public AlertSenderService(AlertDao alertDao, UsersDao usersDao, ProcessDefinitionDao processDefinitionDao, AlertPluginManager alertPluginManager, AlertConfig alertConfig,ProcessInstanceMapper processInstanceMapper) {
         this.alertDao = alertDao;
         this.usersDao = usersDao;
         this.processDefinitionDao = processDefinitionDao;
         this.alertPluginManager = alertPluginManager;
         this.alertConfig = alertConfig;
+        this.processInstanceMapper=processInstanceMapper;
     }
 
     @Override
@@ -115,6 +119,8 @@ public final class AlertSenderService extends Thread {
             ProcessDefinition processDefinition = processDefinitionDao.queryProcessDefinitionByCode(processDefinitionCode);
             String phone = "";
             String processDesc="";
+            ReleaseState prs=processDefinition.getReleaseState();
+            ReleaseState srs=processDefinition.getScheduleReleaseState();
             if (Optional.ofNullable(processDefinition).isPresent()){
                 processDesc=processDefinition.getDescription();
                User user = usersDao.queryUserbyId(processDefinition.getUserId());
@@ -122,6 +128,19 @@ public final class AlertSenderService extends Thread {
                     phone = user.getPhone();
                 }
             }
+            int alertType=alert.getAlertType().getCode();
+            String user = "zoujch";
+            if(alertType== AlertType.PROCESS_INSTANCE_FAILURE.getCode() ||alertType== AlertType.PROCESS_INSTANCE_TIMEOUT.getCode()|| alertType== AlertType.TASK_FAILURE.getCode())
+            {
+                JsonNode content=JSONUtils.parseArray(alert.getContent()).get(0);
+                int pid=content.get("processId").asInt();
+                ProcessInstance instance=processInstanceMapper.queryDetailById(pid);
+                if(instance!=null)
+                {
+                    user= instance.getExecutorName();
+                }
+            }
+
             AlertData alertData = AlertData.builder()
                     .id(alertId)
                     .content(alert.getContent())
@@ -130,6 +149,8 @@ public final class AlertSenderService extends Thread {
                     .warnType(alert.getWarningType().getCode())
                     .alertType(alert.getAlertType().getCode())
                     .phone(phone)
+                    .user(user)
+                    .needAlert(prs==ReleaseState.ONLINE && srs==ReleaseState.ONLINE)
                     .processDesc(processDesc)
                     .build();
 
