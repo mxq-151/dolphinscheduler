@@ -26,6 +26,8 @@ import org.apache.dolphinscheduler.alert.api.AlertInfo;
 import org.apache.dolphinscheduler.alert.api.AlertResult;
 import org.apache.dolphinscheduler.common.enums.AlertType;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -36,6 +38,8 @@ public final class HttpAlertChannel implements AlertChannel {
 
     public static String ALERT_TAG="unit-alert";
     public static String DESC_TAG="affect-data";
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpAlertChannel.class);
     @Override
     public AlertResult process(AlertInfo alertInfo) {
         AlertData alertData = alertInfo.getAlertData();
@@ -47,7 +51,7 @@ public final class HttpAlertChannel implements AlertChannel {
         String contentField = paramsMap.get(HttpAlertConstants.NAME_CONTENT_FIELD);
         String[] relTable=null;
 
-        System.out.println("alertData.isNeedAlert()::"+alertData.isNeedAlert());
+        logger.info("alertData.isNeedAlert():"+alertData.isNeedAlert());
         if(contentField.startsWith(ALERT_TAG) && alertData.isNeedAlert())
         {
             String names=contentField.substring(ALERT_TAG.length()+1);
@@ -171,7 +175,7 @@ public final class HttpAlertChannel implements AlertChannel {
             request.put("receiver","莫旭强");
             request.put("status","失败");
 
-            System.out.println(JSONUtils.toJsonString(request));
+            logger.info(JSONUtils.toJsonString(request));
             return new HttpSender(paramsMap).send(JSONUtils.toJsonString(request));
         }
 

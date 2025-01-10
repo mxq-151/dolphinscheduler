@@ -77,7 +77,6 @@ public final class AlertSenderService extends Thread {
         this.processDefinitionDao = processDefinitionDao;
         this.alertPluginManager = alertPluginManager;
         this.alertConfig = alertConfig;
-        logger.info("------------------"+processInstanceMapper);
         this.processInstanceMapper=processInstanceMapper;
     }
 
