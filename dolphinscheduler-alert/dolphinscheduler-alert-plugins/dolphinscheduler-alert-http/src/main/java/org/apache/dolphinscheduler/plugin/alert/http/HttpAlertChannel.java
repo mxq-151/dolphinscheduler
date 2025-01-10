@@ -46,6 +46,8 @@ public final class HttpAlertChannel implements AlertChannel {
 
         String contentField = paramsMap.get(HttpAlertConstants.NAME_CONTENT_FIELD);
         String[] relTable=null;
+
+        System.out.println("alertData.isNeedAlert()::"+alertData.isNeedAlert());
         if(contentField.startsWith(ALERT_TAG) && alertData.isNeedAlert())
         {
             String names=contentField.substring(ALERT_TAG.length()+1);
