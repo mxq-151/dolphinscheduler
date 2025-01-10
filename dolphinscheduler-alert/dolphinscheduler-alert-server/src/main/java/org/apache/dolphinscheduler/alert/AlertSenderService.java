@@ -141,6 +141,7 @@ public final class AlertSenderService extends Thread {
                 }
             }
 
+            logger.info("process ReleaseState:"+prs+" ScheduleReleaseState:"+srs);
             AlertData alertData = AlertData.builder()
                     .id(alertId)
                     .content(alert.getContent())
