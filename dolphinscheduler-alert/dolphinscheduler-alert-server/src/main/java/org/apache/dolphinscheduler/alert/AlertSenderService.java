@@ -38,6 +38,7 @@ import org.apache.dolphinscheduler.dao.AlertDao;
 import org.apache.dolphinscheduler.dao.UsersDao;
 import org.apache.dolphinscheduler.dao.entity.*;
 import org.apache.dolphinscheduler.dao.mapper.ProcessInstanceMapper;
+import org.apache.dolphinscheduler.dao.mapper.ScheduleMapper;
 import org.apache.dolphinscheduler.dao.repository.ProcessDefinitionDao;
 import org.apache.dolphinscheduler.dao.repository.ProcessInstanceDao;
 import org.apache.dolphinscheduler.remote.command.alert.AlertSendResponseCommand;
@@ -69,15 +70,18 @@ public final class AlertSenderService extends Thread {
     private final ProcessInstanceMapper processInstanceMapper;
 
     private final AlertPluginManager alertPluginManager;
+
+    private final ScheduleMapper scheduleMapper;
     private final AlertConfig alertConfig;
 
-    public AlertSenderService(AlertDao alertDao, UsersDao usersDao, ProcessDefinitionDao processDefinitionDao, AlertPluginManager alertPluginManager, AlertConfig alertConfig,ProcessInstanceMapper processInstanceMapper) {
+    public AlertSenderService(AlertDao alertDao, UsersDao usersDao, ProcessDefinitionDao processDefinitionDao, AlertPluginManager alertPluginManager, AlertConfig alertConfig,ProcessInstanceMapper processInstanceMapper,ScheduleMapper scheduleMapper) {
         this.alertDao = alertDao;
         this.usersDao = usersDao;
         this.processDefinitionDao = processDefinitionDao;
         this.alertPluginManager = alertPluginManager;
         this.alertConfig = alertConfig;
         this.processInstanceMapper=processInstanceMapper;
+        this.scheduleMapper=scheduleMapper;
     }
 
     @Override
@@ -120,10 +124,15 @@ public final class AlertSenderService extends Thread {
             String phone = "";
             String processDesc="";
             ReleaseState prs=processDefinition.getReleaseState();
-            ReleaseState srs=processDefinition.getScheduleReleaseState();
+            ReleaseState srs=ReleaseState.OFFLINE;
             if (Optional.ofNullable(processDefinition).isPresent()){
                 processDesc=processDefinition.getDescription();
-               User user = usersDao.queryUserbyId(processDefinition.getUserId());
+                Schedule schedule=scheduleMapper.queryByProcessDefinitionCode(processDefinitionCode);
+                if (Optional.ofNullable(schedule).isPresent())
+                {
+                    srs=schedule.getReleaseState();
+                }
+                User user = usersDao.queryUserbyId(processDefinition.getUserId());
                 if (Optional.ofNullable(user).isPresent()){
                     phone = user.getPhone();
                 }
