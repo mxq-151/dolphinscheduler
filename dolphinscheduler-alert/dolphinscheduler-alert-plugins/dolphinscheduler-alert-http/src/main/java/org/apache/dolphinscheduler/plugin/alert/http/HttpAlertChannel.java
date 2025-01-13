@@ -51,6 +51,7 @@ public final class HttpAlertChannel implements AlertChannel {
         String contentField = paramsMap.get(HttpAlertConstants.NAME_CONTENT_FIELD);
         String[] relTable=null;
 
+        printStack();
         logger.info("alertData.isNeedAlert():"+alertData.isNeedAlert());
         if(contentField.startsWith(ALERT_TAG))
         {
@@ -180,5 +181,15 @@ public final class HttpAlertChannel implements AlertChannel {
         }
 
         return new HttpSender(paramsMap).send(alertData.getContent());
+    }
+
+    public static void printStack()
+    {
+        StringBuilder sb=new StringBuilder();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        for (StackTraceElement element : stackTraceElements) {
+            sb.append(element).append("\n");
+        }
+        logger.info(sb.toString());
     }
 }
