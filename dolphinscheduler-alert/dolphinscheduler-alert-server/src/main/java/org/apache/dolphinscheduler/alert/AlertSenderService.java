@@ -18,6 +18,7 @@
 package org.apache.dolphinscheduler.alert;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -203,9 +204,35 @@ public final class AlertSenderService extends Thread {
      */
     public AlertSendResponseCommand syncHandler(int alertGroupId, String title, String content, int warnType) {
         List<AlertPluginInstance> alertInstanceList = alertDao.listInstanceByAlertGroupId(alertGroupId);
+
+        boolean needAlert=false;
+        String user="zoujch";
+        String processDesc="";
+
+        if (content.contains("processDefinitionCode"))
+        {
+            ArrayNode arrayNode=JSONUtils.parseArray(content);
+            JsonNode jsonNode=arrayNode.get(0);
+            long processDefinitionCode=jsonNode.get("processDefinitionCode").asLong();
+            ProcessDefinition processDefinition=this.processDefinitionDao.queryProcessDefinitionByCode(processDefinitionCode);
+            processDesc=processDefinition.getDescription();
+            Schedule schedule=this.scheduleMapper.queryByProcessDefinitionCode(processDefinitionCode);
+            needAlert=schedule.getReleaseState().getCode()==ReleaseState.OFFLINE.getCode();
+            int pid=jsonNode.get("processId").asInt();
+            ProcessInstance instance=processInstanceMapper.queryDetailById(pid);
+            if(instance!=null)
+            {
+                user= instance.getExecutorName();
+            }
+        }
+
+
         AlertData alertData = AlertData.builder()
                 .content(content)
                 .title(title)
+                .needAlert(needAlert)
+                .user(user)
+                .processDesc(processDesc)
                 .warnType(warnType)
                 .build();
 

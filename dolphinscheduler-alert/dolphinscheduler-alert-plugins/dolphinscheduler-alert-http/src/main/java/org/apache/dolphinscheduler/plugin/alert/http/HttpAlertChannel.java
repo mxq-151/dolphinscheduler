@@ -52,7 +52,7 @@ public final class HttpAlertChannel implements AlertChannel {
         String[] relTable=null;
 
         logger.info("alertData.isNeedAlert():"+alertData.isNeedAlert());
-        if(contentField.startsWith(ALERT_TAG) && alertData.isNeedAlert())
+        if(contentField.startsWith(ALERT_TAG))
         {
             String names=contentField.substring(ALERT_TAG.length()+1);
             String[] strs= names.split(",");
@@ -72,7 +72,7 @@ public final class HttpAlertChannel implements AlertChannel {
                     alertLevel="P2";
                 }
                 desc=type+"服务节点("+host+")异常";
-            }else if(alertType== AlertType.PROCESS_INSTANCE_FAILURE.getCode() ||alertType== AlertType.PROCESS_INSTANCE_TIMEOUT.getCode()|| alertType== AlertType.TASK_FAILURE.getCode()) {
+            }else if((alertType== AlertType.PROCESS_INSTANCE_FAILURE.getCode() ||alertType== AlertType.PROCESS_INSTANCE_TIMEOUT.getCode()|| alertType== AlertType.TASK_FAILURE.getCode()) && alertData.isNeedAlert()) {
                 JsonNode content=JSONUtils.parseArray(alertData.getContent()).get(0);
                 String projectName=content.get("projectName").asText();
                 String processName=content.get("processName").asText();
