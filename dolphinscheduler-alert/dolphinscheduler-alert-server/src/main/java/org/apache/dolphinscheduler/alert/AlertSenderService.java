@@ -151,7 +151,7 @@ public final class AlertSenderService extends Thread {
                     .alertType(alert.getAlertType().getCode())
                     .phone(phone)
                     .user(user)
-                    .needAlert(prs==ReleaseState.ONLINE && srs==ReleaseState.ONLINE)
+                    .needAlert(srs.getCode()==ReleaseState.ONLINE.getCode())
                     .processDesc(processDesc)
                     .build();
 
