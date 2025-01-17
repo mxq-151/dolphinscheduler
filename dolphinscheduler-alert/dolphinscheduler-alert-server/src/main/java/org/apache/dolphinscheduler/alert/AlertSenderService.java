@@ -147,7 +147,10 @@ public final class AlertSenderService extends Thread {
                 ProcessInstance instance=processInstanceMapper.queryDetailById(pid);
                 if(instance!=null)
                 {
-                    user= instance.getExecutorName();
+                    User u = usersDao.queryUserbyId(instance.getExecutorId());
+                    if (Optional.ofNullable(u).isPresent()){
+                        user = u.getUserName();
+                    }
                 }
             }
 
